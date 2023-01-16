@@ -1,0 +1,10 @@
+AccountID: 2
+No. of Transactions: 7
+S.No.		Transaction ID	Transaction Time	Transaction Type	Amount		Balance
+1		1		16-01-2023 14:18:24		DEPOSIT		100		1200		
+2		2		16-01-2023 14:18:54		DEPOSIT		100		1300		
+3		3		16-01-2023 14:21:23		WITHDRAW		110		1190		
+4		6		16-01-2023 14:33:47		WITHDRAW		190		1000		
+5		7		16-01-2023 14:34:03		WITHDRAW		100		900		
+6		9		16-01-2023 14:49:22		DEPOSIT		100		1000		
+7		10		16-01-2023 14:50:39		WITHDRAW		500		500		

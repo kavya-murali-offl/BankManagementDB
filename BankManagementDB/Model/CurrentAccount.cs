@@ -6,8 +6,8 @@ namespace BankManagement.Model
 {
     public class CurrentAccount : Account
     {
-        private readonly decimal MIN_BALANCE = 5000;
-        private readonly decimal CHARGES = 200;
+        private readonly decimal MIN_BALANCE = 500;
+        private readonly decimal CHARGES = 100;
 
         public CurrentAccount(): base() {
             InterestRate = 5.6m;
@@ -20,13 +20,6 @@ namespace BankManagement.Model
             base.Withdraw(amount);
         }
 
-        public void Transfer(decimal amount, Account toAccount)
-        {
-            bool validTransaction = CheckMinimumBalance(amount);
-            if (!validTransaction)
-                ChargeForMinBalance();
-            base.Transfer(amount, toAccount);
-        }
 
         public bool CheckMinimumBalance(decimal amount)
         {
@@ -44,7 +37,7 @@ namespace BankManagement.Model
 
         public override string ToString()
         {
-            return "Account Type: Current" +
+            return "\nAccount Type: Current" +
                 base.ToString() +
                 "\nMinimum Balance: " + MinimumBalance +
                 "\n========================================\n";

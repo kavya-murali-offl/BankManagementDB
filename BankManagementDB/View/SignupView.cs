@@ -1,4 +1,5 @@
 ﻿using BankManagement.Controller;
+using BankManagement.Enums;
 using BankManagement.Models;
 using BankManagement.Utility;
 using BankManagementDB.db;
@@ -9,7 +10,7 @@ namespace BankManagement.View
 {
     public class SignupView
     {
-        public void Signup(AccountsController accountsController)
+        public void Signup()
         {
             Validation validation= new Validation();
             Helper helper = new Helper();
@@ -44,8 +45,10 @@ namespace BankManagement.View
             bool customerAdded = customersController.CreateCustomer(userName, password, name, email, phone);
             if (customerAdded) Console.WriteLine("Sign up successful");
             else Console.WriteLine("Retry again..");
+            AccountsController accountController = new AccountsController();
             //bool accountAdded = accountsController.CreateAccount(userName);
-            //Account account = AccountFactory.GetAccountByType("CURRENT");
+            Account account = AccountFactory.CreateAccountByType(AccountTypes.CURRENT);
+            accountController.InsertAccountToDB(account);   
             ////bool accountCreated = accountsController.CreateAccount(userName, account);
             //customersController.AddCustomer(userName, password, name);
             //accountsController.AddAccountToUserName(userName, account);

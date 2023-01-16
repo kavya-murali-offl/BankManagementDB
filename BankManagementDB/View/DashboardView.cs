@@ -3,8 +3,6 @@ using BankManagement.Controller;
 using System.Collections.Generic;
 using System;
 using System.Linq;
-using BankManagement.Model;
-using BankManagement.Enums;
 
 namespace BankManagement.View
 {
@@ -50,15 +48,18 @@ namespace BankManagement.View
                 }
                 catch (Exception error)
                 {
-                    Console.WriteLine("Enter a valid option. Try Again!");
+                    Console.WriteLine(error.Message);
                 }
             }
         }
 
-        private bool DashboardOperations(DashboardCases operation, ProfileController profileController, AccountsController accountController)
+        private bool DashboardOperations(
+            DashboardCases operation,
+            ProfileController profileController, 
+            AccountsController accountsController
+            )
         {
-            TransactionsView transactionView = new TransactionsView();
-
+            
             switch (operation)
             {
                 case DashboardCases.PROFILE:
@@ -66,16 +67,15 @@ namespace BankManagement.View
                     profileView.GetProfileDetails(profileController);
                     return false;
                 case DashboardCases.CREATE_ACCOUNT:
-                    bool isCreated = accountController.CreateAccount(profileController.ID);
+                    bool isCreated = accountsController.CreateAccount(profileController.ID);
                     if (isCreated) Console.WriteLine("Successfully created account");
                     else Console.WriteLine("Account not created");
                     return false;
                 case DashboardCases.LIST_ACCOUNTS:
-                    //accountController.PrintDataTable();
+                    ListAllAccounts(accountsController); 
                     return false;
                 case DashboardCases.GO_TO_ACCOUNT:
-                    Account transactionAccount = ChooseAccountForTransaction(accountController);
-                    transactionView.GoToAccount(transactionAccount, accountController);
+                    GoToAccount(accountsController);
                     return false;
                 case DashboardCases.SIGN_OUT:
                     Console.WriteLine(".....LOGGING YOU OUT.....");
@@ -86,14 +86,31 @@ namespace BankManagement.View
             }
         }
 
+        public void GoToAccount(AccountsController accountController)
+        {
+           
+            TransactionsView transactionView = new TransactionsView();
+            Account transactionAccount = ChooseAccountForTransaction(accountController);
+            TransactionController transactionController = new TransactionController();
+            transactionController.FillTable(transactionAccount.ID);
+            transactionView.GoToAccount(transactionAccount, accountController);
+        }
 
         public Account ChooseAccountForTransaction(AccountsController accountController)
         {
-            IList<Account> accounts = accountController.GetAccountsAsList();
-            ListAccountIDs(accounts);
+            IList<Account> accountsList = accountController.GetAllAccounts();
+            ListAccountIDs(accountsList);
             string index = Console.ReadLine();
             int accountIndex = int.Parse(index);
-            return accounts[accountIndex-1];
+            return accountsList[accountIndex-1];
+        }
+
+        public void ListAllAccounts(AccountsController accountsController)
+        {
+            IList<Account> accountsList = accountsController.GetAllAccounts();
+            foreach(Account account in accountsList) {
+                Console.WriteLine(account);
+            }
         }
 
         public void ListAccountIDs(IList<Account> accounts)

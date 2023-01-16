@@ -48,21 +48,9 @@ namespace BankManagement.Models
                  
         }
 
-        public bool Transfer(decimal amount, Account transferAccount)
-        {
-            try
-            {
-                Withdraw(amount);
-                transferAccount.Deposit(amount);
-                return true;
-            }catch(Exception ex)
-            {
-                return false;
-            }
-        }
         public override string ToString()
         {
-            return "Account ID: " + 
+            return "\nAccount ID: " + ID+
                 "\nAccount Status: " + Status +
                 "\nBalance: " + Balance;
         }

@@ -13,20 +13,21 @@ namespace BankManagement.Controller
 {
     public class CustomersController
     {
-        public CustomersController() {
-        }
-
         public DataTable CustomerDB { get; set; }
 
         public DataRow GetUserByUserName(string userName)
         {
-            
-            IEnumerable<DataRow> rows = CustomerDB.AsEnumerable()
-               .Where(r => r.Field<string>("UserName") == userName);
-            if(rows != null && rows.Count() > 0)
+            try
             {
-              DataRow row = rows.FirstOrDefault();
-            return row;
+                IEnumerable<DataRow> rows = CustomerDB.AsEnumerable()
+                   .Where(r => r.Field<string>("UserName") == userName);
+                if (rows != null && rows.Count() > 0)
+                {
+                    DataRow row = rows.FirstOrDefault();
+                    return row;
+                }
+            }catch(Exception ex) {
+                Console.WriteLine(ex.Message);
             }
             return null;    
 
@@ -70,7 +71,6 @@ namespace BankManagement.Controller
         public void FillTable() {
             CustomerDB = Database.FillTable("Customer", null);
         }
-      
 
         public bool ValidatePassword(string userName, string password)
         {

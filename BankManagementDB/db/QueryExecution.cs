@@ -5,7 +5,6 @@ using System.Collections.Specialized;
 using System.Data;
 using System.Data.SQLite;
 using System.Reflection;
-using System.Runtime.Remoting.Messaging;
 
 namespace BankManagementDB.db
 {
@@ -32,27 +31,6 @@ namespace BankManagementDB.db
                         using (SQLiteDataReader reader = com.ExecuteReader())
                         {
                             result.Load(reader);    
-                            //if (reader.HasRows)
-
-                            //    for (int i = 0; i < reader.FieldCount; i++)
-                            //    {
-                            //        result.Columns.Add(new DataColumn(reader.GetName(i)));
-                            //    }
-
-                            //int j = 0;
-                            //while (reader.Read())
-                            //{
-                            //    DataRow row = result.NewRow();
-                            //    result.Rows.Add(row);
-
-                            //    for (int i = 0; i < reader.FieldCount; i++)
-                            //    {
-                            //        Console.WriteLine(reader.GetValue(i));
-                            //        result.Rows[j][i] = (reader.GetValue(i));
-                            //    }
-
-                            //    j++;
-                            //}
                         }
                     }
                     con.Close();
@@ -78,9 +56,9 @@ namespace BankManagementDB.db
                         if (parameters != null && parameters.Count > 0)
                         {
                             foreach (KeyValuePair<string, object> entry in parameters)
-                                com.Parameters.AddWithValue(entry.Key, entry.Value);
+                                com.Parameters.AddWithValue("@"+entry.Key, entry.Value);
                         }
-                        com.ExecuteNonQuery();
+                        var result = com.ExecuteNonQuery();
                         con.Close();
                     }
                 }

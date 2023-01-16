@@ -7,27 +7,75 @@ using System.Data.SQLite;
 using System.IO;
 using System.Data;
 using BankManagement.Models;
+using System.Security.Cryptography;
 
 namespace BankManagementDB.db
 {
     public static class Database
     {
+        public static void CreateTableIfNotExists()
+        {
+            string customerQuery = @"CREATE TABLE IF NOT EXISTS Customer (
+                                    'ID' INTEGER NOT NULL UNIQUE, 
+                                    'Name' TEXT, 
+                                    'UserName' TEXT NOT NULL UNIQUE,
+                                    'Phone' TEXT, 
+                                    'Email' TEXT,
+                                    'HashedPassword' TEXT,
+                                    PRIMARY KEY('ID' AUTOINCREMENT));";
+
+            string accountQuery = @"CREATE TABLE IF NOT EXISTS 'Account' (
+                                 'ID' INTEGER NOT NULL UNIQUE,
+                                 'Balance' DECIMAL, 
+                                 'InterestRate' DECIMAL, 
+                                 'Status' TEXT, 
+                                 'MinimumBalance' DECIMAL, 
+                                 'Charges' DECIMAL, 
+                                 'Type' TEXT, 
+                                 'UserID' INTEGER NOT NULL,
+                                 PRIMARY KEY('ID' AUTOINCREMENT))";
+
+            string transactionsQuery = @"CREATE TABLE IF NOT EXISTS 'Transactions' (
+                                      'ID' INTEGER PRIMARY KEY,
+                                      'Balance' DECIMAL,
+                                      'RecordedOn' TEXT,
+                                      'Amount' DECIMAL,
+                                      'TransactionType' TEXT,
+                                      'AccountID' INTEGER,
+                                      FOREIGN KEY (AccountID) REFERENCES Account(ID)
+                                      );";
+
+            QueryExecution queryExecution = new QueryExecution();
+            queryExecution.ExecuteNonQuery(customerQuery, null);
+            queryExecution.ExecuteNonQuery(accountQuery, null);
+            queryExecution.ExecuteNonQuery(transactionsQuery, null);
+
+
+        }
         public static bool InsertRowToTable(string tableName, IDictionary<string,object> parameters)
         {
             bool result = false;
-            var s = 0;
             try
             {
-                string query = "INSERT INTO " + tableName + " ('";
-                foreach (KeyValuePair<string, object> pair in parameters)
-                {
-                    query += pair.Key + "', '";
+                string query = @"INSERT INTO " + tableName + " ('";
+                for(int i =0; i< parameters.Keys.Count(); i++) {
+                    query += parameters.Keys.ElementAt<string>(i);
+                    if(i != parameters.Keys.Count() - 1 )
+                    {
+                       query += "', '";
+                    }
                 }
+                query += "') ";
                 query += " VALUES (";
-                foreach(KeyValuePair<string, object> pair in parameters)
+                for (int i = 0; i < parameters.Keys.Count(); i++)
                 {
-                    query += '@' + pair.Key;
+                    query += " @" + parameters.Keys.ElementAt<string>(i);
+                    if (i != parameters.Keys.Count() - 1)
+                    {
+                        query += ", ";
+                    }
                 }
+                
                 query += ")";
                 QueryExecution queryExecution = new QueryExecution();
                
@@ -80,13 +128,14 @@ namespace BankManagementDB.db
 
                 foreach (KeyValuePair<string, object> pairs in updateFields)
                 {
-                    query += pairs.Key + "= @" + pairs.Key;
+                    if(pairs.Key != "ID")
+                        query += pairs.Key + "= @" + pairs.Key;
                 }
 
                 query += " WHERE ID = @ID";
                 QueryExecution queryExecution = new QueryExecution();
                 queryExecution.ExecuteNonQuery(query, updateFields);
-                result = true;
+                return true;   
             }
             catch (Exception err)
             { Console.WriteLine(err.Message); }

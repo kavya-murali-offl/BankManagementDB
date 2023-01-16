@@ -18,26 +18,10 @@ namespace BankManagement.Controller
             AccountsView = new AccountsView();
         }
 
-        public DataTable AccountTable { get; set; }
+        public static DataTable AccountTable { get; set; }
 
         public AccountsView AccountsView { get; set; }
 
-        public IList<Account> GetAccountsAsList()
-        {
-            IList<Account> accountsList= new List<Account>();
-            foreach (DataRow row in AccountTable.Rows)
-            {
-                AccountTypes enumType = (AccountTypes)Enum.Parse(typeof(AccountTypes), row.Field<string>("Type"));
-                Account account = AccountFactory.GetAccountByType(enumType);
-                account.Balance = (decimal)row.Field<double>("Balance");
-                account.InterestRate =(decimal) row.Field<double>("InterestRate");
-                account.Status = (AccountStatus)Enum.Parse(typeof(AccountStatus), row.Field<string>("Status"));
-                account.ID = row.Field<Int64>("ID");
-                account.UserID = row.Field<Int64>("UserID");
-                accountsList.Add(account);
-            }
-            return accountsList;
-        }
         public bool CreateAccount(Int64 userId)
         {
             try
@@ -47,31 +31,26 @@ namespace BankManagement.Controller
                 {
                     account.UserID =userId;
                     InsertAccountToDB(account);
-                    AddAccountToDataTable(account);
+                    InsertAccountToDataTable(account);
                     return true;
-                }
-                else
-                {
-                    throw new ArgumentNullException("Something went wrong in creating the account.");
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex);
-                return false;
             }
             return false;
         }
 
-        public void UpdateAccount(Int64 accountID, IDictionary<string, object> parameters) {
-            Database.UpdateTable("Account", parameters);
+        public bool UpdateAccountInDB(IDictionary<string, object> parameters) {
+            return Database.UpdateTable("Account", parameters);
         }
-        public void AddAccountToDataTable(Account account)
+
+        public void InsertAccountToDataTable(Account account)
         {
             try
             {
                 DataRow newRow = AccountTable.NewRow();
-
                 newRow["Balance"] = account.Balance;
                 newRow["InterestRate"] = account.InterestRate;
                 newRow["UserID"] = account.UserID;
@@ -85,27 +64,55 @@ namespace BankManagement.Controller
             }
         }
 
+        public Account GetAccountByID(Int64 id)
+        {
+            Account account = null;
+            try
+            {
+                DataRow[] rows = AccountTable.Select("ID = " + id);
+                if (rows.Count()>0)
+                {
+                    DataRow row = rows.First();
+                    account = RowToAccount(row);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+            return account;
+        }
+
+        public Account RowToAccount(DataRow row)
+        {
+            AccountTypes enumType = (AccountTypes)Enum.Parse(typeof(AccountTypes), row.Field<string>("Type"));
+            Account account = AccountFactory.GetAccountByType(enumType);
+            account.Balance = row.Field<decimal>("Balance");
+            account.InterestRate = row.Field<decimal>("InterestRate");
+            account.Status = (AccountStatus)Enum.Parse(typeof(AccountStatus), row.Field<string>("Status"));
+            account.ID = row.Field<Int64>("ID");
+            account.Type = (AccountTypes)Enum.Parse(typeof(AccountTypes), row.Field<string>("Type"));
+            account.UserID = row.Field<Int64>("UserID");
+            return account;
+        }
+
         public void InsertAccountToDB(Account account)
         {
             IDictionary<string, object> parameters = new Dictionary<string, object>();
-            parameters.Add("ID", account.ID);
             parameters.Add("Balance", account.Balance);
             parameters.Add("InterestRate", account.InterestRate);
             parameters.Add("Status", account.Status.ToString());
             parameters.Add("UserID", account.UserID);
-            parameters.Add("HashedPassword", account.Type.ToString());
-
-            parameters.Add("ID", account.ID);
+            parameters.Add("Type", account.Type.ToString());
             Database.InsertRowToTable("Account", parameters);
         }
 
         public void FillTable(Int64 id)
         {
             IDictionary<string, object> parameters = new Dictionary<string, object>();
-            parameters.Add("ID", id);
+            parameters.Add("UserID", id);
             AccountTable = Database.FillTable("Account", parameters);
         }
-
 
          public void UpdateDataTable(Int64 id, IDictionary<string, object> fields)
          {
@@ -120,7 +127,21 @@ namespace BankManagement.Controller
             }
          }
 
-
+         public IList<Account> GetAllAccounts()
+         {
+                IList<Account> accountsList = new List<Account>();
+            try
+            {
+                foreach (DataRow row in AccountTable.Rows)
+                {
+                    Account account = RowToAccount(row);  
+                    accountsList.Add(account);
+                }
+            }catch(Exception ex) {
+                Console.WriteLine(ex.Message);
+            }
+                return accountsList;
+         }
     }
 
 }

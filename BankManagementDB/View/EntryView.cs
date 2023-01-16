@@ -24,7 +24,7 @@ namespace BankManagement.View
                     int entryOption = int.Parse(option);
                     if (entryOption != 0 && entryOption <= Enum.GetValues(typeof(Entry)).Length)
                     {
-                        if (EntryOperations(entryOption, accountsController))
+                        if (EntryOperations(entryOption))
                         {
                             break;
                         }
@@ -42,18 +42,18 @@ namespace BankManagement.View
         }
         
 
-        public bool EntryOperations(int option, AccountsController accountsController)
+        public bool EntryOperations(int option)
         {
 
             switch (option)
             {
                 case 1:
                     LoginView loginView = new LoginView();
-                    loginView.Login(accountsController);
+                    loginView.Login();
                     return false;
                 case 2:
                     SignupView signupView = new SignupView();
-                    signupView.Signup(accountsController);
+                    signupView.Signup();
                     return false;
                 case 3:
                     Console.WriteLine("Closed");

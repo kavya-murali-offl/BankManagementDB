@@ -13,27 +13,26 @@ namespace BankManagement.View
     public class LoginView
     {
 
-        public LoginView() { }
-
-        public void Login(AccountsController accountController)
+        public void Login()
         {
             try
             {
                 bool isValidated;
+                CustomersController customersController = new CustomersController();
+                customersController.FillTable();
                 string userName = GetUserName();
-                isValidated = ValidateLogin(userName);
-
+                isValidated = ValidateLogin(userName, customersController);
                 if (isValidated)
                 {
                     ProfileController profile = new ProfileController();
-                    CustomersController customersController = new CustomersController();
                     profile.Customer = customersController.GetCustomerByUserName(userName);
                     Console.WriteLine("Customer", profile.Customer);
                     DashboardView dashboard = new DashboardView();
                     IDictionary<string, object> parameters = new Dictionary<string, object>();
-                    parameters.Add("ID", profile.ID);
-                    Database.FillTable("Account", parameters);
-                    dashboard.ViewDashboard(profile, accountController);
+                    parameters.Add("UserID", profile.ID);
+                    AccountsController accountsController = new AccountsController();   
+                    accountsController.FillTable(profile.ID);
+                    dashboard.ViewDashboard(profile, accountsController);
                 }
             }
             catch(Exception ex) {
@@ -53,13 +52,11 @@ namespace BankManagement.View
             return Console.ReadLine();
         }
 
-        public bool ValidateLogin(string username)
+        public bool ValidateLogin(string username, CustomersController customersController)
         {
             bool isValidated = false;
             try
             {
-                CustomersController customersController = new CustomersController();
-                customersController.FillTable();
                 DataRow dr = customersController.GetUserByUserName(username);
                 if (dr != null)
                 {

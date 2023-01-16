@@ -57,7 +57,7 @@ namespace BankManagement.View
 
         public Account GenerateAccount()
         {
-            Account account;
+            Account account = null;
             while (true)
             {
                 Console.WriteLine("Choose Account type: \n1. Current Account \n2. Savings Account\n3. Go Back");
@@ -71,17 +71,18 @@ namespace BankManagement.View
                     {
                         AccountTypes accountType = (AccountTypes)entryOption - 1;
                         account = AccountFactory.CreateAccountByType(accountType);
-                        if (account != null) 
-                            return account;
+                        if(account!=null)
+                        {
+                            break;
+                        }
                     }
-                    else
-                        Console.WriteLine("Enter proper input.");
                 }
                 catch (Exception error)
                 {
                     Console.WriteLine("Enter a valid option.");
                 }
             }
+            return account;
         }
 
         public void AccountCreatedSuccessMessage()

@@ -50,23 +50,26 @@ namespace BankManagement.View
         public bool TransactionOperations(AccountCases option, Account account, AccountsController accountsController)
         {
             Helper helper = new Helper();
-            TransactionController transactionController = new TransactionController();  
+            TransactionController transactionController = new TransactionController();
             decimal amount;
             switch (option)
             {
                 case AccountCases.DEPOSIT:
-                    bool isDeposited = transactionController.Deposit(account, accountsController);
+                    amount = helper.GetAmount();
+                    bool isDeposited = transactionController.Deposit(account, amount, accountsController);
                     if (isDeposited) Console.WriteLine("Deposit succesful");
                     else Console.WriteLine("Something went wrong.");
                     return true;
                 case AccountCases.WITHDRAW:
-                    bool isWithdrawn = transactionController.Withdraw(account);
+                    amount = helper.GetAmount();
+                    bool isWithdrawn = transactionController.Withdraw(account, amount, accountsController);
                     if (isWithdrawn) Console.WriteLine("Withdraw succesful");
                     else Console.WriteLine("Something went wrong.");
                     return true;
                 case AccountCases.TRANSFER:
-                    string transferAccountID = GetTransferAccountID();
-                    bool isTransferred = transactionController.Transfer(account, transferAccountID);
+                    amount = helper.GetAmount();
+                    Int64 transferAccountID = GetTransferAccountID();
+                    bool isTransferred = transactionController.Transfer(account, transferAccountID,amount, accountsController);
                     if (isTransferred) Console.WriteLine("Transfer succesful");
                     else Console.WriteLine("Something went wrong.");
                     return true;
@@ -74,7 +77,7 @@ namespace BankManagement.View
                     ViewStatement(transactionController, account);
                     return false;
                 case AccountCases.PRINT_STATEMENT:
-                    Printer.PrintStatement(account.Transactions);
+                    PrintStatement(transactionController);
                     return false;
                 case AccountCases.BACK:
                     return true;
@@ -84,38 +87,44 @@ namespace BankManagement.View
             }
         }
 
-        public string GetTransferAccountID()
+        public Int64 GetTransferAccountID()
         {
             while (true)
             {
                 Console.WriteLine("Enter Account ID to transfer: ");
                 try
                 {
-                    return Console.ReadLine();
+                    string id = Console.ReadLine();
+                    Int64 intID = Int64.Parse(id);  
+                    return intID;   
                 }
                 catch (Exception error)
                 {
-                    Console.WriteLine("Enter a valid amount. Try Again!(incoming view)");
+                    Console.WriteLine("Enter a valid ID.");
                 }
             }
         }
 
+        public void PrintStatement(TransactionController transactionController)
+        {
+            IList<Transaction> statements = transactionController.GetAllTransactions();
+            Printer.PrintStatement(statements);
+
+        }
         public void ViewStatement(TransactionController transactionController, Account account)
         {
-            IList<Transaction> transactions = transactionController.GetAllTransactions(account);
-            if (transactions.Count > 0)
-            {
-                foreach (Transaction transaction in transactions) { Console.WriteLine(transaction); }
-            }
+            transactionController.ViewAllTransactions();
+            //IList<Transaction> transactions = transactionController.GetAllTransactions(account);
+            //if (transactions.Count > 0)
+            //{
+            //    foreach (Transaction transaction in transactions) { Console.WriteLine(transaction); }
+            //}
         }
 
         public void PrintStatement(TransactionController transactionController, Account account)
         {
-            IList<Transaction> transactions = transactionController.GetAllTransactions(account);
-            if (transactions.Count > 0)
-            {
-                foreach (Transaction transaction in transactions) { Console.WriteLine(transaction); }
-            }
+            IList<Transaction> transactions = transactionController.GetAllTransactions();
+            Printer.PrintStatement(transactions);
         }
     }
 }
