@@ -4,14 +4,16 @@ using BankManagement.Models;
 
 namespace BankManagement.Model
 {
+
     public class Transaction
     {
         public Transaction()
         {
             RecordedOn = DateTime.Now;
         }
-        public Transaction(decimal amount, decimal balance, TransactionTypes transactionType)
+        public Transaction(string description, decimal amount, decimal balance, TransactionTypes transactionType)
         {
+            Description = description;
             TransactionType = transactionType;
             Amount = amount;
             Balance = balance;  
@@ -26,16 +28,20 @@ namespace BankManagement.Model
 
         public decimal Balance { get; set; }
 
-        public Int64 AccountID { get; set; }
+        public long AccountID { get; set; }
 
-        public Int64 ID { get; set; }
+        public long ID { get; set; }
+
+        public string Description { get; set; }
 
         public override string ToString()
         {
-            return "Transaction ID: " +
-                "Transaction Type: " + TransactionType + "\nTransaction ID: "+ID + "\nTransaction Time: " +
-                RecordedOn + "\nAmount: " + Amount +
-                "\nBalance: " + Balance;
+            return $@"Transaction ID: {ID}
+                \tTransaction Type: {TransactionType} 
+                \tTransaction Time: {RecordedOn} 
+                \tDescription: {Amount}
+                \tAmount: {Amount}
+                \tBalance: {Balance}";
         }
     }
 }

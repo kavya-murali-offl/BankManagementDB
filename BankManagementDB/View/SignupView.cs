@@ -4,7 +4,8 @@ using BankManagement.Models;
 using BankManagement.Utility;
 using BankManagementDB.db;
 using System;
-using System.Xml;
+using System.Security.Policy;
+using System.Xml.Linq;
 
 namespace BankManagement.View
 {
@@ -14,19 +15,19 @@ namespace BankManagement.View
         {
             Validation validation= new Validation();
             Helper helper = new Helper();
-            string email, password, userName, phone, name;
+            string email, password, phone, name;
             while (true)
             {
-                userName = GetUsername();
-                if (validation.CheckEmpty(userName))
+                phone = helper.GetPhoneNumber();
+                if (validation.CheckEmpty(phone))
                 {
-                    if (helper.CheckUniqueUserName(userName))
+                    if (CheckUniquePhoneNumber(phone))
                     {
                         break;
                     }
                     else
                     {
-                        Console.WriteLine("Username Already Exists");
+                        Console.WriteLine("Phone Number Already Registered");
                         return;
                     }
                 }
@@ -40,46 +41,65 @@ namespace BankManagement.View
             VerifyPassword(password);
             name = GetValue("Name");
             email = GetValue("Email");
-            phone = GetValue("Phone");
-            CustomersController customersController = new CustomersController();
-            bool customerAdded = customersController.CreateCustomer(userName, password, name, email, phone);
-            if (customerAdded) Console.WriteLine("Sign up successful");
-            else Console.WriteLine("Retry again..");
-            AccountsController accountController = new AccountsController();
-            //bool accountAdded = accountsController.CreateAccount(userName);
-            Account account = AccountFactory.CreateAccountByType(AccountTypes.CURRENT);
-            accountController.InsertAccountToDB(account);   
-            ////bool accountCreated = accountsController.CreateAccount(userName, account);
-            //customersController.AddCustomer(userName, password, name);
-            //accountsController.AddAccountToUserName(userName, account);
-            //Console.WriteLine("Account created Successfully.\n Please Login to continue");
+
+            if(CreateCustomer(name, email, phone, password))
+                CreateAccount();
+            
         }
 
-        private string GetUsername()
+        public bool CheckUniquePhoneNumber(string phoneNumber)
         {
-            Console.WriteLine("Create a unique User Name: ");
-            return Console.ReadLine();
+            CustomersController customersController = new CustomersController();
+            return customersController.GetUserByPhoneNumber(phoneNumber) == null ? true : false;
+        }
+
+        private bool CreateCustomer(string name, string password, string email, string phone)
+        {
+            CustomersController customersController = new CustomersController();
+            bool customerAdded = customersController.CreateCustomer(name, password, email, phone);
+            if (customerAdded) Console.WriteLine("Sign up successful");
+            else Console.WriteLine("Retry again..");
+            return customerAdded;
+        }
+
+        private bool CreateAccount()
+        {
+            AccountsController accountController = new AccountsController();
+            Account account = AccountFactory.CreateAccountByType(AccountTypes.CURRENT);
+            bool isInserted = accountController.InsertAccountToDB(account);
+            if (account != null) Console.WriteLine("Account created successfully");
+            else Console.WriteLine("Error creating account");
+            return isInserted;
         }
 
         private string GetValue(string label)
         {
-            Console.WriteLine(label+": ");
-            return Console.ReadLine();
+            Console.WriteLine(label +": ");
+            Validation validation = new Validation();
+
+            string value = Console.ReadLine().Trim();
+            if (!validation.CheckEmpty(value)) return value;
+            else
+            {
+                Console.WriteLine(label + " cannot be empty.");
+                GetValue(label);
+            }
+            return value;
         }
 
         private string GetRePassword()
         {
             Console.WriteLine("Re-enter password: ");
-            return Console.ReadLine();
+            return Console.ReadLine().Trim();
         }
 
-        public string GetPassword()
+        private string GetPassword()
         {
             Console.WriteLine("Enter password: ");
-            return Console.ReadLine();
+            return Console.ReadLine().Trim();
         }
 
-        public void VerifyPassword(string password)
+        private void VerifyPassword(string password)
         {
             Validation validation = new Validation();
             while (true)

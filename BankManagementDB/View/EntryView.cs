@@ -20,7 +20,7 @@ namespace BankManagement.View
                 Console.WriteLine("1.Login\n2.Signup\n3.Exit\nEnter your choice: ");
                 try
                 {
-                    string option = Console.ReadLine();
+                    string option = Console.ReadLine().Trim();
                     int entryOption = int.Parse(option);
                     if (entryOption != 0 && entryOption <= Enum.GetValues(typeof(Entry)).Length)
                     {

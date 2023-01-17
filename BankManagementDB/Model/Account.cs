@@ -13,15 +13,15 @@ namespace BankManagement.Models
             Balance = 0;
             Status = AccountStatus.ACTIVE;
         }
+        public long ID { get; set; }
 
         public decimal Balance { get; set; }
 
-        public AccountTypes Type { get; set; }
-
         public decimal InterestRate { get; set; }
 
-        public Int64 UserID { get; set; }
-        public Int64 ID { get; set; }
+        public AccountTypes Type { get; set; }
+
+        public long UserID { get; set; }
 
         public AccountStatus Status { get; set; } 
         

@@ -4,6 +4,7 @@ using BankManagement.Model;
 using BankManagement.Models;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Security.Principal;
 
@@ -28,7 +29,7 @@ namespace BankManagement.View
             }
         }
 
-        public void AccountSelection(ProfileController profile)
+        public void AccountSelection()
         {
             bool isValidOption = false;
             while (!isValidOption)
@@ -36,12 +37,13 @@ namespace BankManagement.View
                 Console.WriteLine("Enter your choice: ");
                 try
                 {
-                    string option = Console.ReadLine();
+                    string option = Console.ReadLine().Trim();
                     int entryOption = int.Parse(option);
-                   
-                    if (entryOption != 0 && entryOption <= profile.Accounts.Count())
+                    AccountsController accountsController = new AccountsController();
+                    IList<Account> accountsList = accountsController.GetAllAccounts();
+                    if (entryOption != 0 && entryOption <= accountsList.Count())
                     {
-                        Account account = profile.Accounts[entryOption - 1];
+                        Account account = accountsList[entryOption - 1];
                     }
                     else
                     {
@@ -50,7 +52,7 @@ namespace BankManagement.View
                 }
                 catch (Exception error)
                 {
-                    Console.WriteLine("Enter a valid option(Linked Account view)");
+                    Console.WriteLine("Enter a valid option.");
                 }
             }
         }
@@ -64,7 +66,7 @@ namespace BankManagement.View
                 Console.WriteLine("Enter your choice: ");
                 try
                 {
-                    string option = Console.ReadLine();
+                    string option = Console.ReadLine().Trim();
                     int entryOption = int.Parse(option);
 
                     if (entryOption != 0 && entryOption <= Enum.GetNames(typeof(AccountTypes)).Count())

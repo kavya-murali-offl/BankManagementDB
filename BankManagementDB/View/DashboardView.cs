@@ -30,7 +30,7 @@ namespace BankManagement.View
                     "Enter your choice: \n");
                 try
                 {
-                    string option = Console.ReadLine();
+                    string option = Console.ReadLine().Trim();
                     int entryOption = int.Parse(option);
                     if (entryOption != 0 && entryOption <= Enum.GetNames(typeof(DashboardCases)).Count())
                     {
@@ -100,7 +100,7 @@ namespace BankManagement.View
         {
             IList<Account> accountsList = accountController.GetAllAccounts();
             ListAccountIDs(accountsList);
-            string index = Console.ReadLine();
+            string index = Console.ReadLine().Trim();
             int accountIndex = int.Parse(index);
             return accountsList[accountIndex-1];
         }

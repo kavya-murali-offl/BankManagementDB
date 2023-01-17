@@ -12,12 +12,14 @@ namespace BankManagement.Model
         public CurrentAccount(): base() {
             InterestRate = 5.6m;
         }
-        public void Withdraw(decimal amount)
+
+        public bool Withdraw(decimal amount)
         {
             bool validTransaction = CheckMinimumBalance(amount);
             if (!validTransaction)
                 ChargeForMinBalance();
             base.Withdraw(amount);
+            return validTransaction;
         }
 
 
@@ -26,20 +28,25 @@ namespace BankManagement.Model
             if (Balance - amount < MIN_BALANCE)
                 return false;
             return true;
-
         }
 
         public void ChargeForMinBalance()
         {
-            Balance = Balance - CHARGES;
+            if (Balance < CHARGES)
+                Balance = 0;
+            else
+            {
+                Balance = Balance - CHARGES;
+            }
         }
+
         public decimal MinimumBalance { get { return MIN_BALANCE; } }
 
         public override string ToString()
         {
-            return "\nAccount Type: Current" +
+            return $@"\nAccount Type: Current" +
                 base.ToString() +
-                "\nMinimum Balance: " + MinimumBalance +
+                $@"\nMinimum Balance: {MinimumBalance}\n" +
                 "\n========================================\n";
         }
 

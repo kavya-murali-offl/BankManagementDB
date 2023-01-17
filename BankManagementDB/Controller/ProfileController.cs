@@ -9,25 +9,15 @@ namespace BankManagement.Controller
     {
         public Customer Customer { get; set; }
 
-        public string UserName
-        {
-            get { return Customer.UserName; }
-        }
+        public long ID => Customer.ID;
 
         public string Name => Customer.Name;
 
-        public Int64 ID => Customer.ID;
+        public string Phone => Customer.Phone;
 
+        public string Email => Customer.Email;
 
-        public IList<Account> Accounts
-        {
-            get; set;
-        }
-
-        public Account GetAccountByID(string id)
-        {
-            return null;
-        }
+        public DateTime lastLoginOn => Customer.lastLoginOn;
 
     }
 }

@@ -1,17 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Data.SQLite;
-using System.IO;
 using System.Data;
-using BankManagement.Models;
-using System.Security.Cryptography;
 
 namespace BankManagementDB.db
 {
-    public static class Database
+    public class Database
     {
         public static void CreateTableIfNotExists()
         {
@@ -19,7 +13,7 @@ namespace BankManagementDB.db
                                     'ID' INTEGER NOT NULL UNIQUE, 
                                     'Name' TEXT, 
                                     'UserName' TEXT NOT NULL UNIQUE,
-                                    'Phone' TEXT, 
+                                    'Phone' TEXT,
                                     'Email' TEXT,
                                     'HashedPassword' TEXT,
                                     PRIMARY KEY('ID' AUTOINCREMENT));";
@@ -41,6 +35,7 @@ namespace BankManagementDB.db
                                       'RecordedOn' TEXT,
                                       'Amount' DECIMAL,
                                       'TransactionType' TEXT,
+                                      'Description' TEXT,
                                       'AccountID' INTEGER,
                                       FOREIGN KEY (AccountID) REFERENCES Account(ID)
                                       );";
@@ -49,9 +44,8 @@ namespace BankManagementDB.db
             queryExecution.ExecuteNonQuery(customerQuery, null);
             queryExecution.ExecuteNonQuery(accountQuery, null);
             queryExecution.ExecuteNonQuery(transactionsQuery, null);
-
-
         }
+
         public static bool InsertRowToTable(string tableName, IDictionary<string,object> parameters)
         {
             bool result = false;
@@ -142,15 +136,15 @@ namespace BankManagementDB.db
             return result;
         }
 
-        public static void PrintDataTable(DataTable AccountsTable)
+        public static void PrintDataTable(DataTable Table)
         {
             Console.WriteLine();
             Dictionary<string, int> colWidths = new Dictionary<string, int>();
 
-            foreach (DataColumn col in AccountsTable.Columns)
+            foreach (DataColumn col in Table.Columns)
             {
                 Console.Write(col.ColumnName);
-                var maxLabelSize = AccountsTable.Rows.OfType<DataRow>()
+                var maxLabelSize = Table.Rows.OfType<DataRow>()
                         .Select(m => (m.Field<object>(col.ColumnName)?.ToString() ?? "").Length)
                         .OrderByDescending(m => m).FirstOrDefault();
 
@@ -160,12 +154,12 @@ namespace BankManagementDB.db
 
             Console.WriteLine();
 
-            foreach (DataRow dataRow in AccountsTable.Rows)
+            foreach (DataRow dataRow in Table.Rows)
             {
                 for (int j = 0; j < dataRow.ItemArray.Length; j++)
                 {
                     Console.Write(dataRow.ItemArray[j]);
-                    for (int i = 0; i < colWidths[AccountsTable.Columns[j].ColumnName] - dataRow.ItemArray[j].ToString().Length + 10; i++) Console.Write(" ");
+                    for (int i = 0; i < colWidths[Table.Columns[j].ColumnName] - dataRow.ItemArray[j].ToString().Length + 10; i++) Console.Write(" ");
                 }
                 Console.WriteLine();
             }

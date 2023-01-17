@@ -8,7 +8,6 @@ namespace BankManagement.Controller
 {
     public static class AccountFactory
     {
-
         public static Account CreateAccountByType(AccountTypes accountType)
         {
             switch (accountType)
@@ -20,18 +19,19 @@ namespace BankManagement.Controller
                         decimal amount = helper.GetAmount();
                         currentAccount.Balance = amount;
                         currentAccount.Type = AccountTypes.CURRENT;
+                        currentAccount.InterestRate = 0;
                         return currentAccount;
                     }
                 case AccountTypes.SAVINGS:
                     {
                         SavingsAccount savingsAccount = new SavingsAccount();
                         savingsAccount.Type = AccountTypes.SAVINGS;
+                        savingsAccount.InterestRate = 5.6m;
                         return savingsAccount;
                     }
                 default:
                     return null;
             }
-             
         }
 
         public static Account GetAccountByType(AccountTypes accountType)

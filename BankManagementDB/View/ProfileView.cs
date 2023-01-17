@@ -1,5 +1,4 @@
 ﻿using BankManagement.Controller;
-using BankManagement.Models;
 using System;
 
 
@@ -16,15 +15,11 @@ namespace BankManagement.View
                 Console.WriteLine("Press 0 to go back to dashboard");
                 try
                 {
-                    String input = Console.ReadLine();
+                    String input = Console.ReadLine().Trim();
                     if (input != "0")
-                    {
                         Console.WriteLine("Enter a valid option");
-                    }
                     else
-                    {
                         break;
-                    }
                 }
                 catch (Exception error)
                 {
@@ -37,7 +32,10 @@ namespace BankManagement.View
         {
             Console.WriteLine("\n PROFILE \n");
             Console.WriteLine("Name: " + profileController.Name);
-            Console.WriteLine("UserName: " + profileController.UserName);
+            Console.WriteLine("Phone: " + profileController.Phone);
+            Console.WriteLine("Email: " + profileController.Email);
+            Console.WriteLine("Last login on: " + profileController.lastLoginOn);
+
             //Console.WriteLine("Phone: " + profileController.Phone);
 
         }

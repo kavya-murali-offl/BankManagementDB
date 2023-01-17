@@ -19,5 +19,20 @@ namespace BankManagement.Utility
                 return rePassword.Equals(password);
         }
 
+        public bool IsPhoneNumber(string input)
+        {
+            string pattern = "0000000000";
+            bool matched = false;
+
+            if (input.Length != pattern.Length) return false;
+
+            for (int i = 0; i < input.Length; ++i)
+            {
+                matched = Char.IsDigit(input, i);
+                if (!matched) return false;
+            }
+            return matched;
+        }
+
     }
 }

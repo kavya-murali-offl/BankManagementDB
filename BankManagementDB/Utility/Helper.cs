@@ -19,7 +19,7 @@ namespace BankManagement.Utility
                 Console.WriteLine("Enter amount: ");
                 try
                 {
-                    decimal amount = Decimal.Parse(Console.ReadLine());
+                    decimal amount = Decimal.Parse(Console.ReadLine().Trim());
                     if (amount > 0) return amount;
                     else Console.WriteLine("Amount should be greater than zero.");
                 }
@@ -28,29 +28,30 @@ namespace BankManagement.Utility
                     Console.WriteLine("Enter a valid amount. Try Again!(incoming view)");
                 }
             }
-        } 
-        
-        public bool CheckUniqueUserName(string userName)
+        }
+
+       
+
+        public String GetPhoneNumber()
         {
-            CustomersController customersController = new CustomersController();
-            return customersController.GetUserByUserName(userName) == null ? true : false;
-        }
-
-        public AccountTypes ConvertStringToAccountType(string accountType) { 
-             AccountTypes enumType = AccountTypes.SAVINGS;
-             switch(accountType)
+            Console.WriteLine("Enter Mobile Number: ");
+            string phoneNumber = Console.ReadLine().Trim();
+            Validation validation = new Validation();
+            if (!validation.IsPhoneNumber(phoneNumber))
             {
-                case "CurrentAccount":
-                    enumType = AccountTypes.CURRENT;
-                    break;
-
-                case "SavingsAccount":
-                    enumType = AccountTypes.SAVINGS;
-                    break;
+                Console.WriteLine("Please enter a valid mobile number. ");
+                GetPhoneNumber();
             }
-
-            return enumType;
+            return phoneNumber;
         }
+
+        public String GetPassword()
+        {
+            Console.WriteLine("Enter password: ");
+            return Console.ReadLine().Trim();
+        }
+
+       
 
     }
 }
