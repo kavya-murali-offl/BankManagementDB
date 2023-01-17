@@ -17,17 +17,17 @@ namespace BankManagement.View
 
     public class DashboardView
     {
-        public void ViewDashboard(ProfileController profileController, AccountsController accountsController)
+        public void ViewDashboard(ProfileController profileController)
         {
             while (true)
             {
-                Console.WriteLine("\n" +
-                    "1. Profile\n" +
-                    "2. Create Account\n" +
-                    "3. List Accounts\n" +
-                    "4. Go to Account\n" +
-                    "5. Sign out\n" +
-                    "Enter your choice: \n");
+                Console.WriteLine($@"
+                      1. Profile
+                    \n2. Create Account
+                    \n3. List Accounts
+                    \n4. Go to Account
+                    \n5. Sign out
+                    \nEnter your choice: ");
                 try
                 {
                     string option = Console.ReadLine().Trim();
@@ -36,7 +36,7 @@ namespace BankManagement.View
                     {
                         DashboardCases cases = (DashboardCases)entryOption - 1;
 
-                        if (DashboardOperations(cases, profileController, accountsController))
+                        if (DashboardOperations(cases, profileController))
                         {
                             break;
                         }
@@ -55,11 +55,10 @@ namespace BankManagement.View
 
         private bool DashboardOperations(
             DashboardCases operation,
-            ProfileController profileController, 
-            AccountsController accountsController
+            ProfileController profileController
             )
         {
-            
+            AccountsController accountsController = new AccountsController();   
             switch (operation)
             {
                 case DashboardCases.PROFILE:
@@ -79,6 +78,10 @@ namespace BankManagement.View
                     return false;
                 case DashboardCases.SIGN_OUT:
                     Console.WriteLine(".....LOGGING YOU OUT.....");
+                    CustomersController customersController = new CustomersController();    
+                    IDictionary<string, object> updateFields = new Dictionary<string, object>();
+                    updateFields.Add("lastLoginOn", profileController.lastLoginOn);
+                    //customersController.UpdateCustomer(updateFields);
                     return true;
                 default:
                     Console.WriteLine("Enter a valid option.\n");

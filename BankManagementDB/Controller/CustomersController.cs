@@ -9,42 +9,9 @@ namespace BankManagement.Controller
 {
     public class CustomersController
     {
-        public DataTable CustomerDB { get; set; }
+        public static DataTable CustomerTable { get; set; }
 
-        public DataRow GetUserByPhoneNumber(string phoneNumber)
-        {
-            try
-            {
-                IEnumerable<DataRow> rows = CustomerDB.AsEnumerable()
-                   .Where(r => r.Field<string>("Phone") == phoneNumber);
-                if (rows != null && rows.Count() > 0)
-                {
-                    DataRow row = rows.FirstOrDefault();
-                    return row;
-                }
-            }catch(Exception ex) {
-                Console.WriteLine(ex.Message);
-            }
-            return null;    
-
-        }
-
-        public Customer GetCustomerByPhoneNumber(string phoneNumber) {
-            Customer customer = new Customer();
-            try
-            {
-                DataRow dr = GetUserByPhoneNumber(phoneNumber);
-                customer.ID = dr.Field<long>("ID");
-                customer.Name = dr.Field<string>("Name");
-                customer.Phone = dr.Field<string>("Phone");
-                customer.Email = dr.Field<string>("Email");
-            }catch(Exception ex) {
-                Console.WriteLine(ex);
-            }
-            return customer;
-        }
-
-        public bool CreateCustomer(string name, string password, string email, string phone) 
+        public bool CreateCustomer(string name, string password, string email, string phone)
         {
             try
             {
@@ -56,16 +23,36 @@ namespace BankManagement.Controller
                     { "Phone", phone },
                     { "HashedPassword", hashedPassword }
                 };
-                return Database.InsertRowToTable("Customer", parameters);
+                return DatabaseOperations.InsertRowToTable("Customer", parameters);
 
-            }catch(Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 Console.WriteLine(ex);
             }
             return false;
         }
 
-        public void FillTable() {
-            CustomerDB = Database.FillTable("Customer", null);
+        public bool UpdateCustomer(string name, string password, string email, string phone)
+        {
+            try
+            {
+                string hashedPassword = AuthServices.ComputeHash(password);
+                IDictionary<string, object> parameters = new Dictionary<string, object>
+                {
+                    { "Name", name },
+                    { "Email", email },
+                    { "Phone", phone },
+                    { "HashedPassword", hashedPassword }
+                };
+                return DatabaseOperations.InsertRowToTable("Customer", parameters);
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+            return false;
         }
 
         public bool ValidatePassword(string phoneNumber, string password)
@@ -83,8 +70,41 @@ namespace BankManagement.Controller
             }
         }
 
-        
+        public DataRow GetUserByPhoneNumber(string phoneNumber)
+        {
+            try
+            {
+                IEnumerable<DataRow> rows = CustomerTable.AsEnumerable()
+                   .Where(r => r.Field<string>("Phone") == phoneNumber);
+                if (rows != null && rows.Count() > 0)
+                {
+                    return rows.FirstOrDefault();
+                }
+            }catch(Exception ex) {
+                Console.WriteLine(ex.Message);
+            }
+            return null;    
+        }
 
+        public Customer GetCustomerByPhoneNumber(string phoneNumber) {
+            Customer customer = new Customer();
+            try
+            {
+                DataRow dr = GetUserByPhoneNumber(phoneNumber);
+                customer.ID = dr.Field<long>("ID");
+                customer.Name = dr.Field<string>("Name");
+                customer.Phone = dr.Field<string>("Phone");
+                customer.Email = dr.Field<string>("Email");
+            }catch(Exception ex) {
+                Console.WriteLine(ex);
+            }
+            return customer;
+        }
+
+        public void FillTable()
+        {
+            CustomerTable = DatabaseOperations.FillTable("Customer", null);
+        }
     }
 
 }

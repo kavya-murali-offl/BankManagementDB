@@ -44,7 +44,6 @@ namespace BankManagement.View
 
         public bool EntryOperations(int option)
         {
-
             switch (option)
             {
                 case 1:

@@ -25,7 +25,7 @@ namespace BankManagement.Controller
             {
                 transaction.Balance = row.Field<decimal>("Balance");
                 transaction.Amount = row.Field<decimal>("Amount");
-                transaction.AccountID = row.Field<Int64>("AccountID");
+                transaction.AccountID = row.Field<long>("AccountID");
                 transaction.ID = row.Field<long>("ID");
                 transaction.Description = row.Field<string>("Description");
                 transaction.TransactionType = (TransactionTypes)Enum.Parse(typeof(TransactionTypes), row.Field<string>("TransactionType"));
@@ -38,7 +38,7 @@ namespace BankManagement.Controller
 
         public void ViewAllTransactions()
         {
-            Database.PrintDataTable(TransactionTable);  
+            DatabaseOperations.PrintDataTable(TransactionTable);  
         }
 
         public IList<Transaction> GetAllTransactions()
@@ -73,7 +73,7 @@ namespace BankManagement.Controller
                 AccountsController accountsController = new AccountsController();
                 isDeposited = accountsController.UpdateAccount(updateFields);
                 if (isDeposited)
-                    AddTransaction("DEPOSIT", amount, account, TransactionTypes.DEPOSIT);
+                    CreateTransaction("DEPOSIT", amount, account, TransactionTypes.DEPOSIT);
             }catch(Exception ex) {
                 Console.WriteLine(ex.Message);
             }
@@ -94,7 +94,7 @@ namespace BankManagement.Controller
                 AccountsController accountController = new AccountsController();
                 accountController.UpdateAccount(updateFields);
                 if (isWithdrawn)
-                    AddTransaction("Withdrawal", amount, account, TransactionTypes.WITHDRAW);
+                    CreateTransaction("WITHDRAWAL", amount, account, TransactionTypes.WITHDRAW);
             }catch(Exception ex) { Console.WriteLine(ex.Message); }
             return isWithdrawn;
         }
@@ -117,14 +117,35 @@ namespace BankManagement.Controller
             return false;
         }
 
-        public void AddTransaction(string description, decimal amount, Account account, TransactionTypes type)
+        public void CreateTransaction(string description, decimal amount, Account account, TransactionTypes type)
         {
             Transaction transaction = new Transaction(description, amount, account.Balance, type);
             transaction.AccountID = account.ID;    
-            bool isInserted = InsertTransaction(transaction);
+            InsertTransaction(transaction);
         }
 
-        public bool AddToTransactionDataTable(Transaction transaction)
+        public bool InsertTransaction(Transaction transaction)
+        {
+            bool success = false;
+            try
+            {
+                InsertTransactionDelegate insertTransaction = InsertTransactionInDB;
+                success = insertTransaction(transaction);
+                if (success)
+                {
+                    insertTransaction = InsertTransactionToDataTable;
+                    bool inserted = insertTransaction(transaction);
+                    return inserted;
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+            return success;
+        }
+
+        public bool InsertTransactionToDataTable(Transaction transaction)
         {
             bool success = false;
             try
@@ -159,28 +180,7 @@ namespace BankManagement.Controller
                     { "TransactionType", transaction.TransactionType.ToString() },
                     { "AccountID", transaction.AccountID },
                 };
-            return Database.InsertRowToTable("Transactions", updateFields);
-        }
-
-        public bool InsertTransaction(Transaction transaction)
-        {
-            bool success = false;
-            try
-            {
-                InsertTransactionDelegate insertTransaction = InsertTransactionInDB;
-                success = insertTransaction(transaction);
-                if (success)
-                {
-                    insertTransaction = AddToTransactionDataTable;
-                    bool inserted = insertTransaction(transaction);
-                    return inserted;
-                }
-            }
-            catch(Exception e)
-            {
-
-            }
-            return success;
+            return DatabaseOperations.InsertRowToTable("Transactions", updateFields);
         }
 
         public void FillTable(long accountID)
@@ -189,7 +189,7 @@ namespace BankManagement.Controller
             {
                 { "AccountID", accountID }
             };
-            TransactionTable = Database.FillTable("Transactions", parameters);
+            TransactionTable = DatabaseOperations.FillTable("Transactions", parameters);
         }
 
         public DateTime? GetLastWithdrawnDate()

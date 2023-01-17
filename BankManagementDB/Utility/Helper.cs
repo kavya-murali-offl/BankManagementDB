@@ -25,12 +25,10 @@ namespace BankManagement.Utility
                 }
                 catch (Exception error)
                 {
-                    Console.WriteLine("Enter a valid amount. Try Again!(incoming view)");
+                    Console.WriteLine("Enter a valid amount. Try Again!");
                 }
             }
         }
-
-       
 
         public String GetPhoneNumber()
         {
@@ -48,10 +46,11 @@ namespace BankManagement.Utility
         public String GetPassword()
         {
             Console.WriteLine("Enter password: ");
-            return Console.ReadLine().Trim();
+            string password = Console.ReadLine().Trim();
+            Validation validation = new Validation();
+            if (validation.CheckEmpty(password))
+                return password;
+            return null;
         }
-
-       
-
     }
 }

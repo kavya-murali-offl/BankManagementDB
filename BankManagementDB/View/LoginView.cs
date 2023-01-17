@@ -15,7 +15,6 @@ namespace BankManagement.View
             {
                 bool isValidated;
                 CustomersController customersController = new CustomersController();
-                customersController.FillTable();
                 Helper helper = new Helper();
                 string phoneNumber = helper.GetPhoneNumber();
                 isValidated = ValidateLogin(phoneNumber, customersController);
@@ -25,23 +24,18 @@ namespace BankManagement.View
                         ProfileController profile = new ProfileController();
                         profile.Customer = customersController.GetCustomerByPhoneNumber(phoneNumber);
                         profile.Customer.lastLoginOn = DateTime.Now;
-                        DashboardView dashboard = new DashboardView();
-                        IDictionary<string, object> parameters = new Dictionary<string, object>
-                    {
-                        { "UserID", profile.ID }
-                    };
-
+                        
                         AccountsController accountsController = new AccountsController();
                         accountsController.FillTable(profile.ID);
-                        dashboard.ViewDashboard(profile, accountsController);
+
+                        DashboardView dashboard = new DashboardView();
+                        dashboard.ViewDashboard(profile);
                     }
             }
             catch(Exception ex) {
                 Console.WriteLine(ex.Message);
             }
         }
-
-       
 
         public bool ValidateLogin(string phoneNumber, CustomersController customersController)
         {

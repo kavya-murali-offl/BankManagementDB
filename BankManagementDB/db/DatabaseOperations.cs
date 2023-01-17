@@ -5,15 +5,14 @@ using System.Data;
 
 namespace BankManagementDB.db
 {
-    public class Database
+    public class DatabaseOperations
     {
         public static void CreateTableIfNotExists()
         {
             string customerQuery = @"CREATE TABLE IF NOT EXISTS Customer (
                                     'ID' INTEGER NOT NULL UNIQUE, 
                                     'Name' TEXT, 
-                                    'UserName' TEXT NOT NULL UNIQUE,
-                                    'Phone' TEXT,
+                                    'Phone' TEXT UNIQUE,
                                     'Email' TEXT,
                                     'HashedPassword' TEXT,
                                     PRIMARY KEY('ID' AUTOINCREMENT));";
@@ -46,17 +45,18 @@ namespace BankManagementDB.db
             queryExecution.ExecuteNonQuery(transactionsQuery, null);
         }
 
-        public static bool InsertRowToTable(string tableName, IDictionary<string,object> parameters)
+        public static bool InsertRowToTable(string tableName, IDictionary<string, object> parameters)
         {
             bool result = false;
             try
             {
                 string query = @"INSERT INTO " + tableName + " ('";
-                for(int i =0; i< parameters.Keys.Count(); i++) {
+                for (int i = 0; i < parameters.Keys.Count(); i++)
+                {
                     query += parameters.Keys.ElementAt<string>(i);
-                    if(i != parameters.Keys.Count() - 1 )
+                    if (i != parameters.Keys.Count() - 1)
                     {
-                       query += "', '";
+                        query += "', '";
                     }
                 }
                 query += "') ";
@@ -69,10 +69,10 @@ namespace BankManagementDB.db
                         query += ", ";
                     }
                 }
-                
+
                 query += ")";
                 QueryExecution queryExecution = new QueryExecution();
-               
+
                 queryExecution.ExecuteNonQuery(query, parameters);
                 result = true;
             }
@@ -88,8 +88,8 @@ namespace BankManagementDB.db
             DataTable result = new DataTable();
             try
             {
-                string query = "SELECT * FROM "+ tableName;
-                if(parameters != null && parameters.Count> 0)
+                string query = "SELECT * FROM " + tableName;
+                if (parameters != null && parameters.Count > 0)
                 {
                     query += " WHERE ";
                     foreach (KeyValuePair<string, object> pairs in parameters)
@@ -105,11 +105,6 @@ namespace BankManagementDB.db
             {
                 Console.WriteLine(err);
             }
-            finally
-            {
-                Console.WriteLine("FillingTable");
-                PrintDataTable(result);
-            }
             return result;
         }
 
@@ -118,18 +113,18 @@ namespace BankManagementDB.db
             bool result = false;
             try
             {
-                string query = "UPDATE "+ tableName + " SET ";
+                string query = "UPDATE " + tableName + " SET ";
 
                 foreach (KeyValuePair<string, object> pairs in updateFields)
                 {
-                    if(pairs.Key != "ID")
+                    if (pairs.Key != "ID")
                         query += pairs.Key + "= @" + pairs.Key;
                 }
 
                 query += " WHERE ID = @ID";
                 QueryExecution queryExecution = new QueryExecution();
                 queryExecution.ExecuteNonQuery(query, updateFields);
-                return true;   
+                return true;
             }
             catch (Exception err)
             { Console.WriteLine(err.Message); }
@@ -138,7 +133,7 @@ namespace BankManagementDB.db
 
         public static void PrintDataTable(DataTable Table)
         {
-            Console.WriteLine();
+            Console.WriteLine(" ");
             Dictionary<string, int> colWidths = new Dictionary<string, int>();
 
             foreach (DataColumn col in Table.Columns)

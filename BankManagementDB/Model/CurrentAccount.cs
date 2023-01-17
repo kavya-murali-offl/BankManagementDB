@@ -22,7 +22,6 @@ namespace BankManagement.Model
             return validTransaction;
         }
 
-
         public bool CheckMinimumBalance(decimal amount)
         {
             if (Balance - amount < MIN_BALANCE)

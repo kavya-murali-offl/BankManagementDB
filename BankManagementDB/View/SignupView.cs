@@ -35,11 +35,13 @@ namespace BankManagement.View
 
             do
             {
-                password = GetPassword();
+                password = helper.GetPassword();
             } while (!validation.CheckEmpty(password));
 
             VerifyPassword(password);
+
             name = GetValue("Name");
+
             email = GetValue("Email");
 
             if(CreateCustomer(name, email, phone, password))
@@ -57,7 +59,7 @@ namespace BankManagement.View
         {
             CustomersController customersController = new CustomersController();
             bool customerAdded = customersController.CreateCustomer(name, password, email, phone);
-            if (customerAdded) Console.WriteLine("Sign up successful");
+            if (customerAdded) Console.WriteLine("SignUp successful");
             else Console.WriteLine("Retry again..");
             return customerAdded;
         }
@@ -68,23 +70,22 @@ namespace BankManagement.View
             Account account = AccountFactory.CreateAccountByType(AccountTypes.CURRENT);
             bool isInserted = accountController.InsertAccountToDB(account);
             if (account != null) Console.WriteLine("Account created successfully");
-            else Console.WriteLine("Error creating account");
+            else Console.WriteLine("Error while creating account");
             return isInserted;
         }
 
-        private string GetValue(string label)
+        public string GetValue(string label)
         {
             Console.WriteLine(label +": ");
             Validation validation = new Validation();
 
             string value = Console.ReadLine().Trim();
-            if (!validation.CheckEmpty(value)) return value;
+            if (validation.CheckEmpty(value)) return value;
             else
             {
-                Console.WriteLine(label + " cannot be empty.");
                 GetValue(label);
+                return null;
             }
-            return value;
         }
 
         private string GetRePassword()
@@ -93,11 +94,6 @@ namespace BankManagement.View
             return Console.ReadLine().Trim();
         }
 
-        private string GetPassword()
-        {
-            Console.WriteLine("Enter password: ");
-            return Console.ReadLine().Trim();
-        }
 
         private void VerifyPassword(string password)
         {

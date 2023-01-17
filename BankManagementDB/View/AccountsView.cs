@@ -11,24 +11,7 @@ using System.Security.Principal;
 namespace BankManagement.View
 {
     public class AccountsView
-
-
     {
-        public void ViewAllAccounts(IList<Account> accounts)
-        {
-            if (accounts == null || accounts.Count() == 0)
-            {
-                Console.WriteLine("\n-------- NO ACCOUNTS FOUND --------\n");
-            }
-            else
-            {
-                foreach (Account account in accounts)
-                {
-                    Console.WriteLine(account);
-                }
-            }
-        }
-
         public void AccountSelection()
         {
             bool isValidOption = false;

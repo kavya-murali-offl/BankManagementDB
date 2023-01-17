@@ -1,4 +1,5 @@
-﻿using BankManagement.View;
+﻿using BankManagement.Controller;
+using BankManagement.View;
 using BankManagementDB.db;
 using System;
 using System.Collections.Generic;
@@ -12,8 +13,11 @@ namespace BankManagementDB
     {
         static void Main(string[] args)
         {
-            Database.CreateTableIfNotExists();
-            
+            DatabaseOperations.CreateTableIfNotExists();
+
+            CustomersController customersController = new CustomersController();
+            customersController.FillTable();
+
             EntryView entryView = new EntryView();
             entryView.Entry();
 

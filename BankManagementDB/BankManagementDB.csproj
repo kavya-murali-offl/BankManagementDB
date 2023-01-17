@@ -62,19 +62,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AuthServices.cs" />
+    <Compile Include="db\DatabaseOperations.cs" />
+    <Compile Include="Utility\AuthServices.cs" />
     <Compile Include="Controller\AccountFactory.cs" />
     <Compile Include="Controller\AccountsController.cs" />
     <Compile Include="Controller\CustomersController.cs" />
     <Compile Include="Controller\ProfileController.cs" />
     <Compile Include="Controller\TransactionController.cs" />
-    <Compile Include="db\Database.cs" />
     <Compile Include="db\QueryExecution.cs" />
-    <Compile Include="db\TransactionDB.cs" />
     <Compile Include="Enums\AccountStatus.cs" />
     <Compile Include="Enums\AccountTypes.cs" />
     <Compile Include="Enums\TransactionTypes.cs" />
-    <Compile Include="Interface\IStatementServices.cs" />
     <Compile Include="Interface\ITransactionServices.cs" />
     <Compile Include="Model\Account.cs" />
     <Compile Include="Model\CurrentAccount.cs" />

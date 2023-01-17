@@ -13,7 +13,6 @@ namespace BankManagement.Controller
     delegate bool UpdateAccountDelegate(IDictionary<string, object> fields);
     delegate bool InsertAccountDelegate(Account account);
 
-
     public class AccountsController
     {
         public AccountsController()
@@ -32,7 +31,7 @@ namespace BankManagement.Controller
                 Account account = AccountsView.GenerateAccount();
                 if (account != null)
                 {
-                    account.UserID =userId;
+                    account.UserID = userId;
                     InsertAccountDelegate insertAccount = InsertAccountToDB;
                     bool success = insertAccount(account);
                     if(success)
@@ -62,7 +61,7 @@ namespace BankManagement.Controller
                 { "UserID", account.UserID },
                 { "Type", account.Type.ToString() }
             };
-                return Database.InsertRowToTable("Account", parameters);
+                return DatabaseOperations.InsertRowToTable("Account", parameters);
             }catch(Exception ex)
             {
                 Console.WriteLine(ex);
@@ -102,7 +101,8 @@ namespace BankManagement.Controller
                     return updateAccount(updateFields);
                 }
             }
-            catch(Exception ex) { 
+            catch(Exception ex) {
+                Console.WriteLine(ex.Message);
             }
             return false;
         }
@@ -111,7 +111,7 @@ namespace BankManagement.Controller
         {
             try
             {
-                return Database.UpdateTable("Account", fields);
+                return DatabaseOperations.UpdateTable("Account", fields);
             }catch(Exception ex)
             {
                 return false;   
@@ -145,7 +145,7 @@ namespace BankManagement.Controller
                     {
                         { "UserID", id }
                     };
-                AccountTable = Database.FillTable("Account", parameters);
+                AccountTable = DatabaseOperations.FillTable("Account", parameters);
             }
             catch (Exception ex)
             {
@@ -192,22 +192,23 @@ namespace BankManagement.Controller
 
         public Account RowToAccount(DataRow row)
         {
+            Account account = null;
             try
             {
                 AccountTypes enumType = (AccountTypes)Enum.Parse(typeof(AccountTypes), row.Field<string>("Type"));
-                Account account = AccountFactory.GetAccountByType(enumType);
+                account = AccountFactory.GetAccountByType(enumType);
                 account.Balance = row.Field<decimal>("Balance");
                 account.InterestRate = row.Field<decimal>("InterestRate");
                 account.Status = (AccountStatus)Enum.Parse(typeof(AccountStatus), row.Field<string>("Status"));
                 account.ID = row.Field<Int64>("ID");
-                account.Type = (AccountTypes)Enum.Parse(typeof(AccountTypes), row.Field<string>("Type"));
+                account.Type = enumType;
                 account.UserID = row.Field<Int64>("UserID");
                 return account;
             }catch(Exception e)
             {
                 Console.WriteLine(e);
             }
-            return null;
+            return account;
         }
     }
 

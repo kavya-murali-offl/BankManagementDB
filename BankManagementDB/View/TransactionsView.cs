@@ -52,6 +52,7 @@ namespace BankManagement.View
         {
             Helper helper = new Helper();
             ITransactionServices transactionController = new TransactionController();
+            TransactionController statementServies = new TransactionController();
             decimal amount;
             switch (option)
             {
@@ -75,10 +76,10 @@ namespace BankManagement.View
                     else Console.WriteLine("Something went wrong.");
                     return true;
                 case AccountCases.VIEW_STATEMENT:
-                    //ViewStatement();
+                    ViewStatement(statementServies);
                     return false;
                 case AccountCases.PRINT_STATEMENT:
-                    //PrintStatement();
+                    PrintStatement(statementServies);
                     return false;
                 case AccountCases.BACK:
                     return true;
@@ -88,7 +89,7 @@ namespace BankManagement.View
             }
         }
 
-        public Int64 GetTransferAccountID()
+        public long GetTransferAccountID()
         {
             while (true)
             {
@@ -96,33 +97,27 @@ namespace BankManagement.View
                 try
                 {
                     string id = Console.ReadLine().Trim();
-                    Int64 intID = Int64.Parse(id);
+                    long intID = long.Parse(id);
                     return intID;
                 }
                 catch (Exception error)
                 {
                     Console.WriteLine("Enter a valid ID.");
+                    GetTransferAccountID();
                 }
             }
         }
 
-        //public void PrintStatement()
-        //{
+        public void PrintStatement(TransactionController transactionController)
+        {
+            IList<Transaction> statements = transactionController.GetAllTransactions();
+            Printer.PrintStatement(statements);
 
-        //    IList<Transaction> statements = transactionController.GetAllTransactions();
-        //    Printer.PrintStatement(statements);
+        }
+        public void ViewStatement(TransactionController transactionController)
+        {
+            transactionController.ViewAllTransactions();
+        }
 
-        //}
-        //public void ViewStatement(TransactionController transactionController)
-        //{
-        //    transactionController.ViewAllTransactions();
-        //}
-
-        //    public void PrintStatement()
-        //    {
-        //        IList<Transaction> transactions = transactionController.GetAllTransactions();
-        //        Printer.PrintStatement(transactions);
-        //    }
-        //}
     }
 }

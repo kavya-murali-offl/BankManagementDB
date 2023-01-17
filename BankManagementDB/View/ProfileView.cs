@@ -34,10 +34,7 @@ namespace BankManagement.View
             Console.WriteLine("Name: " + profileController.Name);
             Console.WriteLine("Phone: " + profileController.Phone);
             Console.WriteLine("Email: " + profileController.Email);
-            Console.WriteLine("Last login on: " + profileController.lastLoginOn);
-
-            //Console.WriteLine("Phone: " + profileController.Phone);
-
+            Console.WriteLine("No. of Accounts: "+ AccountsController.AccountTable.Rows.Count);
         }
     }
 }
