@@ -21,13 +21,7 @@ namespace BankManagement.View
         {
             while (true)
             {
-                Console.WriteLine($@"
-                      1. Profile
-                    \n2. Create Account
-                    \n3. List Accounts
-                    \n4. Go to Account
-                    \n5. Sign out
-                    \nEnter your choice: ");
+                Console.WriteLine("1. Profile\n2. Create Account\n3. List Accounts\n4. Go to Account\n5. Sign out\nEnter your choice: ");
                 try
                 {
                     string option = Console.ReadLine().Trim();

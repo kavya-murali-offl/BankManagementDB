@@ -1,4 +1,5 @@
-﻿using BankManagement.Controller;
+﻿using BankManagement;
+using BankManagement.Controller;
 using BankManagement.View;
 using BankManagementDB.db;
 using System;
@@ -17,10 +18,10 @@ namespace BankManagementDB
 
             CustomersController customersController = new CustomersController();
             customersController.FillTable();
+            AuthServices.ComputeHash("pass");
 
             EntryView entryView = new EntryView();
             entryView.Entry();
-
             Console.ReadKey();  
 
         }

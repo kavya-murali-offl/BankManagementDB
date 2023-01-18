@@ -1,4 +1,5 @@
-﻿using BankManagement.Enums;
+﻿using BankManagement.Controller;
+using BankManagement.Enums;
 using BankManagement.Model;
 using System;
 using System.Collections.Generic;
@@ -48,11 +49,29 @@ namespace BankManagement.Models
                  
         }
 
+        public decimal DepositInterest()
+        {
+            decimal interest = (Balance * CountDays() * InterestRate) / (100 * 12);
+            Deposit(interest);
+            return interest;
+        }
+
+        public int CountDays()
+        {
+            TransactionController transactionController = new TransactionController();
+            DateTime? lastWithdrawnDate = transactionController.GetLastWithdrawnDate();
+            if (lastWithdrawnDate.HasValue)
+            {
+                DateTime TodayDate = DateTime.Now;
+                int numberOfDays = (int)(DateTime.Now - lastWithdrawnDate)?.TotalDays;
+                return numberOfDays;
+            }
+            return 0;
+        }
+
         public override string ToString()
         {
-            return "\nAccount ID: " + ID+
-                "\nAccount Status: " + Status +
-                "\nBalance: " + Balance;
+            return $"Account ID: {ID} \nAccount Status: {Status} \nBalance: {Balance}";
         }
     }
 

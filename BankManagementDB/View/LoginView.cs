@@ -19,7 +19,7 @@ namespace BankManagement.View
                 string phoneNumber = helper.GetPhoneNumber();
                 isValidated = ValidateLogin(phoneNumber, customersController);
               
-                    if (isValidated)
+                if (isValidated)
                     {
                         ProfileController profile = new ProfileController();
                         profile.Customer = customersController.GetCustomerByPhoneNumber(phoneNumber);

@@ -8,31 +8,6 @@ namespace BankManagement.Controller
 {
     public static class AccountFactory
     {
-        public static Account CreateAccountByType(AccountTypes accountType)
-        {
-            switch (accountType)
-            {
-                case AccountTypes.CURRENT:
-                    {
-                        CurrentAccount currentAccount = new CurrentAccount();
-                        Helper helper = new Helper();
-                        decimal amount = helper.GetAmount();
-                        currentAccount.Balance = amount;
-                        currentAccount.Type = AccountTypes.CURRENT;
-                        currentAccount.InterestRate = 0;
-                        return currentAccount;
-                    }
-                case AccountTypes.SAVINGS:
-                    {
-                        SavingsAccount savingsAccount = new SavingsAccount();
-                        savingsAccount.Type = AccountTypes.SAVINGS;
-                        savingsAccount.InterestRate = 5.6m;
-                        return savingsAccount;
-                    }
-                default:
-                    return null;
-            }
-        }
 
         public static Account GetAccountByType(AccountTypes accountType)
         {
@@ -41,11 +16,15 @@ namespace BankManagement.Controller
                 case AccountTypes.CURRENT:
                     {
                         CurrentAccount currentAccount = new CurrentAccount();
+                        currentAccount.Type = AccountTypes.CURRENT;
+                        currentAccount.InterestRate = 0m;
                         return currentAccount;
                     }
                 case AccountTypes.SAVINGS:
                     {
                         SavingsAccount savingsAccount = new SavingsAccount();
+                        savingsAccount.Type = AccountTypes.SAVINGS;
+                        savingsAccount.InterestRate = 5.6m;
                         return savingsAccount;
                     }
                 default:

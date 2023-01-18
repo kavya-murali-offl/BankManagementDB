@@ -17,7 +17,7 @@ namespace BankManagement.Models
 
         public override string ToString()
         {
-            return $@"Customer ID: ${ID}\nName: {Name} \nPhone: {Phone}\nEmail: {Email}\n";
+            return $@"Customer ID: {ID}\nName: {Name} \nPhone: {Phone}\nEmail: {Email}\n";
         }
     }
 }

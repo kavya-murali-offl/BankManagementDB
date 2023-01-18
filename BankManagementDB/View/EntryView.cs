@@ -41,7 +41,6 @@ namespace BankManagement.View
             }
         }
         
-
         public bool EntryOperations(int option)
         {
             switch (option)
@@ -62,6 +61,5 @@ namespace BankManagement.View
                     return false;
             }
         }
-        
     }
 }

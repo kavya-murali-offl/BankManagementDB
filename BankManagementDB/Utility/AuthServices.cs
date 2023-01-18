@@ -20,6 +20,7 @@ namespace BankManagement
                 {
                     stringbuilder.Append(bytes[i].ToString("x2"));
                 }
+                Console.WriteLine(stringbuilder.ToString());
                 return stringbuilder.ToString();
             }
         }

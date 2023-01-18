@@ -32,14 +32,7 @@ namespace BankManagement.Controller
                 if (account != null)
                 {
                     account.UserID = userId;
-                    InsertAccountDelegate insertAccount = InsertAccountToDB;
-                    bool success = insertAccount(account);
-                    if(success)
-                    {
-                        insertAccount = InsertAccountToDataTable;
-                        bool inserted = insertAccount(account);
-                        return inserted;
-                    }
+                    return InsertAccount(account);
                 }
             }
             catch (Exception ex)
@@ -47,6 +40,18 @@ namespace BankManagement.Controller
                 Console.WriteLine(ex);
             }
             return false;
+        }
+
+        public bool InsertAccount(Account account)
+        {
+            bool isAdded = false;
+            InsertAccountDelegate insertAccount = InsertAccountToDB;
+            if (insertAccount(account))
+            {
+                insertAccount = InsertAccountToDataTable;
+                isAdded = insertAccount(account);
+            }
+            return isAdded;
         }
 
         public bool InsertAccountToDB(Account account)
@@ -122,22 +127,27 @@ namespace BankManagement.Controller
         {
             try
             {
-                DataRow[] rows = AccountTable.Select("ID = " + fields["ID"]);
-                if (rows.Length > 0)
+                if(AccountTable?.Rows?.Count > 0)
                 {
-                    DataRow row = rows[0];
-                    foreach (var pairs in fields)
+                    DataRow[] rows = AccountTable.Select("ID = " + fields["ID"]);
+                    if (rows.Length > 0)
                     {
-                        row[pairs.Key] = pairs.Value;
+                        DataRow row = rows[0];
+                        foreach (var pairs in fields)
+                        {
+                            row[pairs.Key] = pairs.Value;
+                        }
+                        return true;
                     }
                 }
+                
             }catch(Exception ex) {
                 Console.WriteLine(ex);
             }
             return false;   
         }
 
-        public void FillTable(Int64 id)
+        public void FillTable(long id)
         {
             try
             {

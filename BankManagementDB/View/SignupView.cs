@@ -1,11 +1,12 @@
 ﻿using BankManagement.Controller;
 using BankManagement.Enums;
+using BankManagement.Model;
 using BankManagement.Models;
 using BankManagement.Utility;
-using BankManagementDB.db;
 using System;
-using System.Security.Policy;
-using System.Xml.Linq;
+using System.Data;
+using System.Runtime.Remoting.Messaging;
+using System.Security.Principal;
 
 namespace BankManagement.View
 {
@@ -44,9 +45,16 @@ namespace BankManagement.View
 
             email = GetValue("Email");
 
-            if(CreateCustomer(name, email, phone, password))
-                CreateAccount();
-            
+            bool customerCreated = CreateCustomer(name, password, email, phone);
+            if (customerCreated)
+            {
+            CustomersController customersController = new CustomersController();
+                customersController.FillTable();
+                DataRow user = customersController.GetUserByPhoneNumber(phone);
+                long userID = (long)user["ID"];
+                CreateAccount(userID);
+            }
+
         }
 
         public bool CheckUniquePhoneNumber(string phoneNumber)
@@ -64,14 +72,27 @@ namespace BankManagement.View
             return customerAdded;
         }
 
-        private bool CreateAccount()
+        private void CreateAccount(long userID)
         {
             AccountsController accountController = new AccountsController();
-            Account account = AccountFactory.CreateAccountByType(AccountTypes.CURRENT);
-            bool isInserted = accountController.InsertAccountToDB(account);
-            if (account != null) Console.WriteLine("Account created successfully");
-            else Console.WriteLine("Error while creating account");
-            return isInserted;
+            Account account = AccountFactory.GetAccountByType(AccountTypes.CURRENT);
+            account.Balance = GetAmount();
+            account.UserID = userID;
+            accountController.InsertAccountToDB(account);
+            
+        }
+
+        public decimal GetAmount()
+        {
+            Helper helper = new Helper();
+            decimal amount = helper.GetAmount();
+            CurrentAccount currentAccount = new CurrentAccount();
+            if(amount < currentAccount.MinimumBalance)
+            {
+                Console.WriteLine("Amount should be greater than minimum balance");
+                GetAmount();
+            }
+            return amount;
         }
 
         public string GetValue(string label)
@@ -88,19 +109,13 @@ namespace BankManagement.View
             }
         }
 
-        private string GetRePassword()
-        {
-            Console.WriteLine("Re-enter password: ");
-            return Console.ReadLine().Trim();
-        }
-
 
         private void VerifyPassword(string password)
         {
             Validation validation = new Validation();
             while (true)
             {
-                string rePassword = GetRePassword();
+                string rePassword = GetValue("Re-enter password");
                 if (validation.ValidatePassword(password, rePassword))
                 {
                     break;

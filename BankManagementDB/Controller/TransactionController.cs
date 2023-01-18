@@ -85,6 +85,7 @@ namespace BankManagement.Controller
             bool isWithdrawn = false;
             try
             {
+                DepositInterest(account);
                 isWithdrawn = account.Withdraw(amount);
                 IDictionary<string, object> updateFields = new Dictionary<string, object>
                 {
@@ -97,6 +98,13 @@ namespace BankManagement.Controller
                     CreateTransaction("WITHDRAWAL", amount, account, TransactionTypes.WITHDRAW);
             }catch(Exception ex) { Console.WriteLine(ex.Message); }
             return isWithdrawn;
+        }
+
+        public void DepositInterest(Account account)
+        {
+            decimal interest = account.DepositInterest();
+            if(interest > 0)
+                CreateTransaction("Interest", interest, account, TransactionTypes.DEPOSIT);
         }
 
         public bool Transfer(decimal amount, Account account, long toAccountID )
@@ -151,7 +159,6 @@ namespace BankManagement.Controller
             try
             {
                 DataRow newRow = TransactionTable.NewRow();
-                newRow["ID"] = transaction.ID;
                 newRow["Amount"] = transaction.Amount;
                 newRow["Balance"] = transaction.Balance;
                 newRow["AccountID"] = transaction.Amount;
@@ -176,7 +183,6 @@ namespace BankManagement.Controller
                     { "Amount", transaction.Amount },
                     { "Balance", transaction.Balance },
                     { "RecordedOn", transaction.RecordedOn },
-                    { "Description", transaction.Description },
                     { "TransactionType", transaction.TransactionType.ToString() },
                     { "AccountID", transaction.AccountID },
                 };
@@ -196,7 +202,7 @@ namespace BankManagement.Controller
         {
             for(int i = TransactionTable.Rows.Count ; i>=0; i--)
             {
-                if (TransactionTable.Rows[i].Field<string>("TransactionType") == "WITHDRAW")
+                if (TransactionTable.Rows[i].Field<string>("TransactionType") == "DEPOSIT")
                     return TransactionTable.Rows[i].Field<DateTime>("RecordedOn");
             }
             return new Nullable<DateTime>();

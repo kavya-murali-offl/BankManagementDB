@@ -24,7 +24,6 @@ namespace BankManagement.Controller
                     { "HashedPassword", hashedPassword }
                 };
                 return DatabaseOperations.InsertRowToTable("Customer", parameters);
-
             }
             catch (Exception ex)
             {

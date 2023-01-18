@@ -2,6 +2,7 @@
 using BankManagement.Enums;
 using BankManagement.Model;
 using BankManagement.Models;
+using BankManagement.Utility;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -55,11 +56,21 @@ namespace BankManagement.View
                     if (entryOption != 0 && entryOption <= Enum.GetNames(typeof(AccountTypes)).Count())
                     {
                         AccountTypes accountType = (AccountTypes)entryOption - 1;
-                        account = AccountFactory.CreateAccountByType(accountType);
+                        account = AccountFactory.GetAccountByType(accountType);
+                        Helper helper = new Helper();
                         if(account!=null)
                         {
+                            if (account.Type == AccountTypes.CURRENT) { 
+                                decimal amount = helper.GetAmount();
+                                TransactionController transactionController = new TransactionController();
+                                transactionController.Deposit(amount, account);
+                            }
                             break;
                         }
+                    }
+                    else
+                    {
+                        break;
                     }
                 }
                 catch (Exception error)
@@ -68,11 +79,6 @@ namespace BankManagement.View
                 }
             }
             return account;
-        }
-
-        public void AccountCreatedSuccessMessage()
-        {
-            Console.WriteLine("Account created Successfully");
         }
     }
 }

@@ -43,10 +43,9 @@ namespace BankManagement.Model
 
         public override string ToString()
         {
-            return $@"\nAccount Type: Current" +
-                base.ToString() +
-                $@"\nMinimum Balance: {MinimumBalance}\n" +
-                "\n========================================\n";
+            return $"Account Type: Current\n {base.ToString()}\n" +
+                $"Minimum Balance: {MinimumBalance}\n" +
+                "========================================\n";
         }
 
     }
