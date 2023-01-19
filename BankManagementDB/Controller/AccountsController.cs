@@ -6,6 +6,8 @@ using BankManagement.Models;
 using BankManagement.View;
 using BankManagementDB.db;
 using System.Linq;
+using BankManagement.Utility;
+using BankManagement.Model;
 
 namespace BankManagement.Controller
 {
@@ -24,7 +26,7 @@ namespace BankManagement.Controller
 
         public AccountsView AccountsView { get; set; }
 
-        public bool CreateAccount(long userId)
+        public void CreateAccount(long userId)
         {
             try
             {
@@ -32,15 +34,30 @@ namespace BankManagement.Controller
                 if (account != null)
                 {
                     account.UserID = userId;
-                    return InsertAccount(account);
+                    account.Balance = 0;
+                }
+                if(account is CurrentAccount)
+                {
+                    InsertAccount(account);
+                    FillTable(userId);
+                    account = GetAccountByQuery($"UserID = {userId}");
+                    TransactionController transactionController = new TransactionController();
+                    Helper helper = new Helper();
+                    decimal amount = helper.GetAmount(account as CurrentAccount);
+                    transactionController.Deposit(amount, account);
+                }
+                else
+                {
+                    InsertAccount(account);
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex);
             }
-            return false;
         }
+
+        
 
         public bool InsertAccount(Account account)
         {
@@ -54,7 +71,7 @@ namespace BankManagement.Controller
             return isAdded;
         }
 
-        public bool InsertAccountToDB(Account account)
+        private bool InsertAccountToDB(Account account)
         {
             try
             {
@@ -72,6 +89,20 @@ namespace BankManagement.Controller
                 Console.WriteLine(ex);
             }
             return false;   
+        }
+
+        public void CreateCurrentAccount(long userID)
+        {
+            Account account = AccountFactory.GetAccountByType(AccountTypes.CURRENT);
+            account.UserID = userID;
+            account.Balance = 0;
+            InsertAccountToDB(account);
+            FillTable(userID);
+            account = GetAccountByQuery($"UserID = {userID}");
+            TransactionController transactionController = new TransactionController();
+            Helper helper = new Helper();
+            decimal amount = helper.GetAmount(account as CurrentAccount);
+            transactionController.Deposit(amount, account);   
         }
 
         public bool InsertAccountToDataTable(Account account)
@@ -163,16 +194,19 @@ namespace BankManagement.Controller
             }
         }
 
-        public Account GetAccountByID(long id)
+        public Account GetAccountByQuery(string query)
         {
             Account account = null;
             try
             {
-                DataRow[] rows = AccountTable.Select("ID = " + id);
-                if (rows.Count() > 0)
+                if (AccountTable != null)
                 {
-                    DataRow row = rows.First();
-                    account = RowToAccount(row);
+                    DataRow[] rows = AccountTable.Select(query);
+                    if (rows.Count() > 0)
+                    {
+                        DataRow row = rows.Last();
+                        account = RowToAccount(row);
+                    }
                 }
             }
             catch (Exception ex)
@@ -210,9 +244,9 @@ namespace BankManagement.Controller
                 account.Balance = row.Field<decimal>("Balance");
                 account.InterestRate = row.Field<decimal>("InterestRate");
                 account.Status = (AccountStatus)Enum.Parse(typeof(AccountStatus), row.Field<string>("Status"));
-                account.ID = row.Field<Int64>("ID");
+                account.ID = row.Field<long>("ID");
                 account.Type = enumType;
-                account.UserID = row.Field<Int64>("UserID");
+                account.UserID = row.Field<long>("UserID");
                 return account;
             }catch(Exception e)
             {

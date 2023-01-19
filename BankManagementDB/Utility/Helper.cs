@@ -1,5 +1,6 @@
 ﻿using BankManagement.Controller;
 using BankManagement.Enums;
+using BankManagement.Model;
 using BankManagement.Models;
 using System;
 using System.Collections.Generic;
@@ -30,6 +31,34 @@ namespace BankManagement.Utility
             }
         }
 
+        public decimal GetAmount(CurrentAccount currentAccount)
+        {
+            while (true)
+            {
+                Console.WriteLine("Enter amount: ");
+                try
+                {
+                    decimal amount = Decimal.Parse(Console.ReadLine().Trim());
+                    if (amount > 0)
+                    {
+                        if(amount < currentAccount.MinimumBalance)
+                        {
+                            Console.WriteLine("Initial Amount should be greater than Minimum Balance.");
+                        }
+                        else
+                        {
+                            return amount;
+                        }
+                    }
+                    else Console.WriteLine("Amount should be greater than zero.");
+                }
+                catch (Exception error)
+                {
+                    Console.WriteLine("Enter a valid amount. Try Again!");
+                }
+            }
+        }
+
         public String GetPhoneNumber()
         {
             Console.WriteLine("Enter Mobile Number: ");
@@ -51,6 +80,18 @@ namespace BankManagement.Utility
             if (validation.CheckEmpty(password))
                 return password;
             return null;
+        }
+
+        public int CountDays()
+        {
+            TransactionController transactionController = new TransactionController();
+            //DateTime? lastWithdrawnDate = transactionController.GetLastWithdrawnDate();
+            //if (lastWithdrawnDate.HasValue)
+            //{
+            //    int numberOfDays = (int)(DateTime.Now - lastWithdrawnDate)?.TotalDays;
+            //    return numberOfDays;
+            //}
+            return 30;
         }
     }
 }

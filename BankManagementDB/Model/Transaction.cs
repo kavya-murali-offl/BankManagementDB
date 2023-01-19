@@ -1,6 +1,7 @@
 ﻿using System;
 using BankManagement.Enums;
 using BankManagement.Models;
+using BankManagementDB.Interface;
 
 namespace BankManagement.Model
 {
@@ -11,6 +12,7 @@ namespace BankManagement.Model
         {
             RecordedOn = DateTime.Now;
         }
+
         public Transaction(string description, decimal amount, decimal balance, TransactionTypes transactionType)
         {
             Description = description;

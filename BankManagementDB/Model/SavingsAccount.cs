@@ -8,10 +8,13 @@ namespace BankManagement.Model
 {
     public class SavingsAccount : Account
     {
-
-        
-
-
+        public decimal DepositInterest()
+        {
+            Helper helper= new Helper();
+            decimal interest = (Balance * helper.CountDays() * InterestRate) / (100 * 12);
+            Deposit(interest);
+            return interest;
+        }
 
         public override string ToString()
         {

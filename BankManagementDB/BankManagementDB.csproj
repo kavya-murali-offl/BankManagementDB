@@ -81,8 +81,10 @@
     <Compile Include="Model\Transaction.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utility\GenericKeyValuePairs.cs" />
     <Compile Include="Utility\Helper.cs" />
     <Compile Include="Utility\InterestRate.cs" />
+    <Compile Include="Utility\Pair.cs" />
     <Compile Include="Utility\Printer.cs" />
     <Compile Include="Utility\Validation.cs" />
     <Compile Include="View\AccountsView.cs" />

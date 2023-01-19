@@ -6,7 +6,7 @@ namespace BankManagement.Utility
     {
         public bool CheckEmpty(string field)
         {
-            if (field.Equals(""))
+            if (field == null || field.Equals(""))
             {
                 Console.WriteLine("Field should not be empty");
                 return false;

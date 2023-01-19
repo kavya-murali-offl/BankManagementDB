@@ -48,13 +48,14 @@ namespace BankManagement.View
             bool customerCreated = CreateCustomer(name, password, email, phone);
             if (customerCreated)
             {
-            CustomersController customersController = new CustomersController();
+                Console.WriteLine("Signup Successful. Please login to continue.");
+                CustomersController customersController = new CustomersController();
                 customersController.FillTable();
                 DataRow user = customersController.GetUserByPhoneNumber(phone);
                 long userID = (long)user["ID"];
-                CreateAccount(userID);
+                AccountsController accountsController = new AccountsController();
+                accountsController.CreateCurrentAccount(userID);
             }
-
         }
 
         public bool CheckUniquePhoneNumber(string phoneNumber)
@@ -67,32 +68,7 @@ namespace BankManagement.View
         {
             CustomersController customersController = new CustomersController();
             bool customerAdded = customersController.CreateCustomer(name, password, email, phone);
-            if (customerAdded) Console.WriteLine("SignUp successful");
-            else Console.WriteLine("Retry again..");
             return customerAdded;
-        }
-
-        private void CreateAccount(long userID)
-        {
-            AccountsController accountController = new AccountsController();
-            Account account = AccountFactory.GetAccountByType(AccountTypes.CURRENT);
-            account.Balance = GetAmount();
-            account.UserID = userID;
-            accountController.InsertAccountToDB(account);
-            
-        }
-
-        public decimal GetAmount()
-        {
-            Helper helper = new Helper();
-            decimal amount = helper.GetAmount();
-            CurrentAccount currentAccount = new CurrentAccount();
-            if(amount < currentAccount.MinimumBalance)
-            {
-                Console.WriteLine("Amount should be greater than minimum balance");
-                GetAmount();
-            }
-            return amount;
         }
 
         public string GetValue(string label)

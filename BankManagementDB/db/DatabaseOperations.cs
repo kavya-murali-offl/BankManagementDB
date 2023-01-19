@@ -15,6 +15,8 @@ namespace BankManagementDB.db
                                     'Phone' TEXT UNIQUE,
                                     'Email' TEXT,
                                     'HashedPassword' TEXT,
+                                     'LastLoginOn' TEXT,
+                                     'CreatedOn' TEXT,  
                                     PRIMARY KEY('ID' AUTOINCREMENT));";
 
             string accountQuery = @"CREATE TABLE IF NOT EXISTS 'Account' (
@@ -25,6 +27,7 @@ namespace BankManagementDB.db
                                  'MinimumBalance' DECIMAL, 
                                  'Charges' DECIMAL, 
                                  'Type' TEXT, 
+                                 'CreatedOn' TEXT, 
                                  'UserID' INTEGER NOT NULL,
                                  PRIMARY KEY('ID' AUTOINCREMENT))";
 

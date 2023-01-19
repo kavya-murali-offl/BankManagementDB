@@ -32,28 +32,6 @@ namespace BankManagement.Controller
             return false;
         }
 
-        public bool UpdateCustomer(string name, string password, string email, string phone)
-        {
-            try
-            {
-                string hashedPassword = AuthServices.ComputeHash(password);
-                IDictionary<string, object> parameters = new Dictionary<string, object>
-                {
-                    { "Name", name },
-                    { "Email", email },
-                    { "Phone", phone },
-                    { "HashedPassword", hashedPassword }
-                };
-                return DatabaseOperations.InsertRowToTable("Customer", parameters);
-
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-            }
-            return false;
-        }
-
         public bool ValidatePassword(string phoneNumber, string password)
         {
             try

@@ -8,7 +8,8 @@ namespace BankManagement.View
 {
     public class LoginView
     {
-       
+        public event Action<string> UserChanged;
+        
         public void Login()
         {
             try
@@ -24,13 +25,17 @@ namespace BankManagement.View
                         ProfileController profile = new ProfileController();
                         profile.Customer = customersController.GetCustomerByPhoneNumber(phoneNumber);
                         profile.Customer.lastLoginOn = DateTime.Now;
+
+                        UserChanged?.Invoke("\nWelcome " + profile.Name + "!!!\n" );
                         
                         AccountsController accountsController = new AccountsController();
                         accountsController.FillTable(profile.ID);
 
                         DashboardView dashboard = new DashboardView();
                         dashboard.ViewDashboard(profile);
-                    }
+                        UserChanged?.Invoke($"User {profile.Name} logged out successfully.");
+                }
+               
             }
             catch(Exception ex) {
                 Console.WriteLine(ex.Message);
@@ -52,7 +57,7 @@ namespace BankManagement.View
                 }
                 else
                 {
-                    Console.WriteLine("This Phone Number is not registered with us. Please try again!");
+                    UserChanged?.Invoke("This Phone Number is not registered with us. Please try again!");
                 }
             }
             catch(Exception ex)
@@ -62,5 +67,7 @@ namespace BankManagement.View
             return isValidated;
 
         }
+
+        
     }
 }

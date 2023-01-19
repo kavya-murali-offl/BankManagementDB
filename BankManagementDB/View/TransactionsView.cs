@@ -14,7 +14,7 @@ namespace BankManagement.View
 {
     public enum AccountCases
     {
-        DEPOSIT, WITHDRAW, TRANSFER, VIEW_STATEMENT, PRINT_STATEMENT, BACK
+        DEPOSIT, WITHDRAW, TRANSFER, CHECK_BALANCE, VIEW_STATEMENT, PRINT_STATEMENT, BACK
     }
 
     public class TransactionsView
@@ -23,7 +23,7 @@ namespace BankManagement.View
         {
             while (true)
             {
-                Console.WriteLine("\n1. Deposit \n2. Withdraw\n3. Transfer\n4. View Statement\n5. Print Statement\n6. Back \nEnter your choice: ");
+                Console.WriteLine("\n1. Deposit \n2. Withdraw\n3. Transfer\n4. Check Balance \n5. View Statement\n6. Print Statement\n7. Back \nEnter your choice: ");
                 try
                 {
                     string option = Console.ReadLine().Trim();
@@ -31,7 +31,7 @@ namespace BankManagement.View
                     if (entryOption != 0 && entryOption <= Enum.GetNames(typeof(AccountCases)).Count())
                     {
                         AccountCases operation = (AccountCases)entryOption - 1;
-                        if (TransactionOperations(operation, account, accountsController))
+                        if (TransactionOperations(operation, account))
                         {
                             break;
                         }
@@ -48,7 +48,7 @@ namespace BankManagement.View
             }
         }
 
-        public bool TransactionOperations(AccountCases option, Account account, AccountsController accountsController)
+        public bool TransactionOperations(AccountCases option, Account account)
         {
             Helper helper = new Helper();
             ITransactionServices transactionController = new TransactionController();
@@ -58,23 +58,20 @@ namespace BankManagement.View
             {
                 case AccountCases.DEPOSIT:
                     amount = helper.GetAmount();
-                    bool isDeposited = transactionController.Deposit(amount, account);
-                    if (isDeposited) Console.WriteLine("Deposit succesful");
-                    else Console.WriteLine("Something went wrong.");
+                    transactionController.Deposit(amount, account);
                     return true;
                 case AccountCases.WITHDRAW:
                     amount = helper.GetAmount();
-                    bool isWithdrawn = transactionController.Withdraw(amount, account);
-                    if (isWithdrawn) Console.WriteLine("Withdraw succesful");
-                    else Console.WriteLine("Something went wrong.");
+                    transactionController.Withdraw(amount, account);
                     return true;
                 case AccountCases.TRANSFER:
                     amount = helper.GetAmount();
                     long transferAccountID = GetTransferAccountID();
                     bool isTransferred = transactionController.Transfer(amount, account, transferAccountID);
-                    if (isTransferred) Console.WriteLine("Transfer succesful");
-                    else Console.WriteLine("Something went wrong.");
                     return true;
+                case AccountCases.CHECK_BALANCE:
+                    Console.WriteLine($"BALANCE: {account.Balance}");
+                    return false;
                 case AccountCases.VIEW_STATEMENT:
                     ViewStatement(statementServies);
                     return false;

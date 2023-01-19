@@ -60,9 +60,7 @@ namespace BankManagement.View
                     profileView.GetProfileDetails(profileController);
                     return false;
                 case DashboardCases.CREATE_ACCOUNT:
-                    bool isCreated = accountsController.CreateAccount(profileController.ID);
-                    if (isCreated) Console.WriteLine("Successfully created account");
-                    else Console.WriteLine("Account not created");
+                    accountsController.CreateAccount(profileController.ID);
                     return false;
                 case DashboardCases.LIST_ACCOUNTS:
                     ListAllAccounts(accountsController); 
@@ -71,7 +69,6 @@ namespace BankManagement.View
                     GoToAccount(accountsController);
                     return false;
                 case DashboardCases.SIGN_OUT:
-                    Console.WriteLine(".....LOGGING YOU OUT.....");
                     CustomersController customersController = new CustomersController();    
                     IDictionary<string, object> updateFields = new Dictionary<string, object>();
                     updateFields.Add("lastLoginOn", profileController.lastLoginOn);
@@ -82,12 +79,17 @@ namespace BankManagement.View
                     return false;
             }
         }
+        public void onBalanceChanged(string message)
+        {
+            Console.WriteLine(message);
+        }
 
         public void GoToAccount(AccountsController accountController)
         {
            
             TransactionsView transactionView = new TransactionsView();
             Account transactionAccount = ChooseAccountForTransaction(accountController);
+            transactionAccount.BalanceChanged += onBalanceChanged;
             TransactionController transactionController = new TransactionController();
             transactionController.FillTable(transactionAccount.ID);
             transactionView.GoToAccount(transactionAccount, accountController);

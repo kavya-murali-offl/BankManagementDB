@@ -47,6 +47,7 @@ namespace BankManagement.View
             {
                 case 1:
                     LoginView loginView = new LoginView();
+                    loginView.UserChanged += onUserChanged;
                     loginView.Login();
                     return false;
                 case 2:
@@ -60,6 +61,11 @@ namespace BankManagement.View
                     Console.WriteLine("Enter valid option. Try Again!");
                     return false;
             }
+        }
+
+        public void onUserChanged(string message)
+        {
+            Console.WriteLine(message);
         }
     }
 }
