@@ -1,14 +1,9 @@
-﻿using BankManagement.Controller;
-using BankManagement.Enums;
-using BankManagement.Model;
-using BankManagement.Models;
-using BankManagement.Utility;
-using System;
-using System.Collections.Generic;
-using System.Data;
+﻿using System;
 using System.Linq;
-using System.Runtime.Remoting.Messaging;
-using System.Security.Principal;
+using BankManagement.Controller;
+using BankManagement.Enums;
+using BankManagement.Models;
+using BankManagementDB.View;
 
 namespace BankManagement.View
 {
@@ -19,7 +14,7 @@ namespace BankManagement.View
             Account account = null;
             while (true)
             {
-                Console.WriteLine("Choose Account type: \n1. Current Account \n2. Savings Account\n3. Go Back");
+                Console.WriteLine("Choose Account type: \n1. Current Account \n2. Savings Account\n3. Go Back\n");
                 Console.WriteLine("Enter your choice: ");
                 try
                 {
@@ -35,14 +30,17 @@ namespace BankManagement.View
                             return account;
                         }
                     }
+                    else if(entryOption == 3)
+                        break;
                     else
                     {
-                        break;
+                        Notification.Error("Please enter a valid option");
+                        continue;
                     }
                 }
                 catch (Exception error)
                 {
-                    Console.WriteLine("Enter a valid option.");
+                    Notification.Error("Enter a valid option.");
                 }
             }
             return account;

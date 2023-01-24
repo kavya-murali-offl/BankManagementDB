@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BankManagementDB.Utility
 {
@@ -10,7 +6,7 @@ namespace BankManagementDB.Utility
     {
 
         private readonly T1 first;
-        private readonly T2 second;
+        private T2 second;
 
         public GenericPair(T1 first, T2 second)
         {
@@ -20,7 +16,12 @@ namespace BankManagementDB.Utility
 
         public T1 Key { get { return first; } }
 
-        public T2 Value { get { return second; } }
+        public T2 Value { get { return second; } set { second = value; } }
+
+        public override string ToString()
+        {
+            return $"{Key}: {Value}";
+        }
 
     }
 }

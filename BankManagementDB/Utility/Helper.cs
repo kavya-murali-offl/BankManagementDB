@@ -31,6 +31,24 @@ namespace BankManagement.Utility
             }
         }
 
+        public int GetInteger()
+        {
+            while (true)
+            {
+                try
+                {
+                    int number = int.Parse(Console.ReadLine().Trim());
+                    if (number > 0) return number;
+                    else Console.WriteLine("Enter a valid number.");
+                }
+                catch (Exception error)
+                {
+                    Console.WriteLine("Enter a valid number. Try Again!");
+                    GetInteger();   
+                }
+            }
+        }
+
         public decimal GetAmount(CurrentAccount currentAccount)
         {
             while (true)
@@ -85,13 +103,13 @@ namespace BankManagement.Utility
         public int CountDays()
         {
             TransactionController transactionController = new TransactionController();
-            //DateTime? lastWithdrawnDate = transactionController.GetLastWithdrawnDate();
-            //if (lastWithdrawnDate.HasValue)
-            //{
-            //    int numberOfDays = (int)(DateTime.Now - lastWithdrawnDate)?.TotalDays;
-            //    return numberOfDays;
-            //}
-            return 30;
+            DateTime? lastDepositDate = transactionController.GetLastDepositDate();
+            if (lastDepositDate.HasValue)
+            {
+                int numberOfDays = (int)(DateTime.Now - lastDepositDate)?.TotalDays;
+                return numberOfDays;
+            }
+            return 0;
         }
     }
 }

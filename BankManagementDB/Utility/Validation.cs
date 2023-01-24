@@ -1,4 +1,5 @@
 ﻿using System;
+using BankManagementDB.View;
 
 namespace BankManagement.Utility
 {
@@ -8,7 +9,7 @@ namespace BankManagement.Utility
         {
             if (field == null || field.Equals(""))
             {
-                Console.WriteLine("Field should not be empty");
+                Notification.Warning("Field should not be empty");
                 return false;
             }
             return true;
@@ -33,6 +34,5 @@ namespace BankManagement.Utility
             }
             return matched;
         }
-
     }
 }

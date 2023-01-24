@@ -7,36 +7,18 @@ using BankManagement.Models;
 using BankManagement.Utility;
 using BankManagementDB.db;
 using BankManagementDB.Interface;
+using System.Linq;
+using System.Security.Principal;
 
 namespace BankManagement.Controller
 {
     delegate bool InsertTransactionDelegate(Transaction transaction);
     delegate bool TransferDelegate(decimal amount, Account account);
 
-    public class TransactionController : ITransactionServices
+    public class TransactionController : ITransactionServices, IStatementServices
     {
 
         public static DataTable TransactionTable { get; set; }
-
-        public Transaction RowToTransaction(DataRow row)
-        {
-            Transaction transaction = new Transaction();
-            try
-            {
-                transaction.Balance = row.Field<decimal>("Balance");
-                transaction.Amount = row.Field<decimal>("Amount");
-                transaction.AccountID = row.Field<long>("AccountID");
-                transaction.ID = row.Field<long>("ID");
-                transaction.Description = row.Field<string>("Description");
-                transaction.TransactionType = (TransactionTypes)Enum.Parse(typeof(TransactionTypes), row.Field<string>("TransactionType"));
-                transaction.RecordedOn = DateTime.Parse(row.Field<string>("RecordedOn"));
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-            }
-            return transaction;
-        }
 
         public void ViewAllTransactions()
         {
@@ -60,6 +42,7 @@ namespace BankManagement.Controller
             }
             return transactionList;
         }
+
         public decimal GetInitialAmount(CurrentAccount currentAccount)
         {
             Helper helper = new Helper();
@@ -88,9 +71,7 @@ namespace BankManagement.Controller
                 AccountsController accountsController = new AccountsController();
                 isDeposited = accountsController.UpdateAccount(updateFields);
                 if (isDeposited)
-                {
                     CreateTransaction("DEPOSIT", amount, account, TransactionTypes.DEPOSIT);
-                }
             }
             catch (Exception ex)
             {
@@ -110,16 +91,18 @@ namespace BankManagement.Controller
                     DepositInterest(savingsAccount);
                 }
                 isWithdrawn = account.Withdraw(amount);
+
                 if (isWithdrawn)
                 {
                     IDictionary<string, object> updateFields = new Dictionary<string, object>
-                {
-                    { "Balance", account.Balance },
-                    { "ID", account.ID }
-                };
+                        {
+                            { "Balance", account.Balance },
+                            { "ID", account.ID }
+                        };
                     AccountsController accountController = new AccountsController();
                     accountController.UpdateAccount(updateFields);
                     CreateTransaction("Withdraw", amount, account, TransactionTypes.WITHDRAW);
+
                     if (account is CurrentAccount)
                     {
                         CurrentAccount currentAccount = account as CurrentAccount;
@@ -159,7 +142,7 @@ namespace BankManagement.Controller
             }
             return false;
         }
-
+      
         public void CreateTransaction(string description, decimal amount, Account account, TransactionTypes type)
         {
             Transaction transaction = new Transaction(description, amount, account.Balance, type);
@@ -196,12 +179,13 @@ namespace BankManagement.Controller
                 if (TransactionTable != null)
                 {
                     DataRow newRow = TransactionTable.NewRow();
-                    newRow["AccountID"] = transaction.Amount;
+                    newRow["AccountID"] = transaction.AccountID;
                     newRow["RecordedOn"] = transaction.RecordedOn;
                     newRow["TransactionType"] = transaction.TransactionType.ToString();
-                    newRow["Description"] = transaction.Balance;
+                    newRow["Description"] = transaction.Description;
                     newRow["Amount"] = transaction.Amount;
                     newRow["Balance"] = transaction.Balance;
+                    newRow["ID"] = 0;
                     TransactionTable.Rows.Add(newRow);
                     success = true;
                 }
@@ -235,13 +219,34 @@ namespace BankManagement.Controller
             };
             TransactionTable = DatabaseOperations.FillTable("Transactions", parameters);
         }
-
-        public DateTime? GetLastWithdrawnDate()
+        public Transaction RowToTransaction(DataRow row)
         {
-            for (int i = TransactionTable.Rows.Count; i >= 0; i--)
+            Transaction transaction = new Transaction();
+            try
             {
-                if (TransactionTable.Rows[i].Field<string>("TransactionType") == "DEPOSIT")
-                    return TransactionTable.Rows[i].Field<DateTime>("RecordedOn");
+                transaction.Balance = row.Field<decimal>("Balance");
+                transaction.Amount = row.Field<decimal>("Amount");
+                transaction.AccountID = row.Field<long>("AccountID");
+                transaction.ID = row.Field<long>("ID");
+                transaction.Description = row.Field<string>("Description");
+                transaction.TransactionType = (TransactionTypes)Enum.Parse(typeof(TransactionTypes), row.Field<string>("TransactionType"));
+                transaction.RecordedOn = DateTime.Parse(row.Field<string>("RecordedOn"));
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+            return transaction;
+        }
+
+        public DateTime? GetLastDepositDate()
+        {
+            if(TransactionTable.Rows.Count > 0)
+            {
+                DataRow row = TransactionTable.Select("TransactionType = WITHDRAW").LastOrDefault();
+                if (row != null)
+                    row = TransactionTable.Select("TransactionType = DEPOSIT").LastOrDefault();
+                return DateTime.Parse(row.Field<string>("RecordedOn"));
             }
             return new Nullable<DateTime>();
         }

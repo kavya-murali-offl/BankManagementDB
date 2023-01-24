@@ -13,11 +13,16 @@ namespace BankManagement.Controller
 
         public string Name => Customer.Name;
 
+        public long Age => Customer.Age;
+
         public string Phone => Customer.Phone;
 
         public string Email => Customer.Email;
 
-        public DateTime lastLoginOn => Customer.lastLoginOn;
+        public DateTime LastLoggedOn => Customer.LastLoggedOn;
+
+        public DateTime CreatedOn => Customer.CreatedOn;
+
 
     }
 }

@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Data;
+using System.Threading.Tasks;
+using BankManagementDB.View;
 
 namespace BankManagementDB.db
 {
@@ -12,11 +14,12 @@ namespace BankManagementDB.db
             string customerQuery = @"CREATE TABLE IF NOT EXISTS Customer (
                                     'ID' INTEGER NOT NULL UNIQUE, 
                                     'Name' TEXT, 
+                                    'Age' INTEGER,
                                     'Phone' TEXT UNIQUE,
                                     'Email' TEXT,
                                     'HashedPassword' TEXT,
-                                     'LastLoginOn' TEXT,
-                                     'CreatedOn' TEXT,  
+                                    'LastLoggedOn' TEXT,
+                                    'CreatedOn' TEXT,  
                                     PRIMARY KEY('ID' AUTOINCREMENT));";
 
             string accountQuery = @"CREATE TABLE IF NOT EXISTS 'Account' (
@@ -43,9 +46,9 @@ namespace BankManagementDB.db
                                       );";
 
             QueryExecution queryExecution = new QueryExecution();
-            queryExecution.ExecuteNonQuery(customerQuery, null);
-            queryExecution.ExecuteNonQuery(accountQuery, null);
-            queryExecution.ExecuteNonQuery(transactionsQuery, null);
+            Task task1 = queryExecution.ExecuteNonQuery(customerQuery, null);
+            Task task2 = queryExecution.ExecuteNonQuery(accountQuery, null);
+            Task task3 = queryExecution.ExecuteNonQuery(transactionsQuery, null);
         }
 
         public static bool InsertRowToTable(string tableName, IDictionary<string, object> parameters)
@@ -72,11 +75,9 @@ namespace BankManagementDB.db
                         query += ", ";
                     }
                 }
-
                 query += ")";
                 QueryExecution queryExecution = new QueryExecution();
-
-                queryExecution.ExecuteNonQuery(query, parameters);
+                Task task = queryExecution.ExecuteNonQuery(query, parameters);
                 result = true;
             }
             catch (Exception err)
@@ -101,7 +102,7 @@ namespace BankManagementDB.db
                     }
                 }
                 QueryExecution queryExecution = new QueryExecution();
-                DataTable Table = queryExecution.ExecuteQuery(query, parameters);
+                DataTable Table = queryExecution.ExecuteQuery(query, parameters).Result;
                 result = Table;
             }
             catch (Exception err)
@@ -117,16 +118,17 @@ namespace BankManagementDB.db
             try
             {
                 string query = "UPDATE " + tableName + " SET ";
-
+                int i = 0;
                 foreach (KeyValuePair<string, object> pairs in updateFields)
                 {
+                    i += 1;
                     if (pairs.Key != "ID")
                         query += pairs.Key + "= @" + pairs.Key;
+                    if(i+1 < updateFields.Count) query+= ", "; 
                 }
-
                 query += " WHERE ID = @ID";
                 QueryExecution queryExecution = new QueryExecution();
-                queryExecution.ExecuteNonQuery(query, updateFields);
+                Task task = queryExecution.ExecuteNonQuery(query, updateFields);
                 return true;
             }
             catch (Exception err)
@@ -136,30 +138,37 @@ namespace BankManagementDB.db
 
         public static void PrintDataTable(DataTable Table)
         {
-            Console.WriteLine(" ");
-            Dictionary<string, int> colWidths = new Dictionary<string, int>();
-
-            foreach (DataColumn col in Table.Columns)
+            if (Table.Rows.Count > 0)
             {
-                Console.Write(col.ColumnName);
-                var maxLabelSize = Table.Rows.OfType<DataRow>()
-                        .Select(m => (m.Field<object>(col.ColumnName)?.ToString() ?? "").Length)
-                        .OrderByDescending(m => m).FirstOrDefault();
+                Console.WriteLine(" ");
+                Dictionary<string, int> colWidths = new Dictionary<string, int>();
 
-                colWidths.Add(col.ColumnName, maxLabelSize);
-                for (int i = 0; i < maxLabelSize - col.ColumnName.Length + 10; i++) Console.Write(" ");
-            }
-
-            Console.WriteLine();
-
-            foreach (DataRow dataRow in Table.Rows)
-            {
-                for (int j = 0; j < dataRow.ItemArray.Length; j++)
+                foreach (DataColumn col in Table.Columns)
                 {
-                    Console.Write(dataRow.ItemArray[j]);
-                    for (int i = 0; i < colWidths[Table.Columns[j].ColumnName] - dataRow.ItemArray[j].ToString().Length + 10; i++) Console.Write(" ");
+                    Console.Write(col.ColumnName);
+                    var maxLabelSize = Table.Rows.OfType<DataRow>()
+                            .Select(m => (m.Field<object>(col.ColumnName)?.ToString() ?? "").Length)
+                            .OrderByDescending(m => m).FirstOrDefault();
+
+                    colWidths.Add(col.ColumnName, maxLabelSize);
+                    for (int i = 0; i < maxLabelSize - col.ColumnName.Length + 10; i++) Console.Write(" ");
                 }
+
                 Console.WriteLine();
+
+                foreach (DataRow dataRow in Table.Rows)
+                {
+                    for (int j = 0; j < dataRow.ItemArray.Length; j++)
+                    {
+                        Console.Write(dataRow.ItemArray[j]);
+                        for (int i = 0; i < colWidths[Table.Columns[j].ColumnName] - dataRow.ItemArray[j].ToString().Length + 10; i++) Console.Write(" ");
+                    }
+                    Console.WriteLine();
+                }
+            }
+            else
+            {
+                Notification.Info("No records found.");
             }
         }
 

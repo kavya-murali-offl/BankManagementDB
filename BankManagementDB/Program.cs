@@ -3,10 +3,6 @@ using BankManagement.Controller;
 using BankManagement.View;
 using BankManagementDB.db;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BankManagementDB
 {
@@ -14,15 +10,14 @@ namespace BankManagementDB
     {
         static void Main(string[] args)
         {
-            DatabaseOperations.CreateTableIfNotExists();
 
+            DatabaseOperations.CreateTableIfNotExists();
+            
             CustomersController customersController = new CustomersController();
             customersController.FillTable();
-            AuthServices.ComputeHash("pass");
 
             EntryView entryView = new EntryView();
             entryView.Entry();
-            Console.ReadKey();  
 
         }
     }

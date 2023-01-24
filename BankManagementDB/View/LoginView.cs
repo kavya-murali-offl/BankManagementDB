@@ -3,6 +3,7 @@ using BankManagement.Controller;
 using System.Collections.Generic;
 using System.Data;
 using BankManagement.Utility;
+using BankManagementDB.View;
 
 namespace BankManagement.View
 {
@@ -23,8 +24,8 @@ namespace BankManagement.View
                 if (isValidated)
                     {
                         ProfileController profile = new ProfileController();
-                        profile.Customer = customersController.GetCustomerByPhoneNumber(phoneNumber);
-                        profile.Customer.lastLoginOn = DateTime.Now;
+                        profile.Customer = customersController.GetCustomerByQuery("Phone = " + phoneNumber);
+                        profile.Customer.LastLoggedOn = DateTime.Now;
 
                         UserChanged?.Invoke("\nWelcome " + profile.Name + "!!!\n" );
                         
@@ -33,9 +34,9 @@ namespace BankManagement.View
 
                         DashboardView dashboard = new DashboardView();
                         dashboard.ViewDashboard(profile);
+
                         UserChanged?.Invoke($"User {profile.Name} logged out successfully.");
                 }
-               
             }
             catch(Exception ex) {
                 Console.WriteLine(ex.Message);
@@ -47,18 +48,16 @@ namespace BankManagement.View
             bool isValidated = false;
             try
             {
-                DataRow dr = customersController.GetUserByPhoneNumber(phoneNumber);
+                DataRow dr = customersController.GetUserByQuery("Phone = " + phoneNumber);
                 if (dr != null)
                 {
                     Helper helper = new Helper();
                     string password = helper.GetPassword();
                     isValidated = customersController.ValidatePassword(phoneNumber, password);
-                    if (!isValidated) Console.WriteLine("Incorrect Password");
+                    if (!isValidated) Notification.Error("Incorrect Password");
                 }
                 else
-                {
-                    UserChanged?.Invoke("This Phone Number is not registered with us. Please try again!");
-                }
+                    Notification.Error("This Phone Number is not registered with us. Please try again!");
             }
             catch(Exception ex)
             {
@@ -67,7 +66,5 @@ namespace BankManagement.View
             return isValidated;
 
         }
-
-        
     }
 }

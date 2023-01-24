@@ -1,11 +1,9 @@
-﻿
-
-using BankManagement.Controller;
-using BankManagement.Enums;
+﻿using BankManagement.Controller;
 using BankManagement.Model;
 using BankManagement.Models;
 using BankManagement.Utility;
 using BankManagementDB.Interface;
+using BankManagementDB.View;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,7 +17,7 @@ namespace BankManagement.View
 
     public class TransactionsView
     {
-        public void GoToAccount(Account account, AccountsController accountsController)
+        public void GoToAccount(Account account)
         {
             while (true)
             {
@@ -32,18 +30,14 @@ namespace BankManagement.View
                     {
                         AccountCases operation = (AccountCases)entryOption - 1;
                         if (TransactionOperations(operation, account))
-                        {
                             break;
-                        }
                     }
                     else
-                    {
-                        Console.WriteLine("Enter proper input.");
-                    }
+                        Notification.Error("Enter a valid input.");
                 }
                 catch (Exception error)
                 {
-                    Console.WriteLine("Enter a valid option. Try Again!(view dashboard)");
+                    Notification.Error("Enter a valid option. Try Again!");
                 }
             }
         }
@@ -52,69 +46,70 @@ namespace BankManagement.View
         {
             Helper helper = new Helper();
             ITransactionServices transactionController = new TransactionController();
-            TransactionController statementServies = new TransactionController();
+            IStatementServices statementServices = new TransactionController();
             decimal amount;
+
             switch (option)
             {
                 case AccountCases.DEPOSIT:
                     amount = helper.GetAmount();
                     transactionController.Deposit(amount, account);
                     return true;
+
                 case AccountCases.WITHDRAW:
                     amount = helper.GetAmount();
                     transactionController.Withdraw(amount, account);
                     return true;
+
                 case AccountCases.TRANSFER:
                     amount = helper.GetAmount();
-                    long transferAccountID = GetTransferAccountID();
-                    bool isTransferred = transactionController.Transfer(amount, account, transferAccountID);
+                    long transferAccountID = GetTransferAccountID(account.ID);
+                    transactionController.Transfer(amount, account, transferAccountID);
                     return true;
+
                 case AccountCases.CHECK_BALANCE:
-                    Console.WriteLine($"BALANCE: {account.Balance}");
+                    Notification.Info($"BALANCE: {account.Balance}");
                     return false;
+
                 case AccountCases.VIEW_STATEMENT:
-                    ViewStatement(statementServies);
+                    statementServices.ViewAllTransactions();
                     return false;
+
                 case AccountCases.PRINT_STATEMENT:
-                    PrintStatement(statementServies);
+                    IList<Transaction> statements = statementServices.GetAllTransactions();
+                    Printer.PrintStatement(statements);
                     return false;
+
                 case AccountCases.BACK:
                     return true;
+
                 default:
-                    Console.WriteLine("Invalid option");
+                    Notification.Error("Invalid option. Try again!");
                     return false;
             }
         }
 
-        public long GetTransferAccountID()
+        public long GetTransferAccountID(long ID)
         {
             while (true)
             {
-                Console.WriteLine("Enter Account ID to transfer: ");
                 try
                 {
+                    Console.WriteLine("Enter Account ID to transfer: ");
                     string id = Console.ReadLine().Trim();
                     long intID = long.Parse(id);
+                    if (intID == ID)
+                    {
+                        Notification.Error("Choose a different account number to transfer.");
+                        continue;
+                    }
                     return intID;
                 }
                 catch (Exception error)
                 {
-                    Console.WriteLine("Enter a valid ID.");
-                    GetTransferAccountID();
+                    Notification.Error("Enter a valid ID.");
                 }
             }
         }
-
-        public void PrintStatement(TransactionController transactionController)
-        {
-            IList<Transaction> statements = transactionController.GetAllTransactions();
-            Printer.PrintStatement(statements);
-
-        }
-        public void ViewStatement(TransactionController transactionController)
-        {
-            transactionController.ViewAllTransactions();
-        }
-
     }
 }

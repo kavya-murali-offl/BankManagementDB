@@ -3,6 +3,10 @@ using BankManagement.Controller;
 using System.Collections.Generic;
 using System;
 using System.Linq;
+using BankManagementDB.View;
+using BankManagementDB.Interface;
+using BankManagement.Model;
+using BankManagement.Utility;
 
 namespace BankManagement.View
 {
@@ -21,24 +25,26 @@ namespace BankManagement.View
         {
             while (true)
             {
-                Console.WriteLine("1. Profile\n2. Create Account\n3. List Accounts\n4. Go to Account\n5. Sign out\nEnter your choice: ");
+                Console.WriteLine("1. Profile Services\n2. Create Account\n3. List Accounts\n4. Go to Account\n5. Sign out\nEnter your choice: ");
                 try
                 {
                     string option = Console.ReadLine().Trim();
-                    int entryOption = int.Parse(option);
+                    int entryOption;
+
+                    if (!int.TryParse(option, out entryOption))
+                    {
+                        Notification.Error("Invalid input! Please enter a valid number.");
+                        continue;
+                    }
+
                     if (entryOption != 0 && entryOption <= Enum.GetNames(typeof(DashboardCases)).Count())
                     {
                         DashboardCases cases = (DashboardCases)entryOption - 1;
-
                         if (DashboardOperations(cases, profileController))
-                        {
                             break;
-                        }
                     }
                     else
-                    {
-                        Console.WriteLine("Enter proper input.");
-                    }
+                        Notification.Error("Invalid input! Please enter a valid number.");
                 }
                 catch (Exception error)
                 {
@@ -57,10 +63,11 @@ namespace BankManagement.View
             {
                 case DashboardCases.PROFILE:
                     ProfileView profileView = new ProfileView();
-                    profileView.GetProfileDetails(profileController);
+                    profileView.ViewProfileServices(profileController);
                     return false;
                 case DashboardCases.CREATE_ACCOUNT:
                     accountsController.CreateAccount(profileController.ID);
+                    
                     return false;
                 case DashboardCases.LIST_ACCOUNTS:
                     ListAllAccounts(accountsController); 
@@ -69,39 +76,49 @@ namespace BankManagement.View
                     GoToAccount(accountsController);
                     return false;
                 case DashboardCases.SIGN_OUT:
-                    CustomersController customersController = new CustomersController();    
-                    IDictionary<string, object> updateFields = new Dictionary<string, object>();
-                    updateFields.Add("lastLoginOn", profileController.lastLoginOn);
-                    //customersController.UpdateCustomer(updateFields);
+                    SaveCustomerSession(profileController);
                     return true;
                 default:
-                    Console.WriteLine("Enter a valid option.\n");
+                    Notification.Error("Enter a valid option.\n");
                     return false;
             }
         }
         public void onBalanceChanged(string message)
         {
-            Console.WriteLine(message);
+           Notification.Success(message);
         }
 
         public void GoToAccount(AccountsController accountController)
         {
-           
             TransactionsView transactionView = new TransactionsView();
             Account transactionAccount = ChooseAccountForTransaction(accountController);
             transactionAccount.BalanceChanged += onBalanceChanged;
             TransactionController transactionController = new TransactionController();
             transactionController.FillTable(transactionAccount.ID);
-            transactionView.GoToAccount(transactionAccount, accountController);
+            transactionView.GoToAccount(transactionAccount);
         }
 
         public Account ChooseAccountForTransaction(AccountsController accountController)
         {
-            IList<Account> accountsList = accountController.GetAllAccounts();
-            ListAccountIDs(accountsList);
-            string index = Console.ReadLine().Trim();
-            int accountIndex = int.Parse(index);
-            return accountsList[accountIndex-1];
+            try
+            {
+                IList<Account> accountsList = accountController.GetAllAccounts();
+                ListAccountIDs(accountsList);
+                string index = Console.ReadLine().Trim();
+                int accountIndex;
+                if (!int.TryParse(index, out accountIndex))
+                    Notification.Error("Please enter a valid number.");
+                if (accountIndex  > accountsList.Count)
+                {
+                    Notification.Error("Choose from the listed accounts.");
+                    ChooseAccountForTransaction(accountController);
+                }
+                return accountsList[accountIndex - 1];
+            }
+            catch(Exception e) {
+                Console.WriteLine(e);
+                return null;
+            }
         }
 
         public void ListAllAccounts(AccountsController accountsController)
@@ -112,13 +129,21 @@ namespace BankManagement.View
             }
         }
 
+        private void SaveCustomerSession(ProfileController profileController)
+        {
+            CustomersController customersController = new CustomersController();
+            IDictionary<string, object> updateFields = new Dictionary<string, object>
+            {
+                {"ID", profileController.ID },   
+                { "LastLoggedOn", profileController.LastLoggedOn }
+            };
+            customersController.UpdateCustomer(updateFields);
+        }
+
         public void ListAccountIDs(IList<Account> accounts)
         {
             for(int i = 1; i<accounts.Count()+1;i++)
-            {
                 Console.WriteLine(i + ". " + accounts[i - 1].ID);
-            }
         }
-
     }
 }

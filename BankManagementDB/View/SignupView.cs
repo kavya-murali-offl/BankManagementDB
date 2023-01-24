@@ -1,12 +1,10 @@
-﻿using BankManagement.Controller;
-using BankManagement.Enums;
+﻿using System;
+using System.Data;
+using BankManagement.Controller;
 using BankManagement.Model;
 using BankManagement.Models;
 using BankManagement.Utility;
-using System;
-using System.Data;
-using System.Runtime.Remoting.Messaging;
-using System.Security.Principal;
+using BankManagementDB.View;
 
 namespace BankManagement.View
 {
@@ -16,20 +14,21 @@ namespace BankManagement.View
         {
             Validation validation= new Validation();
             Helper helper = new Helper();
+
             string email, password, phone, name;
+            int age; 
+
             while (true)
             {
                 phone = helper.GetPhoneNumber();
                 if (validation.CheckEmpty(phone))
                 {
                     if (CheckUniquePhoneNumber(phone))
-                    {
                         break;
-                    }
                     else
                     {
-                        Console.WriteLine("Phone Number Already Registered");
-                        return;
+                        Notification.Error("Phone Number Already Registered");
+                        continue;
                     }
                 }
             }
@@ -45,46 +44,55 @@ namespace BankManagement.View
 
             email = GetValue("Email");
 
-            bool customerCreated = CreateCustomer(name, password, email, phone);
+            Console.WriteLine("Age: ");
+            age = helper.GetInteger();
+
+            bool customerCreated = CreateCustomer(name, password, email, phone, age);
             if (customerCreated)
             {
-                Console.WriteLine("Signup Successful. Please login to continue.");
                 CustomersController customersController = new CustomersController();
                 customersController.FillTable();
-                DataRow user = customersController.GetUserByPhoneNumber(phone);
+                DataRow user = customersController.GetUserByQuery("Phone = " + phone);
                 long userID = (long)user["ID"];
+                Notification.Success("Signup Successful");
+
                 AccountsController accountsController = new AccountsController();
-                accountsController.CreateCurrentAccount(userID);
+                Account account = accountsController.CreateCurrentAccount(userID);
+                if(account != null)
+                {
+                    Notification.Success("Account created successfully");
+
+                    TransactionController transactionController = new TransactionController();
+                    decimal amount = helper.GetAmount(account as CurrentAccount);
+                    transactionController.Deposit(amount, account);
+                }
             }
         }
 
         public bool CheckUniquePhoneNumber(string phoneNumber)
         {
             CustomersController customersController = new CustomersController();
-            return customersController.GetUserByPhoneNumber(phoneNumber) == null ? true : false;
+            return customersController.GetUserByQuery("Phone = " + phoneNumber) == null ? true : false;
         }
 
-        private bool CreateCustomer(string name, string password, string email, string phone)
+        private bool CreateCustomer(string name, string password, string email, string phone, int age)
         {
             CustomersController customersController = new CustomersController();
-            bool customerAdded = customersController.CreateCustomer(name, password, email, phone);
+            bool customerAdded = customersController.CreateCustomer(name, password, email, phone, age);
             return customerAdded;
         }
 
         public string GetValue(string label)
         {
-            Console.WriteLine(label +": ");
-            Validation validation = new Validation();
-
-            string value = Console.ReadLine().Trim();
-            if (validation.CheckEmpty(value)) return value;
-            else
+            while (true)
             {
-                GetValue(label);
-                return null;
+                Console.WriteLine(label + ": ");
+                Validation validation = new Validation();
+                string value = Console.ReadLine().Trim();
+                if (validation.CheckEmpty(value)) return value;
+                else continue;
             }
         }
-
 
         private void VerifyPassword(string password)
         {
@@ -93,13 +101,9 @@ namespace BankManagement.View
             {
                 string rePassword = GetValue("Re-enter password");
                 if (validation.ValidatePassword(password, rePassword))
-                {
                     break;
-                }
                 else
-                {
-                    Console.WriteLine("Password not matching, Enter again");
-                }
+                    Notification.Error("Password not matching, Enter again");
             }
         }
     }

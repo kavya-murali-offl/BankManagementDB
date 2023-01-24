@@ -6,35 +6,36 @@ using System.Collections.Specialized;
 using System.Data;
 using System.Data.SQLite;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace BankManagementDB.db
 {
     public class QueryExecution
     {
-        public DataTable ExecuteQuery(string query, IDictionary<string, object> parameters)
+        public async Task<DataTable> ExecuteQuery(string query, IDictionary<string, object> parameters)
         {
             DataTable result = null;
             try
             {
                 result = new DataTable();
-                using (SQLiteConnection con = new SQLiteConnection("Data source=database.sqlite3"))
+                using (SQLiteConnection conn = new SQLiteConnection("Data source=database.sqlite3"))
                 {
-                    con.Open();
-                    using (SQLiteCommand com = new SQLiteCommand(con))
+                    await conn.OpenAsync();
+                    using (SQLiteCommand cmd = new SQLiteCommand(conn))
                     {
-                        com.CommandText = query;
+                        cmd.CommandText = query;
                         if(parameters != null && parameters.Count>0)
                         {
                          foreach (KeyValuePair<string, object> entry in parameters)
-                            com.Parameters.AddWithValue(entry.Key, entry.Value);
+                                cmd.Parameters.AddWithValue(entry.Key, entry.Value);
                         }
-                        com.ExecuteNonQuery();
-                        using (SQLiteDataReader reader = com.ExecuteReader())
+                        await cmd.ExecuteNonQueryAsync();
+                        using (var reader = await cmd.ExecuteReaderAsync())
                         {
                             result.Load(reader);    
                         }
                     }
-                    con.Close();
+                    conn.Close();
                 }
             }
             catch (Exception ex)
@@ -44,7 +45,7 @@ namespace BankManagementDB.db
             return result;
         }
 
-        public void ExecuteNonQuery(string query, IDictionary<string, object> parameters)
+        public async Task ExecuteNonQuery(string query, IDictionary<string, object> parameters)
         {
             try
             {
@@ -52,14 +53,14 @@ namespace BankManagementDB.db
                 {
                     using (SQLiteCommand com = new SQLiteCommand(con))
                     {
-                        con.Open();
+                        await con.OpenAsync();
                         com.CommandText = query;
                         if (parameters != null && parameters.Count > 0)
                         {
                             foreach (KeyValuePair<string, object> entry in parameters)
-                                com.Parameters.AddWithValue("@"+entry.Key, entry.Value);
+                                com.Parameters.AddWithValue("@" + entry.Key, entry.Value);
                         }
-                        var result = com.ExecuteNonQuery();
+                        await com.ExecuteNonQueryAsync();
                         con.Close();
                     }
                 }

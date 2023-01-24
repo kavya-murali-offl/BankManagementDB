@@ -8,6 +8,9 @@ using BankManagementDB.db;
 using System.Linq;
 using BankManagement.Utility;
 using BankManagement.Model;
+using BankManagementDB.View;
+using BankManagementDB.Interface;
+using System.Runtime.Remoting.Messaging;
 
 namespace BankManagement.Controller
 {
@@ -15,40 +18,40 @@ namespace BankManagement.Controller
     delegate bool UpdateAccountDelegate(IDictionary<string, object> fields);
     delegate bool InsertAccountDelegate(Account account);
 
-    public class AccountsController
+    public class AccountsController 
     {
-        public AccountsController()
+        public AccountsController() { }    
+
+        public AccountsController(ITransactionServices transactionController)
         {
-            AccountsView = new AccountsView();
+            TransactionController = transactionController;
         }
 
-        public static DataTable AccountTable { get; set; }
+        public ITransactionServices TransactionController { get; private set; }    
 
-        public AccountsView AccountsView { get; set; }
+        public static DataTable AccountTable { get; set; }
 
         public void CreateAccount(long userId)
         {
             try
             {
-                Account account = AccountsView.GenerateAccount();
+                AccountsView accountsView = new AccountsView(); 
+                Account account = accountsView.GenerateAccount();
                 if (account != null)
                 {
                     account.UserID = userId;
                     account.Balance = 0;
-                }
-                if(account is CurrentAccount)
-                {
-                    InsertAccount(account);
-                    FillTable(userId);
-                    account = GetAccountByQuery($"UserID = {userId}");
-                    TransactionController transactionController = new TransactionController();
-                    Helper helper = new Helper();
-                    decimal amount = helper.GetAmount(account as CurrentAccount);
-                    transactionController.Deposit(amount, account);
-                }
-                else
-                {
-                    InsertAccount(account);
+                    if(account is CurrentAccount)
+                    {
+                        InsertAccount(account);
+                        FillTable(userId);
+                        account = GetAccountByQuery($"UserID = {userId}");
+                        CreateInitialTransaction(account);
+                    }
+                    else
+                        InsertAccount(account);
+
+                    Notification.Success("Account created successfully");
                 }
             }
             catch (Exception ex)
@@ -56,8 +59,6 @@ namespace BankManagement.Controller
                 Console.WriteLine(ex);
             }
         }
-
-        
 
         public bool InsertAccount(Account account)
         {
@@ -71,18 +72,25 @@ namespace BankManagement.Controller
             return isAdded;
         }
 
+        public void CreateInitialTransaction(Account account)
+        {
+            Helper helper = new Helper();   
+            decimal amount = helper.GetAmount(account as CurrentAccount);
+            TransactionController.Deposit(amount, account);
+        }
+
         private bool InsertAccountToDB(Account account)
         {
             try
             {
-                IDictionary<string, object> parameters = new Dictionary<string, object>
-            {
-                { "Balance", account.Balance },
-                { "InterestRate", account.InterestRate },
-                { "Status", account.Status.ToString() },
-                { "UserID", account.UserID },
-                { "Type", account.Type.ToString() }
-            };
+                IDictionary<string, object> parameters = new Dictionary<string, object>()
+                {
+                        { "Balance", account.Balance},
+                        { "InterestRate", account.InterestRate },
+                        { "Status", account.Status.ToString() },
+                        { "UserID", account.UserID },
+                        { "Type", account.Type.ToString() }
+                };
                 return DatabaseOperations.InsertRowToTable("Account", parameters);
             }catch(Exception ex)
             {
@@ -91,18 +99,15 @@ namespace BankManagement.Controller
             return false;   
         }
 
-        public void CreateCurrentAccount(long userID)
+        public Account CreateCurrentAccount(long userID)
         {
             Account account = AccountFactory.GetAccountByType(AccountTypes.CURRENT);
             account.UserID = userID;
             account.Balance = 0;
             InsertAccountToDB(account);
             FillTable(userID);
-            account = GetAccountByQuery($"UserID = {userID}");
-            TransactionController transactionController = new TransactionController();
-            Helper helper = new Helper();
-            decimal amount = helper.GetAmount(account as CurrentAccount);
-            transactionController.Deposit(amount, account);   
+            return GetAccountByQuery($"UserID = {userID}");
+
         }
 
         public bool InsertAccountToDataTable(Account account)
@@ -165,14 +170,13 @@ namespace BankManagement.Controller
                     {
                         DataRow row = rows[0];
                         foreach (var pairs in fields)
-                        {
                             row[pairs.Key] = pairs.Value;
-                        }
                         return true;
                     }
                 }
                 
-            }catch(Exception ex) {
+            }
+            catch(Exception ex) {
                 Console.WriteLine(ex);
             }
             return false;   
@@ -239,6 +243,7 @@ namespace BankManagement.Controller
             Account account = null;
             try
             {
+                
                 AccountTypes enumType = (AccountTypes)Enum.Parse(typeof(AccountTypes), row.Field<string>("Type"));
                 account = AccountFactory.GetAccountByType(enumType);
                 account.Balance = row.Field<decimal>("Balance");
@@ -248,6 +253,7 @@ namespace BankManagement.Controller
                 account.Type = enumType;
                 account.UserID = row.Field<long>("UserID");
                 return account;
+
             }catch(Exception e)
             {
                 Console.WriteLine(e);
@@ -255,5 +261,4 @@ namespace BankManagement.Controller
             return account;
         }
     }
-
 }

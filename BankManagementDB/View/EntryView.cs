@@ -2,6 +2,7 @@
 
 using BankManagement.Controller;
 using BankManagement.Utility;
+using BankManagementDB.View;
 using System;
 
 namespace BankManagement.View
@@ -14,7 +15,6 @@ namespace BankManagement.View
     {
         public void Entry()
         {
-            AccountsController accountsController = new AccountsController();
             while (true)
             {
                 Console.WriteLine("1.Login\n2.Signup\n3.Exit\nEnter your choice: ");
@@ -25,18 +25,14 @@ namespace BankManagement.View
                     if (entryOption != 0 && entryOption <= Enum.GetValues(typeof(Entry)).Length)
                     {
                         if (EntryOperations(entryOption))
-                        {
                             break;
-                        }
                     }
                     else
-                    {
-                        Console.WriteLine("Enter proper input.");
-                    }
+                        Notification.Error("Enter a valid input.");
                 }
                 catch (Exception err)
                 {
-                    Console.WriteLine("Enter a valid option. Try Again!");
+                    Notification.Error("Enter a valid option. Try Again!");
                 }
             }
         }
@@ -55,17 +51,17 @@ namespace BankManagement.View
                     signupView.Signup();
                     return false;
                 case 3:
-                    Console.WriteLine("Closed");
+                    Environment.Exit(0);    
                     return true;
                 default:
-                    Console.WriteLine("Enter valid option. Try Again!");
+                    Notification.Error("Enter valid option. Try Again!");
                     return false;
             }
         }
 
         public void onUserChanged(string message)
         {
-            Console.WriteLine(message);
+            Notification.Success(message);
         }
     }
 }
