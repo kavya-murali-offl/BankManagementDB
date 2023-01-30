@@ -1,6 +1,5 @@
 ﻿using System;
 using BankManagement.Controller;
-using System.Collections.Generic;
 using System.Data;
 using BankManagement.Utility;
 using BankManagementDB.View;
@@ -52,7 +51,7 @@ namespace BankManagement.View
                 if (dr != null)
                 {
                     Helper helper = new Helper();
-                    string password = helper.GetPassword();
+                    string password = helper.GetPassword("Enter password: ");
                     isValidated = customersController.ValidatePassword(phoneNumber, password);
                     if (!isValidated) Notification.Error("Incorrect Password");
                 }

@@ -23,10 +23,8 @@ namespace BankManagement.View
                     string option = Console.ReadLine().Trim();
                     int entryOption = int.Parse(option);
                     if (entryOption != 0 && entryOption <= Enum.GetValues(typeof(Entry)).Length)
-                    {
                         if (EntryOperations(entryOption))
                             break;
-                    }
                     else
                         Notification.Error("Enter a valid input.");
                 }

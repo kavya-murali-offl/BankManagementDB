@@ -74,11 +74,7 @@ namespace BankManagement.Controller
             try
             {
                 if (CustomerTable != null)
-                {
-                    DataRow[] rows = CustomerTable.Select(query);
-                    if (rows.Count() > 0)
-                        return rows.LastOrDefault();
-                }
+                    return CustomerTable.Select(query).LastOrDefault();
             }catch(Exception e)
             {
                 Notification.Error(e.Message);
@@ -112,7 +108,6 @@ namespace BankManagement.Controller
                 customer.CreatedOn = DateTime.Parse(row.Field<string>("CreatedOn"));
                 customer.LastLoggedOn = DateTime.Parse(row.Field<string>("LastLoggedOn"));
                 customer.Email = row.Field<string>("Email");
-
             }catch(Exception ex)
             {
                 Console.WriteLine(ex);

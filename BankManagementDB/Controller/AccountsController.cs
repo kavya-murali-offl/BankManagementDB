@@ -101,13 +101,19 @@ namespace BankManagement.Controller
 
         public Account CreateCurrentAccount(long userID)
         {
-            Account account = AccountFactory.GetAccountByType(AccountTypes.CURRENT);
-            account.UserID = userID;
-            account.Balance = 0;
-            InsertAccountToDB(account);
-            FillTable(userID);
-            return GetAccountByQuery($"UserID = {userID}");
-
+            Account account = null;
+            try
+            {
+                account = AccountFactory.GetAccountByType(AccountTypes.CURRENT);
+                account.UserID = userID;
+                account.Balance = 0;
+                InsertAccountToDB(account);
+                FillTable(userID);
+                return GetAccountByQuery($"UserID = {userID}");
+            }catch(Exception ex ) {
+                Console.WriteLine(ex);
+            }
+            return account;
         }
 
         public bool InsertAccountToDataTable(Account account)

@@ -64,7 +64,6 @@
   <ItemGroup>
     <Compile Include="db\DatabaseOperations.cs" />
     <Compile Include="Interface\IStatementServices.cs" />
-    <Compile Include="Interface\IViewProfileServices.cs" />
     <Compile Include="Utility\AuthServices.cs" />
     <Compile Include="Controller\AccountFactory.cs" />
     <Compile Include="Controller\AccountsController.cs" />
@@ -85,7 +84,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utility\Helper.cs" />
     <Compile Include="Utility\InterestRate.cs" />
-    <Compile Include="Utility\Pair.cs" />
+    <Compile Include="Utility\GenericPair.cs" />
     <Compile Include="Utility\Printer.cs" />
     <Compile Include="Utility\Validation.cs" />
     <Compile Include="View\AccountsView.cs" />

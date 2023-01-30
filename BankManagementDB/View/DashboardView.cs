@@ -67,7 +67,6 @@ namespace BankManagement.View
                     return false;
                 case DashboardCases.CREATE_ACCOUNT:
                     accountsController.CreateAccount(profileController.ID);
-                    
                     return false;
                 case DashboardCases.LIST_ACCOUNTS:
                     ListAllAccounts(accountsController); 
@@ -83,6 +82,7 @@ namespace BankManagement.View
                     return false;
             }
         }
+
         public void onBalanceChanged(string message)
         {
            Notification.Success(message);

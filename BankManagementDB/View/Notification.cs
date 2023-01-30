@@ -25,6 +25,7 @@ namespace BankManagementDB.View
             Console.WriteLine(message);
             Console.ResetColor();
         }
+
         public static void Info(string message)
         {
             Console.ForegroundColor = ConsoleColor.Blue;

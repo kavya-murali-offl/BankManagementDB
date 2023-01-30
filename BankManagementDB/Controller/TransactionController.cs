@@ -8,7 +8,6 @@ using BankManagement.Utility;
 using BankManagementDB.db;
 using BankManagementDB.Interface;
 using System.Linq;
-using System.Security.Principal;
 
 namespace BankManagement.Controller
 {
@@ -47,16 +46,11 @@ namespace BankManagement.Controller
         {
             Helper helper = new Helper();
             decimal amount = helper.GetAmount();
-            if (amount > currentAccount.MinimumBalance)
-            {
-                return amount;
-            }
-            else
-            {
+            if (amount < currentAccount.MinimumBalance)
                 GetInitialAmount(currentAccount);
-                return amount;  
-            }
+            return amount;
         }
+
         public bool Deposit(decimal amount, Account account)
         {
             bool isDeposited = false;

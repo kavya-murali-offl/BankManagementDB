@@ -90,13 +90,26 @@ namespace BankManagement.Utility
             return phoneNumber;
         }
 
-        public String GetPassword()
+        public string GetPassword(string message)
         {
-            Console.WriteLine("Enter password: ");
-            string password = Console.ReadLine().Trim();
+            Console.WriteLine(message);
+
+            StringBuilder passwordBuilder = new StringBuilder();
+            bool continueReading = true;
+            char newLineChar = '\r';
+            while (continueReading)
+            {
+                ConsoleKeyInfo consoleKeyInfo = Console.ReadKey(true);
+                char passwordChar = consoleKeyInfo.KeyChar;
+
+                if (passwordChar == newLineChar)
+                    continueReading = false;
+                else
+                    passwordBuilder.Append(passwordChar.ToString());
+            }
             Validation validation = new Validation();
-            if (validation.CheckEmpty(password))
-                return password;
+            if (validation.CheckEmpty(passwordBuilder.ToString()))
+                return passwordBuilder.ToString();
             return null;
         }
 

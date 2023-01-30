@@ -12,11 +12,11 @@ namespace BankManagement.View
     {
         public void Signup()
         {
-            Validation validation= new Validation();
+            Validation validation = new Validation();
             Helper helper = new Helper();
 
             string email, password, phone, name;
-            int age; 
+            int age;
 
             while (true)
             {
@@ -26,23 +26,25 @@ namespace BankManagement.View
                     if (CheckUniquePhoneNumber(phone))
                         break;
                     else
-                    {
                         Notification.Error("Phone Number Already Registered");
-                        continue;
-                    }
                 }
             }
 
             do
             {
-                password = helper.GetPassword();
+                password = helper.GetPassword("Enter password: ");
             } while (!validation.CheckEmpty(password));
 
             VerifyPassword(password);
 
             name = GetValue("Name");
 
-            email = GetValue("Email");
+            while (true)
+            {
+                email = GetValue("Email");
+                if (validation.IsValidEmail(email)) break;
+                else Notification.Error("PLease enter a valid email.");
+            }
 
             Console.WriteLine("Age: ");
             age = helper.GetInteger();
@@ -97,9 +99,10 @@ namespace BankManagement.View
         private void VerifyPassword(string password)
         {
             Validation validation = new Validation();
+            Helper helper = new Helper();   
             while (true)
             {
-                string rePassword = GetValue("Re-enter password");
+                string rePassword = helper.GetPassword("Re-enter password");
                 if (validation.ValidatePassword(password, rePassword))
                     break;
                 else
