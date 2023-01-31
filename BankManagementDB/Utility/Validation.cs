@@ -7,7 +7,7 @@ namespace BankManagement.Utility
 {
     public class Validation
     {
-        public bool CheckEmpty(string field)
+        public bool CheckNotEmpty(string field)
         {
             if (field == null || field.Equals(""))
             {

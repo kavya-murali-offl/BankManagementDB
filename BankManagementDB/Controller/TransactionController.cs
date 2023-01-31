@@ -8,6 +8,7 @@ using BankManagement.Utility;
 using BankManagementDB.db;
 using BankManagementDB.Interface;
 using System.Linq;
+using BankManagementDB.View;
 
 namespace BankManagement.Controller
 {
@@ -56,14 +57,14 @@ namespace BankManagement.Controller
             bool isDeposited = false;
             try
             {
-                account.Deposit(amount);
+                isDeposited = account.Deposit(amount);
                 IDictionary<string, object> updateFields = new Dictionary<string, object>
                 {
                     { "Balance", account.Balance },
                     { "ID", account.ID }
                 };
                 AccountsController accountsController = new AccountsController();
-                isDeposited = accountsController.UpdateAccount(updateFields);
+                accountsController.UpdateAccount(updateFields);
                 if (isDeposited)
                     CreateTransaction("DEPOSIT", amount, account, TransactionTypes.DEPOSIT);
             }
@@ -123,6 +124,7 @@ namespace BankManagement.Controller
         {
             AccountsController accountsController = new AccountsController();
             Account transferAccount = accountsController.GetAccountByQuery($"ID = {toAccountID}");
+
             if (transferAccount != null)
             {
                 TransferDelegate transfer = Withdraw;
@@ -134,6 +136,9 @@ namespace BankManagement.Controller
                     return isDeposited;
                 }
             }
+            else
+                Notification.Error("Enter a valid account ID to transfer");
+            
             return false;
         }
       
@@ -179,21 +184,22 @@ namespace BankManagement.Controller
                     newRow["Description"] = transaction.Description;
                     newRow["Amount"] = transaction.Amount;
                     newRow["Balance"] = transaction.Balance;
-                    newRow["ID"] = 0;
+                    newRow["ID"] = transaction.ID;
                     TransactionTable.Rows.Add(newRow);
                     success = true;
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
             }
             return success;
         }
 
         public bool InsertTransactionInDB(Transaction transaction)
         {
-            IDictionary<string, object> updateFields = new Dictionary<string, object>
+            try
+            {
+                IDictionary<string, object> updateFields = new Dictionary<string, object>
                 {
                     { "Description", transaction.Description },
                     { "Amount", transaction.Amount },
@@ -202,7 +208,11 @@ namespace BankManagement.Controller
                     { "TransactionType", transaction.TransactionType.ToString() },
                     { "AccountID", transaction.AccountID },
                 };
-            return DatabaseOperations.InsertRowToTable("Transactions", updateFields);
+                return DatabaseOperations.InsertRowToTable("Transactions", updateFields);
+            }catch(Exception e)
+            {
+                return false;   
+            }
         }
 
         public void FillTable(long accountID)
@@ -213,6 +223,7 @@ namespace BankManagement.Controller
             };
             TransactionTable = DatabaseOperations.FillTable("Transactions", parameters);
         }
+
         public Transaction RowToTransaction(DataRow row)
         {
             Transaction transaction = new Transaction();
@@ -233,16 +244,16 @@ namespace BankManagement.Controller
             return transaction;
         }
 
-        public DateTime? GetLastDepositDate()
+        public DateTime? GetLastWithdrawDate()
         {
-            if(TransactionTable.Rows.Count > 0)
+            if(TransactionTable?.Rows?.Count > 0)
             {
                 DataRow row = TransactionTable.Select("TransactionType = WITHDRAW").LastOrDefault();
-                if (row != null)
+                if (row == null)
                     row = TransactionTable.Select("TransactionType = DEPOSIT").LastOrDefault();
                 return DateTime.Parse(row.Field<string>("RecordedOn"));
             }
-            return new Nullable<DateTime>();
+            return new DateTime?();
         }
     }
 }

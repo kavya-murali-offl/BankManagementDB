@@ -25,7 +25,7 @@ namespace BankManagement.View
         {
             while (true)
             {
-                Console.WriteLine("1. Profile Services\n2. Create Account\n3. List Accounts\n4. Go to Account\n5. Sign out\nEnter your choice: ");
+                Console.WriteLine("\n1. Profile Services\n2. Create Account\n3. List Accounts\n4. Go to Account\n5. Sign out\nEnter your choice: ");
                 try
                 {
                     string option = Console.ReadLine().Trim();
@@ -58,25 +58,31 @@ namespace BankManagement.View
             ProfileController profileController
             )
         {
-            AccountsController accountsController = new AccountsController();   
+            ITransactionServices transactionController = new TransactionController();
+            AccountsController accountsController = new AccountsController(transactionController);   
             switch (operation)
             {
                 case DashboardCases.PROFILE:
                     ProfileView profileView = new ProfileView();
                     profileView.ViewProfileServices(profileController);
                     return false;
+
                 case DashboardCases.CREATE_ACCOUNT:
                     accountsController.CreateAccount(profileController.ID);
                     return false;
+
                 case DashboardCases.LIST_ACCOUNTS:
                     ListAllAccounts(accountsController); 
                     return false;
+
                 case DashboardCases.GO_TO_ACCOUNT:
                     GoToAccount(accountsController);
                     return false;
+
                 case DashboardCases.SIGN_OUT:
                     SaveCustomerSession(profileController);
                     return true;
+
                 default:
                     Notification.Error("Enter a valid option.\n");
                     return false;
@@ -90,12 +96,20 @@ namespace BankManagement.View
 
         public void GoToAccount(AccountsController accountController)
         {
-            TransactionsView transactionView = new TransactionsView();
-            Account transactionAccount = ChooseAccountForTransaction(accountController);
-            transactionAccount.BalanceChanged += onBalanceChanged;
-            TransactionController transactionController = new TransactionController();
-            transactionController.FillTable(transactionAccount.ID);
-            transactionView.GoToAccount(transactionAccount);
+            while (true)
+            {
+                TransactionsView transactionView = new TransactionsView();
+                Account transactionAccount = ChooseAccountForTransaction(accountController);
+                if (transactionAccount != null)
+                {
+                    transactionAccount.BalanceChanged += onBalanceChanged;
+                    TransactionController transactionController = new TransactionController();
+                    transactionController.FillTable(transactionAccount.ID);
+                    transactionView.GoToAccount(transactionAccount);
+                }
+                else
+                    break;
+            }
         }
 
         public Account ChooseAccountForTransaction(AccountsController accountController)
@@ -104,15 +118,20 @@ namespace BankManagement.View
             {
                 IList<Account> accountsList = accountController.GetAllAccounts();
                 ListAccountIDs(accountsList);
+                Console.WriteLine("Press 0 to go back!\n");
                 string index = Console.ReadLine().Trim();
                 int accountIndex;
+
                 if (!int.TryParse(index, out accountIndex))
                     Notification.Error("Please enter a valid number.");
-                if (accountIndex  > accountsList.Count)
+                else if (accountIndex == 0)
+                    return null;
+                else if (accountIndex > accountsList.Count)
                 {
                     Notification.Error("Choose from the listed accounts.");
                     ChooseAccountForTransaction(accountController);
                 }
+
                 return accountsList[accountIndex - 1];
             }
             catch(Exception e) {
@@ -143,7 +162,7 @@ namespace BankManagement.View
         public void ListAccountIDs(IList<Account> accounts)
         {
             for(int i = 1; i<accounts.Count()+1;i++)
-                Console.WriteLine(i + ". " + accounts[i - 1].ID);
+                Notification.Info(i + ". " + accounts[i - 1].ID);
         }
     }
 }

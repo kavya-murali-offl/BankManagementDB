@@ -25,13 +25,14 @@ namespace BankManagement.View
                     {
                         AccountTypes accountType = (AccountTypes)entryOption - 1;
                         account = AccountFactory.GetAccountByType(accountType);
+
                         if(account != null)
-                        {
                             return account;
-                        }
+
                     }
                     else if(entryOption == 3)
                         break;
+
                     else
                     {
                         Notification.Error("Please enter a valid option");

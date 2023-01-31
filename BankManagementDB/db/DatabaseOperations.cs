@@ -119,7 +119,7 @@ namespace BankManagementDB.db
             {
                 string query = "UPDATE " + tableName + " SET ";
                 int i = 0;
-                foreach (KeyValuePair<string, object> pairs in updateFields)
+                foreach (var pairs in updateFields)
                 {
                     i += 1;
                     if (pairs.Key != "ID")

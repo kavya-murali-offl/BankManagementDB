@@ -1,6 +1,7 @@
 ﻿using BankManagement.Controller;
 using BankManagement.Enums;
 using BankManagement.Models;
+using BankManagement.Utility;
 using System;
 
 namespace BankManagement.Model
@@ -11,8 +12,11 @@ namespace BankManagement.Model
         public readonly decimal CHARGES = 50;
         
         public CurrentAccount(): base() {
-            InterestRate = 5.6m;
+            InterestRate = AccountInterestRate.CURRENT_INTEREST_RATE;
+            Type = AccountTypes.CURRENT;
+            CreatedOn = DateTime.Now;
         }
+
         public decimal MinimumBalance { get { return MIN_BALANCE; } }
 
         public void Charge()

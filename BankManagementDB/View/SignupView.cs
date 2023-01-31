@@ -21,7 +21,7 @@ namespace BankManagement.View
             while (true)
             {
                 phone = helper.GetPhoneNumber();
-                if (validation.CheckEmpty(phone))
+                if (validation.CheckNotEmpty(phone))
                 {
                     if (CheckUniquePhoneNumber(phone))
                         break;
@@ -33,7 +33,7 @@ namespace BankManagement.View
             do
             {
                 password = helper.GetPassword("Enter password: ");
-            } while (!validation.CheckEmpty(password));
+            } while (!validation.CheckNotEmpty(password));
 
             VerifyPassword(password);
 
@@ -56,17 +56,18 @@ namespace BankManagement.View
                 customersController.FillTable();
                 DataRow user = customersController.GetUserByQuery("Phone = " + phone);
                 long userID = (long)user["ID"];
-                Notification.Success("Signup Successful");
+                Notification.Success("Signup Successful\n");
 
                 AccountsController accountsController = new AccountsController();
                 Account account = accountsController.CreateCurrentAccount(userID);
                 if(account != null)
                 {
-                    Notification.Success("Account created successfully");
 
                     TransactionController transactionController = new TransactionController();
                     decimal amount = helper.GetAmount(account as CurrentAccount);
                     transactionController.Deposit(amount, account);
+
+                    Notification.Success("Account created successfully\n");
                 }
             }
         }
@@ -91,7 +92,7 @@ namespace BankManagement.View
                 Console.WriteLine(label + ": ");
                 Validation validation = new Validation();
                 string value = Console.ReadLine().Trim();
-                if (validation.CheckEmpty(value)) return value;
+                if (validation.CheckNotEmpty(value)) return value;
                 else continue;
             }
         }

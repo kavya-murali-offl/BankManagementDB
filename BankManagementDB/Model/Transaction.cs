@@ -22,6 +22,8 @@ namespace BankManagement.Model
             RecordedOn = DateTime.Now;
         }
 
+        public long ID { get; set; }
+
         public TransactionTypes TransactionType { get; set; }
 
         public decimal Amount { get; set; }
@@ -32,18 +34,16 @@ namespace BankManagement.Model
 
         public long AccountID { get; set; }
 
-        public long ID { get; set; }
-
         public string Description { get; set; }
 
         public override string ToString()
         {
-            return $@"Transaction ID: {ID}
-                \tTransaction Type: {TransactionType} 
-                \tTransaction Time: {RecordedOn} 
-                \tDescription: {Amount}
-                \tAmount: {Amount}
-                \tBalance: {Balance}";
+            return $@"
+                Transaction Type: {TransactionType} 
+                Transaction Time: {RecordedOn} 
+                Description: {Amount}
+                Amount: {Amount}
+                Balance: {Balance}";
         }
     }
 }

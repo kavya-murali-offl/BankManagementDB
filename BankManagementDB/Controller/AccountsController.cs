@@ -35,7 +35,7 @@ namespace BankManagement.Controller
         {
             try
             {
-                AccountsView accountsView = new AccountsView(); 
+                AccountsView accountsView = new AccountsView();
                 Account account = accountsView.GenerateAccount();
                 if (account != null)
                 {
@@ -89,6 +89,7 @@ namespace BankManagement.Controller
                         { "InterestRate", account.InterestRate },
                         { "Status", account.Status.ToString() },
                         { "UserID", account.UserID },
+                        { "CreatedOn", account.CreatedOn },
                         { "Type", account.Type.ToString() }
                 };
                 return DatabaseOperations.InsertRowToTable("Account", parameters);
@@ -110,6 +111,7 @@ namespace BankManagement.Controller
                 InsertAccountToDB(account);
                 FillTable(userID);
                 return GetAccountByQuery($"UserID = {userID}");
+
             }catch(Exception ex ) {
                 Console.WriteLine(ex);
             }

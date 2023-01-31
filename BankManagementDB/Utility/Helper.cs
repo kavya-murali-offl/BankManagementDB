@@ -2,6 +2,7 @@
 using BankManagement.Enums;
 using BankManagement.Model;
 using BankManagement.Models;
+using BankManagementDB.View;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity.Core.Metadata.Edm;
@@ -33,20 +34,26 @@ namespace BankManagement.Utility
 
         public int GetInteger()
         {
+            int number = 0;
             while (true)
             {
                 try
                 {
-                    int number = int.Parse(Console.ReadLine().Trim());
-                    if (number > 0) return number;
-                    else Console.WriteLine("Enter a valid number.");
+                    int input = int.Parse(Console.ReadLine().Trim());
+                    if (input > 0)
+                    {
+                        number = input;
+                        break;
+                    }
+                    else
+                        Notification.Error("Enter a valid number.");
                 }
                 catch (Exception error)
                 {
-                    Console.WriteLine("Enter a valid number. Try Again!");
-                    GetInteger();   
+                    Notification.Error("Enter a valid number. Try Again!");
                 }
             }
+            return number;
         }
 
         public decimal GetAmount(CurrentAccount currentAccount)
@@ -60,32 +67,33 @@ namespace BankManagement.Utility
                     if (amount > 0)
                     {
                         if(amount < currentAccount.MinimumBalance)
-                        {
-                            Console.WriteLine("Initial Amount should be greater than Minimum Balance.");
-                        }
+                            Notification.Error($"Initial Amount should be greater than Minimum Balance Rs. {currentAccount.MinimumBalance}");
+                        
                         else
-                        {
                             return amount;
-                        }
                     }
-                    else Console.WriteLine("Amount should be greater than zero.");
+                    else Notification.Error("Amount should be greater than zero.");
                 }
                 catch (Exception error)
                 {
-                    Console.WriteLine("Enter a valid amount. Try Again!");
+                    Notification.Error(error.Message);
                 }
             }
         }
 
-        public String GetPhoneNumber()
+        public string GetPhoneNumber()
         {
-            Console.WriteLine("Enter Mobile Number: ");
-            string phoneNumber = Console.ReadLine().Trim();
-            Validation validation = new Validation();
-            if (!validation.IsPhoneNumber(phoneNumber))
+            string phoneNumber;
+            while (true)
             {
-                Console.WriteLine("Please enter a valid mobile number. ");
-                GetPhoneNumber();
+                Console.WriteLine("Enter Mobile Number: ");
+                phoneNumber = Console.ReadLine().Trim();
+                Validation validation = new Validation();
+
+                if (!validation.IsPhoneNumber(phoneNumber))
+                    Notification.Error("Please enter a valid mobile number. ");
+
+                else break;
             }
             return phoneNumber;
         }
@@ -93,10 +101,10 @@ namespace BankManagement.Utility
         public string GetPassword(string message)
         {
             Console.WriteLine(message);
-
             StringBuilder passwordBuilder = new StringBuilder();
             bool continueReading = true;
             char newLineChar = '\r';
+
             while (continueReading)
             {
                 ConsoleKeyInfo consoleKeyInfo = Console.ReadKey(true);
@@ -107,20 +115,29 @@ namespace BankManagement.Utility
                 else
                     passwordBuilder.Append(passwordChar.ToString());
             }
+
             Validation validation = new Validation();
-            if (validation.CheckEmpty(passwordBuilder.ToString()))
+            if (validation.CheckNotEmpty(passwordBuilder.ToString()))
                 return passwordBuilder.ToString();
+
             return null;
         }
 
         public int CountDays()
         {
-            TransactionController transactionController = new TransactionController();
-            DateTime? lastDepositDate = transactionController.GetLastDepositDate();
-            if (lastDepositDate.HasValue)
+            try
             {
-                int numberOfDays = (int)(DateTime.Now - lastDepositDate)?.TotalDays;
-                return numberOfDays;
+                TransactionController transactionController = new TransactionController();
+                DateTime? lastDepositDate = transactionController.GetLastWithdrawDate();
+                if (lastDepositDate.HasValue)
+                {
+                    int numberOfDays = (int)(DateTime.Now - lastDepositDate)?.TotalDays;
+                    if(numberOfDays > 30) return numberOfDays;
+                    else return 0;
+                }
+            }catch(Exception e)
+            {
+                Notification.Error(e.Message);
             }
             return 0;
         }

@@ -26,7 +26,7 @@ namespace BankManagementDB.db
                         cmd.CommandText = query;
                         if(parameters != null && parameters.Count>0)
                         {
-                         foreach (KeyValuePair<string, object> entry in parameters)
+                         foreach (var entry in parameters)
                                 cmd.Parameters.AddWithValue(entry.Key, entry.Value);
                         }
                         await cmd.ExecuteNonQueryAsync();

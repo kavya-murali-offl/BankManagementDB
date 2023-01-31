@@ -12,20 +12,12 @@ namespace BankManagement.Controller
             {
                 case AccountTypes.CURRENT:
                     {
-                        CurrentAccount currentAccount = new CurrentAccount
-                        {
-                            Type = AccountTypes.CURRENT,
-                            InterestRate = 0m
-                        };
+                        CurrentAccount currentAccount = new CurrentAccount();
                         return currentAccount;
                     }
                 case AccountTypes.SAVINGS:
                     {
-                        SavingsAccount savingsAccount = new SavingsAccount
-                        {
-                            Type = AccountTypes.SAVINGS,
-                            InterestRate = 5.6m
-                        };
+                        SavingsAccount savingsAccount = new SavingsAccount();
                         return savingsAccount;
                     }
                 default:

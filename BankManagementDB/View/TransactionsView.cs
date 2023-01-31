@@ -54,18 +54,18 @@ namespace BankManagement.View
                 case AccountCases.DEPOSIT:
                     amount = helper.GetAmount();
                     transactionController.Deposit(amount, account);
-                    return true;
+                    return false;
 
                 case AccountCases.WITHDRAW:
                     amount = helper.GetAmount();
                     transactionController.Withdraw(amount, account);
-                    return true;
+                    return false;
 
                 case AccountCases.TRANSFER:
                     amount = helper.GetAmount();
                     long transferAccountID = GetTransferAccountID(account.ID);
                     transactionController.Transfer(amount, account, transferAccountID);
-                    return true;
+                    return false;
 
                 case AccountCases.CHECK_BALANCE:
                     Notification.Info($"BALANCE: {account.Balance}");

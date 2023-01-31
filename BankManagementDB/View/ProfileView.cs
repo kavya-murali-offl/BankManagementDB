@@ -66,15 +66,14 @@ namespace BankManagement.View
 
         public void ViewProfileDetails(ProfileController profileController)
         {
-            Console.WriteLine("\n ================== PROFILE ===================\n");
-            Console.WriteLine("Name: " + profileController.Name);
-            Console.WriteLine("Äge: " + profileController.Age);
-            Console.WriteLine("Phone: " + profileController.Phone);
-            Console.WriteLine("Email: " + profileController.Email);
-            Console.WriteLine("No. of Accounts: " + AccountsController.AccountTable.Rows.Count);
-            Console.WriteLine("\n ==============================================\n");
+            Notification.Info("\n ================== PROFILE ===================\n");
+            Notification.Info("Name: " + profileController.Name);
+            Notification.Info("Äge: " + profileController.Age);
+            Notification.Info("Phone: " + profileController.Phone);
+            Notification.Info("Email: " + profileController.Email);
+            Notification.Info("No. of Accounts: " + AccountsController.AccountTable.Rows.Count);
+            Notification.Info("\n ==============================================\n");
         }
-
 
         public void EditProfile(ProfileController profile)
         {
@@ -126,13 +125,19 @@ namespace BankManagement.View
                 updatedFields.Add("Age", pair2.Value);
 
             if(updatedFields.Count > 0) {
-                updatedFields.Add("ID", profile.ID);
-                CustomersController customersController = new CustomersController();
-                Customer customer = customersController.UpdateCustomer(updatedFields);
-                if(customer != null) {
-                    Notification.Success("Profile Updated Successfully");
-                    profile.Customer = customer;
-                }
+                UpdateProfile(updatedFields, profile);
+            }
+        }
+
+        public void UpdateProfile(IDictionary<string, object> updatedFields, ProfileController profile)
+        {
+            updatedFields.Add("ID", profile.ID);
+            CustomersController customersController = new CustomersController();
+            Customer customer = customersController.UpdateCustomer(updatedFields);
+            if (customer != null)
+            {
+                Notification.Success("Profile Updated Successfully");
+                profile.Customer = customer;
             }
         }
     }

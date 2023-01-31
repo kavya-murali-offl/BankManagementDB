@@ -17,7 +17,7 @@ namespace BankManagement.View
         {
             while (true)
             {
-                Console.WriteLine("1.Login\n2.Signup\n3.Exit\nEnter your choice: ");
+                Console.WriteLine("\n1.Login\n2.Signup\n3.Exit\nEnter your choice: ");
                 try
                 {
                     string option = Console.ReadLine().Trim();
@@ -25,8 +25,6 @@ namespace BankManagement.View
                     if (entryOption != 0 && entryOption <= Enum.GetValues(typeof(Entry)).Length)
                         if (EntryOperations(entryOption))
                             break;
-                    else
-                        Notification.Error("Enter a valid input.");
                 }
                 catch (Exception err)
                 {
@@ -44,13 +42,16 @@ namespace BankManagement.View
                     loginView.UserChanged += onUserChanged;
                     loginView.Login();
                     return false;
+
                 case 2:
                     SignupView signupView = new SignupView();
                     signupView.Signup();
                     return false;
+
                 case 3:
                     Environment.Exit(0);    
                     return true;
+
                 default:
                     Notification.Error("Enter valid option. Try Again!");
                     return false;

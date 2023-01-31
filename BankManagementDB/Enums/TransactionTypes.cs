@@ -10,4 +10,5 @@ namespace BankManagement.Enums
         {
             DEPOSIT, WITHDRAW, TRANSFER
         }
+
 }

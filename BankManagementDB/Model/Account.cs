@@ -25,13 +25,20 @@ namespace BankManagement.Models
 
         public long UserID { get; set; }
 
+        public DateTime CreatedOn { get; set; }
+
         public AccountStatus Status { get; set; }
 
         public bool Deposit(decimal amount)
         {
-            Balance += amount;
-            OnBalanceChanged($"Deposit of Rs. {amount} is successful");
-            return true;
+            if(amount > 0)
+            {
+                Balance += amount;
+                OnBalanceChanged($"Deposit of Rs. {amount} is successful");
+                return true;
+            }
+            return false;
+           
         }
 
         public void OnBalanceChanged(string message)
@@ -56,7 +63,7 @@ namespace BankManagement.Models
 
         public override string ToString()
         {
-            return $"Account ID: {ID} \nAccount Status: {Status} \nBalance: {Balance}";
+            return $"Account ID: {ID} \nAccount Status: {Status} \nBalance: Rs. {Balance}";
         }
     }
 

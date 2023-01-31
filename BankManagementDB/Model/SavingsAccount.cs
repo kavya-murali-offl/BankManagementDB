@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Xml.Linq;
 using BankManagement.Controller;
+using BankManagement.Enums;
 using BankManagement.Models;
 using BankManagement.Utility;
 
@@ -8,6 +9,13 @@ namespace BankManagement.Model
 {
     public class SavingsAccount : Account
     {
+        public SavingsAccount() : base()
+        {
+            InterestRate = AccountInterestRate.SAVINGS_INTEREST_RATE;
+            Type = AccountTypes.SAVINGS;
+            CreatedOn = DateTime.Now;
+        }
+
         public decimal DepositInterest()
         {
             Helper helper= new Helper();
