@@ -129,10 +129,10 @@ namespace BankManagement.Utility
             try
             {
                 TransactionController transactionController = new TransactionController();
-                DateTime? lastDepositDate = transactionController.GetLastWithdrawDate();
-                if (lastDepositDate.HasValue)
+                DateTime? lastWithdrawDate = transactionController.GetLastWithdrawDate();
+                if (lastWithdrawDate.HasValue)
                 {
-                    int numberOfDays = (int)(DateTime.Now - lastDepositDate)?.TotalDays;
+                    int numberOfDays = (int)(DateTime.Now - lastWithdrawDate)?.TotalDays;
                     if(numberOfDays > 30) return numberOfDays;
                     else return 0;
                 }

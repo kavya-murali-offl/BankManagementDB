@@ -55,7 +55,6 @@ namespace BankManagement.View
                 customersController.FillTable();
                 DataRow user = customersController.GetUserByQuery("Phone = " + phone);
                 long userID = (long)user["ID"];
-                Notification.Success("Signup Successful\n");
 
                 AccountsController accountsController = new AccountsController();
                 Account account = accountsController.CreateCurrentAccount(userID);
@@ -82,6 +81,7 @@ namespace BankManagement.View
         {
             CustomersController customersController = new CustomersController();
             bool customerAdded = customersController.CreateCustomer(name, password, email, phone, age);
+            if (customerAdded) Notification.Success("\nSignup successful");
             return customerAdded;
         }
 

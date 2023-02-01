@@ -1,11 +1,8 @@
 ﻿using BankManagementDB.Utility;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Data;
 using System.Data.SQLite;
-using System.Reflection;
 using System.Threading.Tasks;
 
 namespace BankManagementDB.db
@@ -57,7 +54,7 @@ namespace BankManagementDB.db
                         com.CommandText = query;
                         if (parameters != null && parameters.Count > 0)
                         {
-                            foreach (KeyValuePair<string, object> entry in parameters)
+                            foreach (var entry in parameters)
                                 com.Parameters.AddWithValue("@" + entry.Key, entry.Value);
                         }
                         await com.ExecuteNonQueryAsync();

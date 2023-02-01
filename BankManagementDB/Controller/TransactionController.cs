@@ -249,10 +249,10 @@ namespace BankManagement.Controller
         {
             if(TransactionTable?.Rows?.Count > 0)
             {
-                DataRow row = TransactionTable.Select("TransactionType = WITHDRAW").LastOrDefault();
+                DataRow row = TransactionTable.AsEnumerable().Where((r) => r.Field<string>("TransactionType") == "WITHDRAW").LastOrDefault();
 
                 if (row == null)
-                    row = TransactionTable.Select("TransactionType = DEPOSIT").LastOrDefault();
+                    row = TransactionTable.AsEnumerable().Where((r) => r.Field<string>("TransactionType") == "DEPOSIT").LastOrDefault();
 
                 return DateTime.Parse(row.Field<string>("RecordedOn"));
             }

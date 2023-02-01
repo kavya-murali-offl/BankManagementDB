@@ -23,6 +23,7 @@ namespace BankManagement.View
             {
                 try
                 {
+                    Console.WriteLine("\n\n");
                     for (int i = 0; i < Enum.GetNames(typeof(ProfileServiceCases)).Length; i++)
                     {
                         ProfileServiceCases cases = (ProfileServiceCases)i;
