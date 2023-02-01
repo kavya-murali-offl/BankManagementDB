@@ -23,7 +23,7 @@ namespace BankManagement.View
             {
                 try
                 {
-                    Console.WriteLine("\n\n");
+                    Console.WriteLine("\n");
                     for (int i = 0; i < Enum.GetNames(typeof(ProfileServiceCases)).Length; i++)
                     {
                         ProfileServiceCases cases = (ProfileServiceCases)i;
@@ -108,7 +108,7 @@ namespace BankManagement.View
                 {
                     Console.WriteLine(pair1);
                     Console.WriteLine(pair2);
-                    Console.WriteLine("Which field you want to edit? Press 0 to go back!\n");
+                    Console.WriteLine("Which field you want to edit? Press 0 to go back!");
                     string field = Console.ReadLine().Trim().ToUpper();
 
                     if (fields.ContainsKey(field))
@@ -128,7 +128,7 @@ namespace BankManagement.View
                 }
             }
 
-            IDictionary<string, object> updatedFields = new Dictionary<string, object>();   
+            IDictionary<string, dynamic> updatedFields = new Dictionary<string, dynamic>();   
             if (pair1.Value != profile.Name)
                 updatedFields.Add("Name", pair1.Value);
             if(pair2.Value != profile.Age)
@@ -139,7 +139,7 @@ namespace BankManagement.View
         }
 
 
-        public void UpdateProfile(IDictionary<string, object> updatedFields, ProfileController profile)
+        public void UpdateProfile(IDictionary<string, dynamic> updatedFields, ProfileController profile)
         {
             updatedFields.Add("ID", profile.ID);
 

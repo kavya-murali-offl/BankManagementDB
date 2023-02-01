@@ -20,6 +20,7 @@ namespace BankManagement.Model
         {
             Helper helper= new Helper();
             decimal interest = (Balance * helper.CountDays() * InterestRate) / (100 * 12);
+            interest = Math.Round(interest, 3);
             Deposit(interest);
             return interest;
         }

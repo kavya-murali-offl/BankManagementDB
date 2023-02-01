@@ -1,13 +1,10 @@
 ﻿using BankManagement.Models;
-using BankManagementDB;
 using BankManagementDB.db;
 using BankManagementDB.View;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Reflection;
-using System.Runtime.InteropServices;
 
 namespace BankManagement.Controller
 {
@@ -20,7 +17,7 @@ namespace BankManagement.Controller
             try
             {
                 string hashedPassword = AuthServices.ComputeHash(password);
-                IDictionary<string, object> parameters = new Dictionary<string, object>
+                IDictionary<string, dynamic> parameters = new Dictionary<string, dynamic>
                 {
                     { "Name", name },
                     { "Email", email },
@@ -39,7 +36,7 @@ namespace BankManagement.Controller
             return false;
         }
 
-        public Customer UpdateCustomer(IDictionary<string, object> parameters)
+        public Customer UpdateCustomer(IDictionary<string, dynamic> parameters)
         {
             try
             {
@@ -110,7 +107,7 @@ namespace BankManagement.Controller
                 customer.LastLoggedOn = DateTime.Parse(row.Field<string>("LastLoggedOn"));
                 customer.Email = row.Field<string>("Email");
 
-            }catch(Exception ex)
+            }   catch(Exception ex)
             {
                 Console.WriteLine(ex);
             }

@@ -14,7 +14,7 @@ using BankManagementDB.Interface;
 namespace BankManagement.Controller
 {
 
-    delegate bool UpdateAccountDelegate(IDictionary<string, object> fields);
+    delegate bool UpdateAccountDelegate(IDictionary<string, dynamic> fields);
     delegate bool InsertAccountDelegate(Account account);
 
     public class AccountsController 
@@ -82,7 +82,7 @@ namespace BankManagement.Controller
         {
             try
             {
-                IDictionary<string, object> parameters = new Dictionary<string, object>()
+                IDictionary<string, dynamic> parameters = new Dictionary<string, dynamic>()
                 {
                         { "Balance", account.Balance},
                         { "InterestRate", account.InterestRate },
@@ -117,7 +117,7 @@ namespace BankManagement.Controller
             return account;
         }
 
-        public bool InsertAccountToDataTable(Account account)
+        private bool InsertAccountToDataTable(Account account)
         {
             try
             {
@@ -137,7 +137,7 @@ namespace BankManagement.Controller
             return false;
         }
 
-        public bool UpdateAccount(IDictionary<string, object> updateFields)
+        public bool UpdateAccount(IDictionary<string, dynamic> updateFields)
         {
             try
             {
@@ -155,7 +155,7 @@ namespace BankManagement.Controller
             return false;
         }
 
-        public bool UpdateAccountInDB(IDictionary<string, object> fields)
+        private bool UpdateAccountInDB(IDictionary<string, dynamic> fields)
         {
             try
             {
@@ -166,7 +166,7 @@ namespace BankManagement.Controller
             }
         }
 
-        public bool UpdateAccountInDataTable(IDictionary<string, object> fields)
+        private bool UpdateAccountInDataTable(IDictionary<string, dynamic> fields)
         {
             try
             {
@@ -175,7 +175,7 @@ namespace BankManagement.Controller
                     DataRow[] rows = AccountTable.Select("ID = " + fields["ID"]);
                     if (rows.Length > 0)
                     {
-                        DataRow row = rows[0];
+                        DataRow row = rows.LastOrDefault();
                         foreach (var pairs in fields)
                             row[pairs.Key] = pairs.Value;
                         return true;
@@ -193,7 +193,7 @@ namespace BankManagement.Controller
         {
             try
             {
-                IDictionary<string, object> parameters = new Dictionary<string, object>
+                IDictionary<string, dynamic> parameters = new Dictionary<string, dynamic>
                     {
                         { "UserID", id }
                     };
@@ -261,7 +261,8 @@ namespace BankManagement.Controller
                 account.UserID = row.Field<long>("UserID");
                 return account;
 
-            }catch(Exception e)
+            } 
+            catch(Exception e)
             {
                 Console.WriteLine(e);
             }

@@ -1,9 +1,6 @@
-﻿using BankManagement.Controller;
-using BankManagement.Enums;
-using BankManagement.Model;
+﻿using BankManagement.Enums;
 using BankManagementDB.View;
 using System;
-using System.Collections.Generic;
 
 namespace BankManagement.Models
 {
@@ -41,10 +38,6 @@ namespace BankManagement.Models
             return false;
         }
 
-        public void OnBalanceChanged(string message)
-        {
-            BalanceChanged?.Invoke(message);
-        }
 
         public bool Withdraw(decimal amount)
         {
@@ -59,6 +52,11 @@ namespace BankManagement.Models
                 Notification.Error($"Insufficient Balance");
                 return false;
             }
+        }
+
+        public void OnBalanceChanged(string message)
+        {
+            BalanceChanged?.Invoke(message);
         }
 
         public override string ToString()

@@ -1,15 +1,18 @@
 ﻿using BankManagementDB.Utility;
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Data;
 using System.Data.SQLite;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace BankManagementDB.db
 {
     public class QueryExecution
     {
-        public async Task<DataTable> ExecuteQuery(string query, IDictionary<string, object> parameters)
+        public async Task<DataTable> ExecuteQuery(string query, IDictionary<string, dynamic> parameters)
         {
             DataTable result = null;
             try
@@ -42,7 +45,7 @@ namespace BankManagementDB.db
             return result;
         }
 
-        public async Task ExecuteNonQuery(string query, IDictionary<string, object> parameters)
+        public async Task ExecuteNonQuery(string query, IDictionary<string, dynamic> parameters)
         {
             try
             {

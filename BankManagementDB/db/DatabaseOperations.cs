@@ -51,7 +51,7 @@ namespace BankManagementDB.db
             Task task3 = queryExecution.ExecuteNonQuery(transactionsQuery, null);
         }
 
-        public static bool InsertRowToTable(string tableName, IDictionary<string, object> parameters)
+        public static bool InsertRowToTable(string tableName, IDictionary<string, dynamic> parameters)
         {
             bool result = false;
             try
@@ -86,7 +86,7 @@ namespace BankManagementDB.db
             return result;
         }
 
-        public static DataTable FillTable(string tableName, IDictionary<string, object> parameters)
+        public static DataTable FillTable(string tableName, IDictionary<string, dynamic> parameters)
         {
             DataTable result = new DataTable();
             try
@@ -95,7 +95,7 @@ namespace BankManagementDB.db
                 if (parameters != null && parameters.Count > 0)
                 {
                     query += " WHERE ";
-                    foreach (KeyValuePair<string, object> pairs in parameters)
+                    foreach (var pairs in parameters)
                         query += pairs.Key + "= @" + pairs.Key;
                 }
 
@@ -110,7 +110,7 @@ namespace BankManagementDB.db
             return result;
         }
 
-        public static bool UpdateTable(string tableName, IDictionary<string, object> updateFields)
+        public static bool UpdateTable(string tableName, IDictionary<string, dynamic> updateFields)
         {
             bool result = false;
             try
@@ -146,7 +146,7 @@ namespace BankManagementDB.db
                 {
                     Console.Write(col.ColumnName);
                     var maxLabelSize = Table.Rows.OfType<DataRow>()
-                            .Select(m => (m.Field<object>(col.ColumnName)?.ToString() ?? "").Length)
+                            .Select(m => (m.Field<dynamic>(col.ColumnName)?.ToString() ?? "").Length)
                             .OrderByDescending(m => m).FirstOrDefault();
 
                     colWidths.Add(col.ColumnName, maxLabelSize);

@@ -58,7 +58,7 @@ namespace BankManagement.Controller
             try
             {
                 isDeposited = account.Deposit(amount);
-                IDictionary<string, object> updateFields = new Dictionary<string, object>
+                IDictionary<string, dynamic> updateFields = new Dictionary<string, dynamic>
                 {
                     { "Balance", account.Balance },
                     { "ID", account.ID }
@@ -89,7 +89,7 @@ namespace BankManagement.Controller
 
                 if (isWithdrawn)
                 {
-                    IDictionary<string, object> updateFields = new Dictionary<string, object>
+                    IDictionary<string, dynamic> updateFields = new Dictionary<string, dynamic>
                         {
                             { "Balance", account.Balance },
                             { "ID", account.ID }
@@ -199,7 +199,7 @@ namespace BankManagement.Controller
         {
             try
             {
-                IDictionary<string, object> updateFields = new Dictionary<string, object>
+                IDictionary<string, dynamic> updateFields = new Dictionary<string, dynamic>
                 {
                     { "Description", transaction.Description },
                     { "Amount", transaction.Amount },
@@ -217,7 +217,7 @@ namespace BankManagement.Controller
 
         public void FillTable(long accountID)
         {
-            IDictionary<string, object> parameters = new Dictionary<string, object>
+            IDictionary<string, dynamic> parameters = new Dictionary<string, dynamic>
             {
                 { "AccountID", accountID }
             };

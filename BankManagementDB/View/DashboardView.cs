@@ -157,7 +157,7 @@ namespace BankManagement.View
         private void SaveCustomerSession(ProfileController profileController)
         {
             CustomersController customersController = new CustomersController();
-            IDictionary<string, object> updateFields = new Dictionary<string, object>
+            IDictionary<string, dynamic> updateFields = new Dictionary<string, dynamic>
             {
                 {"ID", profileController.ID },   
                 { "LastLoggedOn", profileController.LastLoggedOn }

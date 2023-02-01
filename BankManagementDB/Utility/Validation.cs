@@ -9,7 +9,7 @@ namespace BankManagement.Utility
     {
         public bool CheckNotEmpty(string field)
         {
-            if (field.Equals(null) || field.Equals(""))
+            if (string.IsNullOrEmpty(field))
             {
                 Notification.Error("Field should not be empty");
                 return false;
@@ -24,7 +24,7 @@ namespace BankManagement.Utility
 
         public bool IsValidEmail(string email)
         {
-            if (string.IsNullOrWhiteSpace(email))
+            if (string.IsNullOrWhiteSpace(email) || string.IsNullOrEmpty(email))
                 return false;
 
             try
