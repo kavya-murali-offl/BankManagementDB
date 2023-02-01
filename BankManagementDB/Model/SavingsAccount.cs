@@ -14,6 +14,7 @@ namespace BankManagement.Model
             InterestRate = AccountInterestRate.SAVINGS_INTEREST_RATE;
             Type = AccountTypes.SAVINGS;
             CreatedOn = DateTime.Now;
+            MinimumBalance = 0;
         }
 
         public decimal DepositInterest()
@@ -25,12 +26,10 @@ namespace BankManagement.Model
             return interest;
         }
 
-        public override string ToString()
-        {
-            return $"Account Type: Savings\n {base.ToString()}\n" +
+        public override string ToString() =>
+             $"Account Type: Savings\n {base.ToString()}\n" +
                  $"Interest Rate:  {InterestRate}\n" +
                 "========================================\n";
-        }
 
     }
 }

@@ -4,12 +4,19 @@ using BankManagement.Controller;
 using BankManagement.Model;
 using BankManagement.Models;
 using BankManagement.Utility;
+using BankManagementDB.Interface;
 using BankManagementDB.View;
 
 namespace BankManagement.View
 {
     public class SignupView
     {
+        public SignupView(ICustomerServices customerController) { 
+             CustomersController = customerController;
+        }
+
+        public ICustomerServices CustomersController { get; set; }    
+
         public void Signup()
         {
             Validation validation = new Validation();
@@ -51,9 +58,8 @@ namespace BankManagement.View
             bool customerCreated = CreateCustomer(name, password, email, phone, age);
             if (customerCreated)
             {
-                CustomersController customersController = new CustomersController();
-                customersController.FillTable();
-                DataRow user = customersController.GetUserByQuery("Phone = " + phone);
+                CustomersController.FillTable();
+                DataRow user = CustomersController.GetUserByQuery("Phone = " + phone);
                 long userID = (long)user["ID"];
 
                 AccountsController accountsController = new AccountsController();
@@ -73,19 +79,21 @@ namespace BankManagement.View
 
         public bool CheckUniquePhoneNumber(string phoneNumber)
         {
-            CustomersController customersController = new CustomersController();
-            return customersController.GetUserByQuery("Phone = " + phoneNumber).Equals(null) ? true : false;
+            return CustomersController.GetUserByQuery("Phone = " + phoneNumber).Equals(null) ? true : false;
         }
 
         private bool CreateCustomer(string name, string password, string email, string phone, int age)
         {
-            CustomersController customersController = new CustomersController();
-            bool customerAdded = customersController.CreateCustomer(name, password, email, phone, age);
+
+            Customer customer = new Customer(name, age, phone, email);
+            bool customerAdded = CustomersController.InsertCustomer(customer, password);
+
             if (customerAdded) Notification.Success("\nSignup successful");
+
             return customerAdded;
         }
 
-        public string GetValue(string label)
+        private string GetValue(string label)
         {
             while (true)
             {

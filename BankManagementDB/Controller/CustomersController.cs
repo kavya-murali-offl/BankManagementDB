@@ -1,5 +1,6 @@
 ﻿using BankManagement.Models;
 using BankManagementDB.db;
+using BankManagementDB.Interface;
 using BankManagementDB.View;
 using System;
 using System.Collections.Generic;
@@ -8,25 +9,26 @@ using System.Linq;
 
 namespace BankManagement.Controller
 {
-    public class CustomersController
+    public class CustomersController : ICustomerServices
     {
         public static DataTable CustomerTable { get; set; }
 
-        public bool CreateCustomer(string name, string password, string email, string phone, int age)
+        public bool InsertCustomer(Customer customer, string password)
         {
             try
             {
                 string hashedPassword = AuthServices.ComputeHash(password);
                 IDictionary<string, dynamic> parameters = new Dictionary<string, dynamic>
                 {
-                    { "Name", name },
-                    { "Email", email },
-                    { "Phone", phone },
-                    { "Age", age },
-                    { "CreatedOn", DateTime.Now },
-                    { "LastLoggedOn", DateTime.Now },
+                    { "Name", customer.Name },
+                    { "Email", customer.Email },
+                    { "Phone", customer.Phone },
+                    { "Age", customer.Age },
+                    { "CreatedOn", customer.CreatedOn },
+                    { "LastLoggedOn", customer.LastLoggedOn },
                     { "HashedPassword", hashedPassword }
                 };
+
                 return DatabaseOperations.InsertRowToTable("Customer", parameters);
             }
             catch (Exception ex)
@@ -42,7 +44,7 @@ namespace BankManagement.Controller
             {
                 bool success = DatabaseOperations.UpdateTable("Customer", parameters);
                 FillTable();
-                return GetCustomerByQuery("ID = "+(long)parameters["ID"]);
+                return GetCustomerByQuery("ID = " + (long)parameters["ID"]);
             }
             catch (Exception ex)
             {
@@ -56,7 +58,7 @@ namespace BankManagement.Controller
             try
             {
                 string hashedInput = AuthServices.ComputeHash(password);
-                DataRow row = GetUserByQuery("Phone = "+ phoneNumber);
+                DataRow row = GetUserByQuery("Phone = " + phoneNumber);
                 string passwordFromDB = row.Field<string>("HashedPassword");
                 return hashedInput == passwordFromDB ? true : false;
             }
@@ -72,7 +74,8 @@ namespace BankManagement.Controller
             {
                 if (CustomerTable != null)
                     return CustomerTable.Select(query).LastOrDefault();
-            }catch(Exception e)
+            }
+            catch (Exception e)
             {
                 Notification.Error(e.Message);
             }
@@ -95,19 +98,21 @@ namespace BankManagement.Controller
 
         public Customer RowToCustomer(DataRow row)
         {
-            Customer customer = new Customer();
+            Customer customer = null;
             try
             {
 
+                customer = new Customer(
+                    row.Field<string>("Name"),
+                    row.Field<long>("Age"),
+                    row.Field<string>("Phone"),
+                    row.Field<string>("Email")
+                 );
                 customer.ID = row.Field<long>("ID");
-                customer.Name = row.Field<string>("Name");
-                customer.Age = row.Field<long>("Age");
-                customer.Phone = row.Field<string>("Phone");
+                customer.LastLoggedOn = DateTime.Parse(row.Field<string>("LastLoggedOn")); ;
                 customer.CreatedOn = DateTime.Parse(row.Field<string>("CreatedOn"));
-                customer.LastLoggedOn = DateTime.Parse(row.Field<string>("LastLoggedOn"));
-                customer.Email = row.Field<string>("Email");
-
-            }   catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 Console.WriteLine(ex);
             }

@@ -17,6 +17,8 @@ namespace BankManagement.Models
 
         public decimal Balance { get; set; }
 
+        public decimal MinimumBalance { get; set; }
+
         public decimal InterestRate { get; set; }
 
         public AccountTypes Type { get; set; }
@@ -59,9 +61,6 @@ namespace BankManagement.Models
             BalanceChanged?.Invoke(message);
         }
 
-        public override string ToString()
-        {
-            return $"Account ID: {ID} \nAccount Status: {Status} \nBalance: Rs. {Balance}";
-        }
+        public override string ToString() => $"Account ID: {ID} \nAccount Status: {Status} \nBalance: Rs. {Balance}"; 
     }
 }

@@ -24,8 +24,6 @@ namespace BankManagement.View
 
                 Console.Write("\nEnter your choice: ");
 
-                //Console.WriteLine("Choose Account type: \n1. Current Account \n2. Savings Account\n3. Go Back\n");
-                //Console.WriteLine("Enter your choice: ");
                 try
                 {
                     string option = Console.ReadLine().Trim();

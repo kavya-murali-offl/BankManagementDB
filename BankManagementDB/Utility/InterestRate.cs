@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BankManagement.Utility
 {
-    public static class AccountInterestRate
+    public struct AccountInterestRate
     {
         public static readonly decimal SAVINGS_INTEREST_RATE = 5.6m;
         public static readonly decimal CURRENT_INTEREST_RATE = 0m;

@@ -36,14 +36,12 @@ namespace BankManagement.Model
 
         public string Description { get; set; }
 
-        public override string ToString()
-        {
-            return $@"
+        public override string ToString() =>
+             $@"
                 Transaction Type: {TransactionType} 
                 Transaction Time: {RecordedOn} 
                 Description: {Amount}
                 Amount: {Amount}
                 Balance: {Balance}";
-        }
     }
 }

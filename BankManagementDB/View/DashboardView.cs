@@ -65,7 +65,8 @@ namespace BankManagement.View
             )
         {
             ITransactionServices transactionController = new TransactionController();
-            AccountsController accountsController = new AccountsController(transactionController);   
+            AccountsController accountsController = new AccountsController(transactionController); 
+            
             switch (operation)
             {
                 case DashboardCases.PROFILE_SERVICES:
@@ -156,7 +157,7 @@ namespace BankManagement.View
 
         private void SaveCustomerSession(ProfileController profileController)
         {
-            CustomersController customersController = new CustomersController();
+            ICustomerServices customersController = new CustomersController();
             IDictionary<string, dynamic> updateFields = new Dictionary<string, dynamic>
             {
                 {"ID", profileController.ID },   

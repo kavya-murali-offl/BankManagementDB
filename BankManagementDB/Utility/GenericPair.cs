@@ -18,10 +18,7 @@ namespace BankManagementDB.Utility
 
         public T2 Value { get { return second; } set { second = value; } }
 
-        public override string ToString()
-        {
-            return $"{Key}: {Value}";
-        }
+        public override string ToString() => $"{Key}: {Value}";       
 
     }
 }

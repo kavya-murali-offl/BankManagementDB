@@ -1,5 +1,6 @@
 ﻿using BankManagement.Controller;
 using BankManagement.Models;
+using BankManagementDB.Interface;
 using BankManagementDB.Utility;
 using BankManagementDB.View;
 using System;
@@ -143,7 +144,7 @@ namespace BankManagement.View
         {
             updatedFields.Add("ID", profile.ID);
 
-            CustomersController customersController = new CustomersController();
+            ICustomerServices customersController = new CustomersController();
             Customer customer = customersController.UpdateCustomer(updatedFields);
 
             if (customer != null)

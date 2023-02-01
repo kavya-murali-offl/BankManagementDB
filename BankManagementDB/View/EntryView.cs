@@ -1,4 +1,6 @@
 ﻿using System;
+using BankManagement.Controller;
+using BankManagementDB.Interface;
 using BankManagementDB.View;
 
 namespace BankManagement.View
@@ -53,7 +55,8 @@ namespace BankManagement.View
 
                 case EntryCases.SIGNUP:
 
-                    SignupView signupView = new SignupView();
+                    ICustomerServices customersController = new CustomersController();
+                    SignupView signupView = new SignupView(customersController);
                     signupView.Signup();
                     return false;
 

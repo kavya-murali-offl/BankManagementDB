@@ -36,6 +36,7 @@ namespace BankManagement.Controller
             {
                 AccountsView accountsView = new AccountsView();
                 Account account = accountsView.GenerateAccount();
+
                 if (account != null)
                 {
                     account.UserID = userId;
@@ -82,16 +83,17 @@ namespace BankManagement.Controller
         {
             try
             {
-                IDictionary<string, dynamic> parameters = new Dictionary<string, dynamic>()
-                {
-                        { "Balance", account.Balance},
-                        { "InterestRate", account.InterestRate },
-                        { "Status", account.Status.ToString() },
-                        { "UserID", account.UserID },
-                        { "CreatedOn", account.CreatedOn },
-                        { "Type", account.Type.ToString() }
-                };
+                IDictionary<string, dynamic> parameters = new Dictionary<string, dynamic>();
+
+                foreach (var prop in account.GetType().GetProperties())
+                    if (prop.Name != "ID")
+                    {
+                        var value = prop.GetValue(account);
+                        parameters.Add(prop.Name, value.GetType().IsEnum ? value.ToString() : value);
+                    }
+
                 return DatabaseOperations.InsertRowToTable("Account", parameters);
+
             }catch(Exception ex)
             {
                 Console.WriteLine(ex);
