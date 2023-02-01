@@ -86,8 +86,8 @@ namespace BankManagement.Controller
         {
             try
             {
-                DataRow dr = CustomerTable.Select(query).LastOrDefault();
-                return RowToCustomer(dr);
+                DataRow customerRow = CustomerTable.Select(query).LastOrDefault();
+                return RowToCustomer(customerRow);
             }
             catch (Exception ex)
             {
@@ -101,6 +101,7 @@ namespace BankManagement.Controller
             Customer customer = new Customer();
             try
             {
+
                 customer.ID = row.Field<long>("ID");
                 customer.Name = row.Field<string>("Name");
                 customer.Age = row.Field<long>("Age");
@@ -108,6 +109,7 @@ namespace BankManagement.Controller
                 customer.CreatedOn = DateTime.Parse(row.Field<string>("CreatedOn"));
                 customer.LastLoggedOn = DateTime.Parse(row.Field<string>("LastLoggedOn"));
                 customer.Email = row.Field<string>("Email");
+
             }catch(Exception ex)
             {
                 Console.WriteLine(ex);
@@ -120,5 +122,4 @@ namespace BankManagement.Controller
             CustomerTable = DatabaseOperations.FillTable("Customer", null);
         }
     }
-
 }

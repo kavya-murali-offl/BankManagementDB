@@ -43,11 +43,10 @@ namespace BankManagement.View
             {
                 email = GetValue("Email");
                 if (validation.IsValidEmail(email)) break;
-                else Notification.Error("PLease enter a valid email.");
+                else Notification.Error("Please enter a valid email.");
             }
 
-            Console.WriteLine("Age: ");
-            age = helper.GetInteger();
+            age = helper.GetInteger("Age: ");
 
             bool customerCreated = CreateCustomer(name, password, email, phone, age);
             if (customerCreated)
@@ -60,6 +59,7 @@ namespace BankManagement.View
 
                 AccountsController accountsController = new AccountsController();
                 Account account = accountsController.CreateCurrentAccount(userID);
+
                 if(account != null)
                 {
 
@@ -75,7 +75,7 @@ namespace BankManagement.View
         public bool CheckUniquePhoneNumber(string phoneNumber)
         {
             CustomersController customersController = new CustomersController();
-            return customersController.GetUserByQuery("Phone = " + phoneNumber) == null ? true : false;
+            return customersController.GetUserByQuery("Phone = " + phoneNumber).Equals(null) ? true : false;
         }
 
         private bool CreateCustomer(string name, string password, string email, string phone, int age)
@@ -89,11 +89,10 @@ namespace BankManagement.View
         {
             while (true)
             {
-                Console.WriteLine(label + ": ");
+                Console.Write(label + ": ");
                 Validation validation = new Validation();
                 string value = Console.ReadLine().Trim();
                 if (validation.CheckNotEmpty(value)) return value;
-                else continue;
             }
         }
 

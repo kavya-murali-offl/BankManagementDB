@@ -14,8 +14,18 @@ namespace BankManagement.View
             Account account = null;
             while (true)
             {
-                Console.WriteLine("Choose Account type: \n1. Current Account \n2. Savings Account\n3. Go Back\n");
-                Console.WriteLine("Enter your choice: ");
+                Console.WriteLine("Choose Account Type: ");
+
+                for (int i = 0; i < Enum.GetNames(typeof(AccountTypes)).Length; i++)
+                {
+                    AccountTypes cases = (AccountTypes)i;
+                    Console.WriteLine($"{i + 1}. {cases.ToString().Replace("_", " ")}");
+                }
+
+                Console.Write("\nEnter your choice: ");
+
+                //Console.WriteLine("Choose Account type: \n1. Current Account \n2. Savings Account\n3. Go Back\n");
+                //Console.WriteLine("Enter your choice: ");
                 try
                 {
                     string option = Console.ReadLine().Trim();
@@ -30,6 +40,7 @@ namespace BankManagement.View
                             return account;
 
                     }
+
                     else if(entryOption == 3)
                         break;
 

@@ -61,21 +61,20 @@ namespace BankManagementDB.db
                 {
                     query += parameters.Keys.ElementAt<string>(i);
                     if (i != parameters.Keys.Count() - 1)
-                    {
                         query += "', '";
-                    }
                 }
+
                 query += "') ";
                 query += " VALUES (";
+
                 for (int i = 0; i < parameters.Keys.Count(); i++)
                 {
                     query += " @" + parameters.Keys.ElementAt<string>(i);
                     if (i != parameters.Keys.Count() - 1)
-                    {
                         query += ", ";
-                    }
                 }
                 query += ")";
+
                 QueryExecution queryExecution = new QueryExecution();
                 Task task = queryExecution.ExecuteNonQuery(query, parameters);
                 result = true;
@@ -97,10 +96,9 @@ namespace BankManagementDB.db
                 {
                     query += " WHERE ";
                     foreach (KeyValuePair<string, object> pairs in parameters)
-                    {
                         query += pairs.Key + "= @" + pairs.Key;
-                    }
                 }
+
                 QueryExecution queryExecution = new QueryExecution();
                 DataTable Table = queryExecution.ExecuteQuery(query, parameters).Result;
                 result = Table;
@@ -127,6 +125,7 @@ namespace BankManagementDB.db
                     if(i+1 < updateFields.Count) query+= ", "; 
                 }
                 query += " WHERE ID = @ID";
+
                 QueryExecution queryExecution = new QueryExecution();
                 Task task = queryExecution.ExecuteNonQuery(query, updateFields);
                 return true;

@@ -1,13 +1,10 @@
 ﻿using BankManagement.Controller;
 using BankManagement.Models;
-using BankManagementDB.Interface;
 using BankManagementDB.Utility;
 using BankManagementDB.View;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection.Emit;
-using System.Security.Cryptography;
 
 namespace BankManagement.View
 {
@@ -26,10 +23,18 @@ namespace BankManagement.View
             {
                 try
                 {
-                    Console.WriteLine("1. View Profile\n2. Edit Profile\n3. Back");
+                    for (int i = 0; i < Enum.GetNames(typeof(ProfileServiceCases)).Length; i++)
+                    {
+                        ProfileServiceCases cases = (ProfileServiceCases)i;
+                        Console.WriteLine($"{i + 1}. {cases.ToString().Replace("_", " ")}");
+                    }
+
+                    Console.Write("\nEnter your choice: ");
+
                     string option = Console.ReadLine().Trim();
                     int entryOption = int.Parse(option);
-                    if (entryOption != 0 && entryOption <= Enum.GetNames(typeof(DashboardCases)).Count())
+
+                    if (entryOption != 0 && entryOption <= Enum.GetNames(typeof(ProfileServiceCases)).Count())
                     {
                         ProfileServiceCases cases = (ProfileServiceCases)entryOption - 1;
 
@@ -41,7 +46,7 @@ namespace BankManagement.View
                 }
                 catch (Exception error)
                 {
-                    Notification.Error("Enter a valid option");
+                    Notification.Error(error.Message);
                 }
             }
         }
@@ -53,11 +58,14 @@ namespace BankManagement.View
                 case ProfileServiceCases.VIEW_PROFILE:
                     ViewProfileDetails(profileController);
                     return false;
+
                 case ProfileServiceCases.EDIT_PROFILE:
                     EditProfile(profileController);
                     return false;
+
                 case ProfileServiceCases.EXIT:
                     return true;
+
                 default:
                     Notification.Error("Enter a valid option.\n");
                     return false;
@@ -67,8 +75,8 @@ namespace BankManagement.View
         public void ViewProfileDetails(ProfileController profileController)
         {
             Notification.Info("\n ================== PROFILE ===================\n");
-            Notification.Info("Name: " + profileController.Name);
-            Notification.Info("Äge: " + profileController.Age);
+            Notification.Info($"Name: {profileController.Name}");
+            Notification.Info("Age: " + profileController.Age);
             Notification.Info("Phone: " + profileController.Phone);
             Notification.Info("Email: " + profileController.Email);
             Notification.Info("No. of Accounts: " + AccountsController.AccountTable.Rows.Count);
@@ -99,8 +107,9 @@ namespace BankManagement.View
                 {
                     Console.WriteLine(pair1);
                     Console.WriteLine(pair2);
-                    Console.WriteLine("Which field you want to edit? Press 0 to go back!");
+                    Console.WriteLine("Which field you want to edit? Press 0 to go back!\n");
                     string field = Console.ReadLine().Trim().ToUpper();
+
                     if (fields.ContainsKey(field))
                     {
                         Console.Write("Enter new value: ");
@@ -124,16 +133,18 @@ namespace BankManagement.View
             if(pair2.Value != profile.Age)
                 updatedFields.Add("Age", pair2.Value);
 
-            if(updatedFields.Count > 0) {
+            if(updatedFields.Count > 0) 
                 UpdateProfile(updatedFields, profile);
-            }
         }
+
 
         public void UpdateProfile(IDictionary<string, object> updatedFields, ProfileController profile)
         {
             updatedFields.Add("ID", profile.ID);
+
             CustomersController customersController = new CustomersController();
             Customer customer = customersController.UpdateCustomer(updatedFields);
+
             if (customer != null)
             {
                 Notification.Success("Profile Updated Successfully");

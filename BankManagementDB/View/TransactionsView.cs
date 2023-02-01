@@ -1,12 +1,12 @@
-﻿using BankManagement.Controller;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using BankManagement.Controller;
 using BankManagement.Model;
 using BankManagement.Models;
 using BankManagement.Utility;
 using BankManagementDB.Interface;
 using BankManagementDB.View;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace BankManagement.View
 {
@@ -21,7 +21,14 @@ namespace BankManagement.View
         {
             while (true)
             {
-                Console.WriteLine("\n1. Deposit \n2. Withdraw\n3. Transfer\n4. Check Balance \n5. View Statement\n6. Print Statement\n7. Back \nEnter your choice: ");
+                for (int i = 0; i < Enum.GetNames(typeof(AccountCases)).Length; i++)
+                {
+                    AccountCases cases = (AccountCases)i;
+                    Console.WriteLine($"{i + 1}. {cases.ToString().Replace("_", " ")}");
+                }
+
+                Console.Write("\nEnter your choice: ");
+
                 try
                 {
                     string option = Console.ReadLine().Trim();
@@ -95,7 +102,7 @@ namespace BankManagement.View
             {
                 try
                 {
-                    Console.WriteLine("Enter Account ID to transfer: ");
+                    Console.Write("Enter Account ID to transfer: ");
                     string id = Console.ReadLine().Trim();
                     long intID = long.Parse(id);
                     if (intID == ID)

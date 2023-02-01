@@ -9,9 +9,9 @@ namespace BankManagement.Utility
     {
         public bool CheckNotEmpty(string field)
         {
-            if (field == null || field.Equals(""))
+            if (field.Equals(null) || field.Equals(""))
             {
-                Notification.Warning("Field should not be empty");
+                Notification.Error("Field should not be empty");
                 return false;
             }
             return true;

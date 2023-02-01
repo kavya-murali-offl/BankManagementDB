@@ -1,6 +1,7 @@
 ﻿using BankManagement.Controller;
 using BankManagement.Enums;
 using BankManagement.Model;
+using BankManagementDB.View;
 using System;
 using System.Collections.Generic;
 
@@ -38,7 +39,6 @@ namespace BankManagement.Models
                 return true;
             }
             return false;
-           
         }
 
         public void OnBalanceChanged(string message)
@@ -56,7 +56,7 @@ namespace BankManagement.Models
             }
             else
             {
-                OnBalanceChanged($"Insufficient Balance");
+                Notification.Error($"Insufficient Balance");
                 return false;
             }
         }
@@ -66,5 +66,4 @@ namespace BankManagement.Models
             return $"Account ID: {ID} \nAccount Status: {Status} \nBalance: Rs. {Balance}";
         }
     }
-
 }

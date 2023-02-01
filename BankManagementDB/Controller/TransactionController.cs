@@ -236,6 +236,7 @@ namespace BankManagement.Controller
                 transaction.Description = row.Field<string>("Description");
                 transaction.TransactionType = (TransactionTypes)Enum.Parse(typeof(TransactionTypes), row.Field<string>("TransactionType"));
                 transaction.RecordedOn = DateTime.Parse(row.Field<string>("RecordedOn"));
+           
             }
             catch (Exception e)
             {
@@ -249,8 +250,10 @@ namespace BankManagement.Controller
             if(TransactionTable?.Rows?.Count > 0)
             {
                 DataRow row = TransactionTable.Select("TransactionType = WITHDRAW").LastOrDefault();
+
                 if (row == null)
                     row = TransactionTable.Select("TransactionType = DEPOSIT").LastOrDefault();
+
                 return DateTime.Parse(row.Field<string>("RecordedOn"));
             }
             return new DateTime?();

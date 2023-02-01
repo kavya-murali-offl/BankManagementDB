@@ -12,7 +12,7 @@ namespace BankManagement.View
 {
     public enum DashboardCases
     {
-        PROFILE,
+        PROFILE_SERVICES,
         CREATE_ACCOUNT,
         LIST_ACCOUNTS,
         GO_TO_ACCOUNT,
@@ -25,7 +25,13 @@ namespace BankManagement.View
         {
             while (true)
             {
-                Console.WriteLine("\n1. Profile Services\n2. Create Account\n3. List Accounts\n4. Go to Account\n5. Sign out\nEnter your choice: ");
+                for (int i = 0; i < Enum.GetNames(typeof(DashboardCases)).Length; i++)
+                {
+                    DashboardCases cases = (DashboardCases)i;
+                    Console.WriteLine($"{i + 1}. {cases.ToString().Replace("_", " ")}");
+                }
+                Console.Write("\nEnter your choice: ");
+
                 try
                 {
                     string option = Console.ReadLine().Trim();
@@ -62,7 +68,7 @@ namespace BankManagement.View
             AccountsController accountsController = new AccountsController(transactionController);   
             switch (operation)
             {
-                case DashboardCases.PROFILE:
+                case DashboardCases.PROFILE_SERVICES:
                     ProfileView profileView = new ProfileView();
                     profileView.ViewProfileServices(profileController);
                     return false;

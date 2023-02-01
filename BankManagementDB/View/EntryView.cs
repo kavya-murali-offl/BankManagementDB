@@ -1,30 +1,37 @@
-﻿
-
-using BankManagement.Controller;
-using BankManagement.Utility;
+﻿using System;
 using BankManagementDB.View;
-using System;
 
 namespace BankManagement.View
 {
-    public enum Entry
+    public enum EntryCases
     {
         LOGIN, SIGNUP, EXIT
     }
+
     public class EntryView
     {
         public void Entry()
         {
             while (true)
             {
-                Console.WriteLine("\n1.Login\n2.Signup\n3.Exit\nEnter your choice: ");
+                for (int i = 0; i < Enum.GetNames(typeof(EntryCases)).Length; i++)
+                {
+                    EntryCases cases = (EntryCases)i;
+                    Console.WriteLine($"{i + 1}. {cases.ToString().Replace("_", " ")}");
+                }
+
+                Console.Write("\nEnter your choice: ");
+
                 try
                 {
                     string option = Console.ReadLine().Trim();
                     int entryOption = int.Parse(option);
-                    if (entryOption != 0 && entryOption <= Enum.GetValues(typeof(Entry)).Length)
-                        if (EntryOperations(entryOption))
+                    if (entryOption != 0 && entryOption <= Enum.GetValues(typeof(EntryCases)).Length)
+                    {
+                        EntryCases entry = (EntryCases)entryOption - 1;
+                        if (EntryOperations(entry))
                             break;
+                    }
                 }
                 catch (Exception err)
                 {
@@ -33,22 +40,25 @@ namespace BankManagement.View
             }
         }
         
-        public bool EntryOperations(int option)
+        public bool EntryOperations(EntryCases option)
         {
             switch (option)
             {
-                case 1:
+                case EntryCases.LOGIN:
+
                     LoginView loginView = new LoginView();
                     loginView.UserChanged += onUserChanged;
                     loginView.Login();
                     return false;
 
-                case 2:
+                case EntryCases.SIGNUP:
+
                     SignupView signupView = new SignupView();
                     signupView.Signup();
                     return false;
 
-                case 3:
+                case EntryCases.EXIT:
+
                     Environment.Exit(0);    
                     return true;
 

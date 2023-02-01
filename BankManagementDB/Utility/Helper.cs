@@ -18,7 +18,7 @@ namespace BankManagement.Utility
         {
             while (true)
             {
-                Console.WriteLine("Enter amount: ");
+                Console.Write("Enter amount: ");
                 try
                 {
                     decimal amount = Decimal.Parse(Console.ReadLine().Trim());
@@ -27,18 +27,19 @@ namespace BankManagement.Utility
                 }
                 catch (Exception error)
                 {
-                    Console.WriteLine("Enter a valid amount. Try Again!");
+                    Notification.Error("Enter a valid amount. Try Again!");
                 }
             }
         }
 
-        public int GetInteger()
+        public int GetInteger(string message)
         {
             int number = 0;
             while (true)
             {
                 try
                 {
+                    Console.Write(message);
                     int input = int.Parse(Console.ReadLine().Trim());
                     if (input > 0)
                     {
@@ -60,7 +61,7 @@ namespace BankManagement.Utility
         {
             while (true)
             {
-                Console.WriteLine("Enter amount: ");
+                Console.Write("Enter amount: ");
                 try
                 {
                     decimal amount = Decimal.Parse(Console.ReadLine().Trim());
@@ -86,7 +87,7 @@ namespace BankManagement.Utility
             string phoneNumber;
             while (true)
             {
-                Console.WriteLine("Enter Mobile Number: ");
+                Console.Write("Enter Mobile Number: ");
                 phoneNumber = Console.ReadLine().Trim();
                 Validation validation = new Validation();
 
@@ -100,7 +101,7 @@ namespace BankManagement.Utility
 
         public string GetPassword(string message)
         {
-            Console.WriteLine(message);
+            Console.Write(message);
             StringBuilder passwordBuilder = new StringBuilder();
             bool continueReading = true;
             char newLineChar = '\r';

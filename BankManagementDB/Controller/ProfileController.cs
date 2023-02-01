@@ -23,6 +23,5 @@ namespace BankManagement.Controller
 
         public DateTime CreatedOn => Customer.CreatedOn;
 
-
     }
 }
