@@ -1,14 +1,8 @@
-﻿using BankManagement.Controller;
-using BankManagement.Enums;
-using BankManagement.Model;
-using BankManagement.Models;
-using BankManagementDB.View;
-using System;
-using System.Collections.Generic;
-using System.Data.Entity.Core.Metadata.Edm;
-using System.Linq;
+﻿using System;
 using System.Text;
-using System.Threading.Tasks;
+using BankManagement.Controller;
+using BankManagement.Model;
+using BankManagementDB.View;
 
 namespace BankManagement.Utility
 {
@@ -64,7 +58,7 @@ namespace BankManagement.Utility
                 Console.Write("Enter amount: ");
                 try
                 {
-                    decimal amount = Decimal.Parse(Console.ReadLine().Trim());
+                    decimal amount = decimal.Parse(Console.ReadLine().Trim());
                     if (amount > 0)
                     {
                         if(amount < currentAccount.MinimumBalance)
@@ -101,7 +95,7 @@ namespace BankManagement.Utility
 
         public string GetPassword(string message)
         {
-            Console.Write(message);
+            Console.WriteLine(message);
             StringBuilder passwordBuilder = new StringBuilder();
             bool continueReading = true;
             char newLineChar = '\r';
@@ -141,6 +135,12 @@ namespace BankManagement.Utility
                 Notification.Error(e.Message);
             }
             return 0;
+        }
+
+        public static bool IsValidGuid(string str)
+        {
+            Guid guid;
+            return Guid.TryParse(str, out guid);
         }
     }
 }

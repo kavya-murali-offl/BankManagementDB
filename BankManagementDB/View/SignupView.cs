@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Data;
+using System.Runtime.Remoting.Messaging;
 using BankManagement.Controller;
+using BankManagement.Enums;
 using BankManagement.Model;
 using BankManagement.Models;
 using BankManagement.Utility;
@@ -11,11 +13,12 @@ namespace BankManagement.View
 {
     public class SignupView
     {
-        public SignupView(ICustomerServices customerController) { 
-             CustomersController = customerController;
+        public SignupView(ICustomerServices customerController)
+        {
+            CustomersController = customerController;
         }
 
-        public ICustomerServices CustomersController { get; set; }    
+        public ICustomerServices CustomersController { get; set; }
 
         public void Signup()
         {
@@ -55,31 +58,34 @@ namespace BankManagement.View
 
             age = helper.GetInteger("Age: ");
 
-            bool customerCreated = CreateCustomer(name, password, email, phone, age);
-            if (customerCreated)
-            {
-                CustomersController.FillTable();
-                DataRow user = CustomersController.GetUserByQuery("Phone = " + phone);
-                long userID = (long)user["ID"];
-
-                AccountsController accountsController = new AccountsController();
-                Account account = accountsController.CreateCurrentAccount(userID);
-
-                if(account != null)
-                {
-
-                    TransactionController transactionController = new TransactionController();
-                    decimal amount = helper.GetAmount(account as CurrentAccount);
-                    transactionController.Deposit(amount, account);
-
-                    Notification.Success("Account created successfully\n");
-                }
-            }
+            CreateCustomer(name, password, email, phone, age);
+            Customer signedUpCustomer = CustomersController.GetCustomer(phone);
+            CreateAccountAndDeposit(signedUpCustomer);
         }
 
+        public void CreateAccountAndDeposit(Customer signedUpCustomer)
+        {
+            Account account = AccountFactory.GetAccountByType(AccountTypes.CURRENT);
+            account.UserID = signedUpCustomer.ID;
+            account.Balance = 0;
+            AccountsController accountsController = new AccountsController();
+            
+            if (accountsController.InsertAccount(account))
+            {
+
+                TransactionController transactionController = new TransactionController();
+                Helper helper = new Helper();
+                decimal amount = helper.GetAmount(account as CurrentAccount);
+                transactionController.Deposit(amount, account);
+
+                Notification.Success("Account created successfully\n");
+
+            }
+        }
         public bool CheckUniquePhoneNumber(string phoneNumber)
         {
-            return CustomersController.GetUserByQuery("Phone = " + phoneNumber).Equals(null) ? true : false;
+            Customer customer = CustomersController.GetCustomer(phoneNumber);
+            return customer == null ? true : false;
         }
 
         private bool CreateCustomer(string name, string password, string email, string phone, int age)
@@ -107,10 +113,10 @@ namespace BankManagement.View
         private void VerifyPassword(string password)
         {
             Validation validation = new Validation();
-            Helper helper = new Helper();   
+            Helper helper = new Helper();
             while (true)
             {
-                string rePassword = helper.GetPassword("Re-enter password");
+                string rePassword = helper.GetPassword("Re-enter password: ");
                 if (validation.ValidatePassword(password, rePassword))
                     break;
                 else

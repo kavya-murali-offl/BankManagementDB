@@ -1,35 +1,38 @@
-﻿using BankManagement.Models;
+﻿using System;
+using System.Data;
+using System.Security.Policy;
+using System.Xml.Linq;
+using BankManagement.Models;
 using BankManagementDB.db;
 using BankManagementDB.Interface;
 using BankManagementDB.View;
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
 
 namespace BankManagement.Controller
 {
     public class CustomersController : ICustomerServices
     {
-        public static DataTable CustomerTable { get; set; }
+        public Customer GetCustomer(string phoneNumber)
+        {
+            DataTable table = CustomerOperations.Get(phoneNumber).Result;
+            if (table.Rows.Count > 0)
+                return RowToCustomer(table.Rows[0]);
+            else
+                return null;
+        }
+
+
+        public void CreateCustomer(string name, int age, string phone, string email, string password)
+        {
+            Customer customer = new Customer(name, age, phone, email);
+            InsertCustomer(customer, password);
+        }
 
         public bool InsertCustomer(Customer customer, string password)
         {
             try
             {
                 string hashedPassword = AuthServices.ComputeHash(password);
-                IDictionary<string, dynamic> parameters = new Dictionary<string, dynamic>
-                {
-                    { "Name", customer.Name },
-                    { "Email", customer.Email },
-                    { "Phone", customer.Phone },
-                    { "Age", customer.Age },
-                    { "CreatedOn", customer.CreatedOn },
-                    { "LastLoggedOn", customer.LastLoggedOn },
-                    { "HashedPassword", hashedPassword }
-                };
-
-                return DatabaseOperations.InsertRowToTable("Customer", parameters);
+                return CustomerOperations.Upsert(customer, hashedPassword).Result;
             }
             catch (Exception ex)
             {
@@ -38,13 +41,12 @@ namespace BankManagement.Controller
             return false;
         }
 
-        public Customer UpdateCustomer(IDictionary<string, dynamic> parameters)
+        public Customer UpdateCustomer(Customer customer)
         {
             try
             {
-                bool success = DatabaseOperations.UpdateTable("Customer", parameters);
-                FillTable();
-                return GetCustomerByQuery("ID = " + (long)parameters["ID"]);
+                bool success = CustomerOperations.Upsert(customer, null).Result;
+                return GetCustomer(customer.Phone);
             }
             catch (Exception ex)
             {
@@ -58,8 +60,7 @@ namespace BankManagement.Controller
             try
             {
                 string hashedInput = AuthServices.ComputeHash(password);
-                DataRow row = GetUserByQuery("Phone = " + phoneNumber);
-                string passwordFromDB = row.Field<string>("HashedPassword");
+                string passwordFromDB = CustomerOperations.GetHashedPassword(phoneNumber);
                 return hashedInput == passwordFromDB ? true : false;
             }
             catch (Exception ex)
@@ -68,60 +69,29 @@ namespace BankManagement.Controller
             }
         }
 
-        public DataRow GetUserByQuery(string query)
-        {
-            try
-            {
-                if (CustomerTable != null)
-                    return CustomerTable.Select(query).LastOrDefault();
-            }
-            catch (Exception e)
-            {
-                Notification.Error(e.Message);
-            }
-            return null;
-        }
-
-        public Customer GetCustomerByQuery(string query)
-        {
-            try
-            {
-                DataRow customerRow = CustomerTable.Select(query).LastOrDefault();
-                return RowToCustomer(customerRow);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-            }
-            return null;
-        }
-
-        public Customer RowToCustomer(DataRow row)
+        private Customer RowToCustomer(DataRow row)
         {
             Customer customer = null;
             try
             {
 
                 customer = new Customer(
-                    row.Field<string>("Name"),
-                    row.Field<long>("Age"),
-                    row.Field<string>("Phone"),
-                    row.Field<string>("Email")
+                        row.Field<string>("Name"),
+                       (int)row.Field<long>("Age"),
+                        row.Field<string>("Phone"),
+                        row.Field<string>("Email")
                  );
-                customer.ID = row.Field<long>("ID");
-                customer.LastLoggedOn = DateTime.Parse(row.Field<string>("LastLoggedOn")); ;
-                customer.CreatedOn = DateTime.Parse(row.Field<string>("CreatedOn"));
+
+                customer.ID = Guid.Parse(row.Field<string>("ID"));
+                customer.CreatedOn = row.Field<DateTime>("CreatedOn");
+                customer.LastLoggedOn = row.Field<DateTime>("LastLoggedOn");
+
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex);
             }
             return customer;
-        }
-
-        public void FillTable()
-        {
-            CustomerTable = DatabaseOperations.FillTable("Customer", null);
         }
     }
 }

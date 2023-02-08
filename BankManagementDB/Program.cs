@@ -1,8 +1,12 @@
 ﻿using BankManagement;
 using BankManagement.Controller;
+using BankManagement.Models;
 using BankManagement.View;
 using BankManagementDB.db;
 using System;
+using System.Data.Linq;
+using System.Data.SQLite;
+using System.Linq;
 
 namespace BankManagementDB
 {
@@ -12,12 +16,12 @@ namespace BankManagementDB
         {
 
             DatabaseOperations.CreateTableIfNotExists();
-            
-            CustomersController customersController = new CustomersController();
-            customersController.FillTable();
+
 
             EntryView entryView = new EntryView();
             entryView.Entry();
+
+            Console.ReadKey();
 
         }
     }

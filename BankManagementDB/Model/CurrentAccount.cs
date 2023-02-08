@@ -17,13 +17,6 @@ namespace BankManagement.Model
             MinimumBalance = 500;
         }
 
-
-        public void Charge()
-        {
-            Withdraw(CHARGES);
-            OnBalanceChanged($"Minumum balance must be maintained. You have been charged Rs. {CHARGES}.");
-        }
-
         public override string ToString() => $"Account Type: Current\n {base.ToString()}\n" +
                 $"Minimum Balance: {MinimumBalance}\n" +
                 "========================================\n";

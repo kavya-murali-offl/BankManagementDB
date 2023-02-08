@@ -3,6 +3,7 @@ using BankManagement.Controller;
 using System.Data;
 using BankManagement.Utility;
 using BankManagementDB.View;
+using BankManagement.Models;
 
 namespace BankManagement.View
 {
@@ -23,18 +24,18 @@ namespace BankManagement.View
                 if (isValidated)
                     {
                         ProfileController profile = new ProfileController();
-                        profile.Customer = customersController.GetCustomerByQuery("Phone = " + phoneNumber);
+                        profile.Customer = customersController.GetCustomer(phoneNumber);
                         profile.Customer.LastLoggedOn = DateTime.Now;
 
-                        UserChanged?.Invoke("\nWelcome " + profile.Name + "!!!\n" );
+                        UserChanged?.Invoke("\nWelcome " + profile.Customer.Name + "!!!\n" );
                         
                         AccountsController accountsController = new AccountsController();
-                        accountsController.FillTable(profile.ID);
+                        accountsController.FillTable(profile.Customer.ID);
 
                         DashboardView dashboard = new DashboardView();
                         dashboard.ViewDashboard(profile);
 
-                        UserChanged?.Invoke($"User {profile.Name} logged out successfully.");
+                        UserChanged?.Invoke($"User {profile.Customer.Name} logged out successfully.");
                 }
             }
             catch(Exception ex) {
@@ -47,8 +48,8 @@ namespace BankManagement.View
             bool isValidated = false;
             try
             {
-                DataRow dr = customersController.GetUserByQuery("Phone = " + phoneNumber);
-                if (dr != null)
+                Customer customer = customersController.GetCustomer(phoneNumber);
+                if (customer != null)
                 {
                     Helper helper = new Helper();
                     string password = helper.GetPassword("Enter password: ");

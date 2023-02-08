@@ -55,7 +55,7 @@ namespace BankManagement.View
 
                 case EntryCases.SIGNUP:
 
-                    ICustomerServices customersController = new CustomersController();
+                    CustomersController customersController = new CustomersController();
                     SignupView signupView = new SignupView(customersController);
                     signupView.Signup();
                     return false;

@@ -1,11 +1,7 @@
-﻿using BankManagementDB.Utility;
-using System;
-using System.Collections;
+﻿using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Data;
 using System.Data.SQLite;
-using System.Reflection;
 using System.Threading.Tasks;
 
 namespace BankManagementDB.db
@@ -34,6 +30,7 @@ namespace BankManagementDB.db
                         {
                             result.Load(reader);    
                         }
+                        cmd.Dispose();
                     }
                     conn.Close();
                 }
@@ -55,14 +52,42 @@ namespace BankManagementDB.db
                     {
                         await con.OpenAsync();
                         com.CommandText = query;
+
+                        if (parameters != null && parameters.Count > 0)
+                            foreach (var entry in parameters)
+                                com.Parameters.AddWithValue("@" + entry.Key, entry.Value);
+                        
+                        await com.ExecuteNonQueryAsync();
+                        com.Dispose();
+                    }
+                    con.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+        }
+
+        public async Task ExecuteNonQuery2(string query, IDictionary<string, dynamic> parameters)
+        {
+            try
+            {
+                using (SQLiteConnection con = new SQLiteConnection("Data source=database.sqlite3"))
+                {
+                    using (SQLiteCommand com = new SQLiteCommand(con))
+                    {
+                        await con.OpenAsync();
+                        com.CommandText = query;
                         if (parameters != null && parameters.Count > 0)
                         {
                             foreach (var entry in parameters)
                                 com.Parameters.AddWithValue("@" + entry.Key, entry.Value);
                         }
                         await com.ExecuteNonQueryAsync();
-                        con.Close();
+                        com.Dispose();
                     }
+                    con.Close();
                 }
             }
             catch (Exception ex)

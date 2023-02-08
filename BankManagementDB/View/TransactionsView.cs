@@ -17,6 +17,7 @@ namespace BankManagement.View
 
     public class TransactionsView
     {
+
         public void GoToAccount(Account account)
         {
             while (true)
@@ -48,12 +49,16 @@ namespace BankManagement.View
                 }
             }
         }
+        public void onBalanceChanged(string message)
+        {
+            Notification.Success(message);
+        }
 
         public bool TransactionOperations(AccountCases option, Account account)
         {
             Helper helper = new Helper();
             ITransactionServices transactionController = new TransactionController();
-            IStatementServices statementServices = new TransactionController();
+            transactionController.BalanceChanged += onBalanceChanged;
             decimal amount;
 
             switch (option)
@@ -70,7 +75,7 @@ namespace BankManagement.View
 
                 case AccountCases.TRANSFER:
                     amount = helper.GetAmount();
-                    long transferAccountID = GetTransferAccountID(account.ID);
+                    Guid transferAccountID = GetTransferAccountID(account.ID);
                     transactionController.Transfer(amount, account, transferAccountID);
                     return false;
 
@@ -79,12 +84,11 @@ namespace BankManagement.View
                     return false;
 
                 case AccountCases.VIEW_STATEMENT:
-                    statementServices.ViewAllTransactions();
+                    ViewAllTransactions();
                     return false;
 
                 case AccountCases.PRINT_STATEMENT:
-                    IList<Transaction> statements = statementServices.GetAllTransactions();
-                    Printer.PrintStatement(statements);
+                    PrintStatement();
                     return false;
 
                 case AccountCases.BACK:
@@ -96,7 +100,22 @@ namespace BankManagement.View
             }
         }
 
-        public long GetTransferAccountID(long ID)
+        public void ViewAllTransactions()
+        {
+            TransactionController transactionController = new TransactionController();  
+            IList<Transaction> statements = transactionController.GetAllTransactions();
+            foreach (Transaction transaction in statements)
+                Console.WriteLine(transaction);
+        }
+
+        public void PrintStatement()
+        {
+            TransactionController transactionController = new TransactionController();
+            IList<Transaction> statements = transactionController.GetAllTransactions();
+            Printer.PrintStatement(statements);
+        }
+
+        public Guid GetTransferAccountID(Guid ID)
         {
             while (true)
             {
@@ -104,13 +123,13 @@ namespace BankManagement.View
                 {
                     Console.Write("Enter Account ID to transfer: ");
                     string id = Console.ReadLine().Trim();
-                    long intID = long.Parse(id);
-                    if (intID == ID)
+                    Guid inputID = Guid.Parse(id);
+                    if (inputID.Equals(ID))
                     {
                         Notification.Error("Choose a different account number to transfer.");
                         continue;
                     }
-                    return intID;
+                    return inputID;
                 }
                 catch (Exception error)
                 {

@@ -10,7 +10,7 @@ namespace BankManagement.Utility
 {
     public class Printer
     {
-        public static void PrintStatement(IList<Model.Transaction> transactions)
+        public static void PrintStatement(IList<Transaction> transactions)
         {
             try
             {

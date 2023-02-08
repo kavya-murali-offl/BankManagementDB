@@ -1,11 +1,11 @@
-﻿using BankManagement.Controller;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using BankManagement.Controller;
 using BankManagement.Models;
 using BankManagementDB.Interface;
 using BankManagementDB.Utility;
 using BankManagementDB.View;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace BankManagement.View
 {
@@ -77,26 +77,25 @@ namespace BankManagement.View
         public void ViewProfileDetails(ProfileController profileController)
         {
             Notification.Info("\n ================== PROFILE ===================\n");
-            Notification.Info($"Name: {profileController.Name}");
-            Notification.Info("Age: " + profileController.Age);
-            Notification.Info("Phone: " + profileController.Phone);
-            Notification.Info("Email: " + profileController.Email);
+            Notification.Info($"Name: {profileController.Customer.Name}");
+            Notification.Info("Age: " + profileController.Customer.Age);
+            Notification.Info("Phone: " + profileController.Customer.Phone);
+            Notification.Info("Email: " + profileController.Customer.Email);
             Notification.Info("No. of Accounts: " + AccountsController.AccountTable.Rows.Count);
             Notification.Info("\n ==============================================\n");
         }
 
         public void EditProfile(ProfileController profile)
         {
-            GenericPair<string, string> pair1 = new GenericPair<string, string>("Name", profile.Name);
-            GenericPair<string, long> pair2 = new GenericPair<string, long>("Age", profile.Age);
+            Customer customer = (Customer)profile.Customer.Clone();
 
             IDictionary<string, Action<string>> fields = new Dictionary<string, Action<string>>(){
-                     { "NAME", (value) => pair1.Value = value },
+                     { "NAME", (value) => customer.Name = value },
                      { "AGE", (value) =>
                                 {
-                                    long age;
-                                    if (long.TryParse(value, out age))
-                                        pair2.Value = age;
+                                    int age;
+                                    if (int.TryParse(value, out age))
+                                        customer.Age = age;
                                     else
                                         Notification.Error("Invalid input! Age should be a number.");
                                 }
@@ -107,9 +106,10 @@ namespace BankManagement.View
             {
                 try
                 {
-                    Console.WriteLine(pair1);
-                    Console.WriteLine(pair2);
+                    Console.WriteLine($"Name: {customer.Name}" );
+                    Console.WriteLine($"Age: {customer.Age}");
                     Console.WriteLine("Which field you want to edit? Press 0 to go back!");
+
                     string field = Console.ReadLine().Trim().ToUpper();
 
                     if (fields.ContainsKey(field))
@@ -128,24 +128,16 @@ namespace BankManagement.View
                     Console.WriteLine(error.Message);
                 }
             }
-
-            IDictionary<string, dynamic> updatedFields = new Dictionary<string, dynamic>();   
-            if (pair1.Value != profile.Name)
-                updatedFields.Add("Name", pair1.Value);
-            if(pair2.Value != profile.Age)
-                updatedFields.Add("Age", pair2.Value);
-
-            if(updatedFields.Count > 0) 
-                UpdateProfile(updatedFields, profile);
+            
+            if (customer.Name != profile.Customer.Name || customer.Age != profile.Customer.Age)
+                UpdateProfile(customer, profile);
         }
 
 
-        public void UpdateProfile(IDictionary<string, dynamic> updatedFields, ProfileController profile)
+        public void UpdateProfile(Customer updatedCustomer, ProfileController profile)
         {
-            updatedFields.Add("ID", profile.ID);
-
-            ICustomerServices customersController = new CustomersController();
-            Customer customer = customersController.UpdateCustomer(updatedFields);
+            CustomersController customersController = new CustomersController();
+            Customer customer = customersController.UpdateCustomer(updatedCustomer);
 
             if (customer != null)
             {

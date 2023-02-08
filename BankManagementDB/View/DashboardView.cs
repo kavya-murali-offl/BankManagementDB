@@ -75,7 +75,9 @@ namespace BankManagement.View
                     return false;
 
                 case DashboardCases.CREATE_ACCOUNT:
-                    accountsController.CreateAccount(profileController.ID);
+                    AccountsView accountsView = new AccountsView();
+                    Account account = accountsView.GenerateAccount();
+                    accountsController.InsertAccount(account);
                     return false;
 
                 case DashboardCases.LIST_ACCOUNTS:
@@ -96,10 +98,7 @@ namespace BankManagement.View
             }
         }
 
-        public void onBalanceChanged(string message)
-        {
-           Notification.Success(message);
-        }
+
 
         public void GoToAccount(AccountsController accountController)
         {
@@ -109,7 +108,6 @@ namespace BankManagement.View
                 Account transactionAccount = ChooseAccountForTransaction(accountController);
                 if (transactionAccount != null)
                 {
-                    transactionAccount.BalanceChanged += onBalanceChanged;
                     TransactionController transactionController = new TransactionController();
                     transactionController.FillTable(transactionAccount.ID);
                     transactionView.GoToAccount(transactionAccount);
@@ -125,7 +123,7 @@ namespace BankManagement.View
             {
                 IList<Account> accountsList = accountController.GetAllAccounts();
                 ListAccountIDs(accountsList);
-                Console.WriteLine("Press 0 to go back!\n");
+                Console.WriteLine("Choose the account or Press 0 to go back!\n");
                 string index = Console.ReadLine().Trim();
                 int accountIndex;
 
@@ -157,18 +155,13 @@ namespace BankManagement.View
 
         private void SaveCustomerSession(ProfileController profileController)
         {
-            ICustomerServices customersController = new CustomersController();
-            IDictionary<string, dynamic> updateFields = new Dictionary<string, dynamic>
-            {
-                {"ID", profileController.ID },   
-                { "LastLoggedOn", profileController.LastLoggedOn }
-            };
-            customersController.UpdateCustomer(updateFields);
+            CustomersController customersController = new CustomersController();
+            customersController.UpdateCustomer(profileController.Customer);
         }
 
         public void ListAccountIDs(IList<Account> accounts)
         {
-            for(int i = 1; i<accounts.Count()+1;i++)
+            for(int i = 1; i < accounts.Count()+1;i++)
                 Notification.Info(i + ". " + accounts[i - 1].ID);
         }
     }

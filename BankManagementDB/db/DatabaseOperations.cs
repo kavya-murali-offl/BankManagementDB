@@ -4,6 +4,9 @@ using System.Linq;
 using System.Data;
 using System.Threading.Tasks;
 using BankManagementDB.View;
+using BankManagement.Models;
+using System.Data.Linq;
+using System.Data.SQLite;
 
 namespace BankManagementDB.db
 {
@@ -12,36 +15,34 @@ namespace BankManagementDB.db
         public static void CreateTableIfNotExists()
         {
             string customerQuery = @"CREATE TABLE IF NOT EXISTS Customer (
-                                    'ID' INTEGER NOT NULL UNIQUE, 
+                                    'ID' VARCHAR UNIQUE PRIMARY KEY NOT NULL, 
                                     'Name' TEXT, 
                                     'Age' INTEGER,
                                     'Phone' TEXT UNIQUE,
                                     'Email' TEXT,
                                     'HashedPassword' TEXT,
-                                    'LastLoggedOn' TEXT,
-                                    'CreatedOn' TEXT,  
-                                    PRIMARY KEY('ID' AUTOINCREMENT));";
-
+                                    'LastLoggedOn' DATETIME DEFAULT CURRENT_TIMESTAMP,
+                                    'CreatedOn' DATETIME DEFAULT CURRENT_TIMESTAMP);";
+             
             string accountQuery = @"CREATE TABLE IF NOT EXISTS 'Account' (
-                                 'ID' INTEGER NOT NULL UNIQUE,
+                                 'ID' VARCHAR NOT NULL UNIQUE,
                                  'Balance' DECIMAL, 
                                  'InterestRate' DECIMAL, 
                                  'Status' TEXT, 
                                  'MinimumBalance' DECIMAL, 
-                                 'Charges' DECIMAL, 
                                  'Type' TEXT, 
-                                 'CreatedOn' TEXT, 
-                                 'UserID' INTEGER NOT NULL,
-                                 PRIMARY KEY('ID' AUTOINCREMENT))";
+                                 'CreatedOn' DATETIME DEFAULT CURRENT_TIMESTAMP, 
+                                 'UserID' VARCHAR NOT NULL,
+                                 PRIMARY KEY('ID'))";
 
             string transactionsQuery = @"CREATE TABLE IF NOT EXISTS 'Transactions' (
-                                      'ID' INTEGER PRIMARY KEY,
+                                      'ID' VARCHAR NOT NULL UNIQUE,
                                       'Balance' DECIMAL,
-                                      'RecordedOn' TEXT,
+                                      'RecordedOn' DATETIME DEFAULT CURRENT_TIMESTAMP,
                                       'Amount' DECIMAL,
                                       'TransactionType' TEXT,
                                       'Description' TEXT,
-                                      'AccountID' INTEGER,
+                                      'AccountID' VARCHAR,
                                       FOREIGN KEY (AccountID) REFERENCES Account(ID)
                                       );";
 
@@ -76,7 +77,14 @@ namespace BankManagementDB.db
                 query += ")";
 
                 QueryExecution queryExecution = new QueryExecution();
-                Task task = queryExecution.ExecuteNonQuery(query, parameters);
+                if (parameters["TransactionType"] == "DEPOSIT")
+                {
+                    Task task = queryExecution.ExecuteNonQuery2(query, parameters);
+                }
+                else
+                {
+                    Task task = queryExecution.ExecuteNonQuery(query, parameters);
+                }
                 result = true;
             }
             catch (Exception err)
@@ -171,5 +179,20 @@ namespace BankManagementDB.db
             }
         }
 
+        public static void Get()
+        {
+            var connectionString = "Data Source=database.sqlite";
+            using (var db = new DatabaseContext(connectionString))
+            {
+                //var people = from p in db.Customers
+                //             select p;
+                //Console.WriteLine(db.);
+                //foreach (var person in people)
+                //{
+                //    Console.WriteLine(person.Name);
+                //}
+            }
+            
+        }
     }
 }

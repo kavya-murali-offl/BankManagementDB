@@ -9,8 +9,9 @@ namespace BankManagementDB.Interface
 {
     public interface ITransactionServices
     {
+        event Action<string> BalanceChanged;
         bool Deposit(decimal amount, Account account);
         bool Withdraw(decimal amount, Account account);
-        bool Transfer(decimal amount, Account account, long transferAccountID);
+        bool Transfer(decimal amount, Account account, Guid transferAccountID);
     }
 }

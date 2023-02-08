@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Xml.Linq;
-using BankManagement.Controller;
 using BankManagement.Enums;
 using BankManagement.Models;
 using BankManagement.Utility;
@@ -17,12 +15,11 @@ namespace BankManagement.Model
             MinimumBalance = 0;
         }
 
-        public decimal DepositInterest()
+        public decimal GetInterest()
         {
-            Helper helper= new Helper();
+            Helper helper = new();
             decimal interest = (Balance * helper.CountDays() * InterestRate) / (100 * 12);
             interest = Math.Round(interest, 3);
-            Deposit(interest);
             return interest;
         }
 
