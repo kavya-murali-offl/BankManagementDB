@@ -70,17 +70,21 @@ namespace BankManagement.View
 
                 case AccountCases.WITHDRAW:
                     amount = helper.GetAmount();
-                    transactionController.Withdraw(amount, account);
+                    if (amount > account.Balance) Notification.Error("Insufficient Balance");
+                    else transactionController.Withdraw(amount, account);
                     return false;
 
                 case AccountCases.TRANSFER:
                     amount = helper.GetAmount();
-                    Guid transferAccountID = GetTransferAccountID(account.ID);
-                    transactionController.Transfer(amount, account, transferAccountID);
+                    if (amount > account.Balance) Notification.Error("Insufficient Balance");
+                    else {
+                        Guid transferAccountID = GetTransferAccountID(account.ID);
+                        transactionController.Transfer(amount, account, transferAccountID);
+                    }
                     return false;
 
                 case AccountCases.CHECK_BALANCE:
-                    Notification.Info($"BALANCE: {account.Balance}");
+                    Notification.Info($"\nBALANCE: {account.Balance}\n");
                     return false;
 
                 case AccountCases.VIEW_STATEMENT:
@@ -123,7 +127,7 @@ namespace BankManagement.View
                 {
                     Console.Write("Enter Account ID to transfer: ");
                     string id = Console.ReadLine().Trim();
-                    Guid inputID = Guid.Parse(id);
+                    Guid inputID = new Guid(id);
                     if (inputID.Equals(ID))
                     {
                         Notification.Error("Choose a different account number to transfer.");

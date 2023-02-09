@@ -2,22 +2,23 @@
 using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
-using System.Data;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using System.Data.Linq;
+using BankManagementDB.Utility;
+using BankManagement.Controller;
+using BankManagement.Enums;
+using BankManagementDB.Interface;
 
 namespace BankManagementDB.db
 {
     
-    public class AccountOperations
+    public class AccountOperations : IQueryOperations<Account>
     {
         private static string connectionString = "Data source=database.sqlite3";
 
-        public async static Task<bool> Upsert(Account account)
+        public async Task<bool> UpdateOrInsert(Account account)
         {
             bool result = false;
+            
             try
             {
                 using (SQLiteConnection con = new SQLiteConnection(connectionString))
@@ -39,12 +40,10 @@ namespace BankManagementDB.db
                         cmd.Parameters.AddWithValue("@Status", account.Status.ToString());
                         cmd.Parameters.AddWithValue("@UserID", account.UserID.ToString());
                         cmd.Parameters.AddWithValue("@Type", account.Type.ToString());
-                        cmd.Parameters.AddWithValue("@CreatedOn", account.CreatedOn);
+                        cmd.Parameters.AddWithValue("@CreatedOn", DateTimeHelper.GetEpoch(account.CreatedOn));
                         
                         await cmd.ExecuteNonQueryAsync();
-                        cmd.Dispose();
                     }
-                    con.Close();
                 }
                 return true;
             }
@@ -53,9 +52,9 @@ namespace BankManagementDB.db
             return result;
         }
 
-        public async static Task<DataTable> Get(string userID)
+        public async Task<IList<Account>> Get(string userID)
         {
-            DataTable dataTable = new DataTable();
+            IList<Account> accounts = new List<Account>();
             try
             {
                 using (SQLiteConnection conn = new SQLiteConnection(connectionString))
@@ -65,20 +64,32 @@ namespace BankManagementDB.db
                     {
                         cmd.CommandText = @"Select ID, Balance, MinimumBalance, InterestRate, Status, UserID, Type, CreatedOn FROM Account WHERE UserID = @UserID";
 
-                        cmd.Parameters.AddWithValue("UserID", userID);
+                        cmd.Parameters.AddWithValue("@UserID", userID);
 
                         await cmd.ExecuteNonQueryAsync();
                         using (var reader = await cmd.ExecuteReaderAsync())
-                            dataTable.Load(reader);
-
-                        cmd.Dispose();
+                        {
+                            while (reader.Read())
+                            {
+                                AccountTypes type = (AccountTypes)Enum.Parse(typeof(AccountTypes), reader.GetString(6));
+                                Account account = AccountFactory.GetAccountByType(type);
+                                account.ID = new Guid(reader.GetString(0));
+                                account.Balance = reader.GetDecimal(1);
+                                account.MinimumBalance = reader.GetDecimal(2);
+                                account.InterestRate = reader.GetDecimal(3);
+                                account.Status = (AccountStatus)Enum.Parse(typeof(AccountStatus), reader.GetString(4));
+                                account.UserID = new Guid(reader.GetString(5));
+                                account.Type = type;
+                                account.CreatedOn = DateTimeHelper.ConvertEpochToDateTime(reader.GetInt64(7));
+                                accounts.Add(account);
+                            }
+                        }
                     }
-                    conn.Close();
                 }
             }
             catch (Exception err)
             { Console.WriteLine(err.Message); }
-            return dataTable;
+            return accounts;
         }
 
     }

@@ -7,6 +7,8 @@ using BankManagementDB.View;
 using BankManagementDB.Interface;
 using BankManagement.Model;
 using BankManagement.Utility;
+using System.Runtime.Remoting.Messaging;
+using System.Security.Principal;
 
 namespace BankManagement.View
 {
@@ -75,9 +77,7 @@ namespace BankManagement.View
                     return false;
 
                 case DashboardCases.CREATE_ACCOUNT:
-                    AccountsView accountsView = new AccountsView();
-                    Account account = accountsView.GenerateAccount();
-                    accountsController.InsertAccount(account);
+                    CreateAccount(accountsController, transactionController, profileController);
                     return false;
 
                 case DashboardCases.LIST_ACCOUNTS:
@@ -98,7 +98,45 @@ namespace BankManagement.View
             }
         }
 
+        public Account CreateAccount(AccountsController accountsController, ITransactionServices transactionController, ProfileController profile)
+        {
 
+            AccountsView accountsView = new AccountsView();
+            Account account = accountsView.GenerateAccount();
+            account.UserID = profile.Customer.ID;
+            bool inserted = accountsController.InsertAccount(account);
+            if (inserted)
+            {
+                if (account is CurrentAccount)
+                    if (!CheckAmount(account, accountsController, transactionController)) 
+                        Notification.Error("Initial Deposit unsuccessful");
+            }
+
+            if (account != null)
+                Notification.Success("Account created successfully");
+            else
+                Notification.Error("Account not created");
+
+            return account;
+        }
+
+        public bool CheckAmount(Account account, AccountsController accountsController, ITransactionServices transactionController)
+        {
+            Helper helper = new Helper();
+            while (true)
+            {
+                decimal amount = helper.GetAmount();
+
+                if (amount > account.MinimumBalance)
+                    if (transactionController.Deposit(amount, account))
+                        return true;
+                    else
+                        Notification.Error("Initial deposit was not done. Try again");
+                else
+                    Notification.Error($"Initial deposit amount must be greater than Minimum Balance (Rs. {account.MinimumBalance}). Try again");
+            }
+            return false;
+        }
 
         public void GoToAccount(AccountsController accountController)
         {
@@ -161,8 +199,8 @@ namespace BankManagement.View
 
         public void ListAccountIDs(IList<Account> accounts)
         {
-            for(int i = 1; i < accounts.Count()+1;i++)
-                Notification.Info(i + ". " + accounts[i - 1].ID);
+            for(int i = 0; i < accounts.Count(); i++)
+                Notification.Info(i+1 + ". " + accounts[i].ID);
         }
     }
 }

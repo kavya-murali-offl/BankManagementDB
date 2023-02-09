@@ -4,16 +4,8 @@ namespace BankManagement.Models
 {
     public class Customer : ICloneable
     {
-        public Customer(string name, int age, string phone, string email)
-        {
-            ID = Guid.NewGuid();
-            Name = name;
-            Age = age;
-            Phone = phone;
-            Email = email;
-            LastLoggedOn = DateTime.Now;
-            CreatedOn = DateTime.Now;
-        }
+        public Customer() { }
+      
         public Guid ID { get; set; }
         
         public int Age { get; set; }

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Data;
 using System.Runtime.Remoting.Messaging;
+using System.Security.Policy;
+using System.Xml.Linq;
 using BankManagement.Controller;
 using BankManagement.Enums;
 using BankManagement.Model;
@@ -91,7 +93,17 @@ namespace BankManagement.View
         private bool CreateCustomer(string name, string password, string email, string phone, int age)
         {
 
-            Customer customer = new Customer(name, age, phone, email);
+            Customer customer = new Customer()
+            {
+                ID = Guid.NewGuid(),
+                Name = name,
+                Age = age,
+                Phone = phone,
+                Email = email,
+                LastLoggedOn = DateTime.Now,
+                CreatedOn = DateTime.Now
+            };
+
             bool customerAdded = CustomersController.InsertCustomer(customer, password);
 
             if (customerAdded) Notification.Success("\nSignup successful");
@@ -117,7 +129,7 @@ namespace BankManagement.View
             while (true)
             {
                 string rePassword = helper.GetPassword("Re-enter password: ");
-                if (validation.ValidatePassword(password, rePassword))
+                if (validation.ValidatePassword(password, rePassword) && rePassword != null)
                     break;
                 else
                     Notification.Error("Password not matching, Enter again");

@@ -1,20 +1,24 @@
 ﻿using BankManagement.Models;
+using BankManagementDB.Interface;
+using BankManagementDB.Utility;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SQLite;
 using System.Linq;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace BankManagementDB.db
 {
-    public class CustomerOperations
+    public class CustomerOperations 
     {
 
         private static string connectionString = "Data source=database.sqlite3";
 
-        public async static Task<bool> Upsert(Customer customer, string hashedPassword)
+        public static async Task<bool> UpdateOrInsert(Customer customer, string hashedPassword)
         {
             bool result = false;
             try
@@ -38,8 +42,8 @@ namespace BankManagementDB.db
                         cmd.Parameters.AddWithValue("@Phone", customer.Phone);
                         cmd.Parameters.AddWithValue("@Email", customer.Email);
                         cmd.Parameters.AddWithValue("@HashedPassword", hashedPassword);
-                        cmd.Parameters.AddWithValue("@CreatedOn", customer.CreatedOn);
-                        cmd.Parameters.AddWithValue("@LastLoggedOn", customer.LastLoggedOn);
+                        cmd.Parameters.AddWithValue("@CreatedOn", DateTimeHelper.GetEpoch(customer.CreatedOn));
+                        cmd.Parameters.AddWithValue("@LastLoggedOn", DateTimeHelper.GetEpoch(customer.LastLoggedOn));
 
                         await cmd.ExecuteNonQueryAsync();
                         cmd.Dispose();
@@ -49,13 +53,12 @@ namespace BankManagementDB.db
                 return true;
             }
             catch (Exception err)
-            { Console.WriteLine(err.Message); }
+            { Console.WriteLine(err); }
             return result;
         }
 
-        public async static Task<DataTable> Get(string phoneNumber)
+        public static async Task<Customer> Get(string phoneNumber)
         {
-            DataTable dataTable = new DataTable();
             try
             {
                 using (SQLiteConnection conn = new SQLiteConnection(connectionString))
@@ -65,11 +68,23 @@ namespace BankManagementDB.db
                     {
                         cmd.CommandText = @"Select ID, Name, Age, Phone, Email, LastLoggedOn, CreatedOn FROM Customer WHERE Phone = @Phone";
                         
-                        cmd.Parameters.AddWithValue("Phone", phoneNumber);
+                        cmd.Parameters.AddWithValue("@Phone", phoneNumber);
 
                         await cmd.ExecuteNonQueryAsync();
                         using (var reader = await cmd.ExecuteReaderAsync())
-                            dataTable.Load(reader);
+                        {
+                            while (reader.Read())
+                            {
+                                Customer customer = new Customer();
+                                customer.ID = new Guid(reader.GetString(0));
+                                customer.Name = reader.GetString(1);
+                                customer.Age = (int)reader.GetInt64(2);
+                                customer.Phone = reader.GetString(3);
+                                customer.Email = reader.GetString(4);
+                                customer.LastLoggedOn = DateTimeHelper.ConvertEpochToDateTime(reader.GetInt64(5));
+                                return customer;
+                            }
+                        }
                         
                         cmd.Dispose();
                     }
@@ -78,7 +93,7 @@ namespace BankManagementDB.db
             }
             catch (Exception err)
             { Console.WriteLine(err.Message); }
-            return dataTable;
+            return null;
         }
 
         public static string GetHashedPassword(string phoneNumber)

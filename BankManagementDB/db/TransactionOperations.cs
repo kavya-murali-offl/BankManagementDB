@@ -1,23 +1,20 @@
-﻿using BankManagement.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Data.Linq;
 using System.Data.SQLite;
-using System.Data;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using BankManagement.Model;
+using BankManagementDB.Utility;
+using BankManagement.Enums;
+using BankManagementDB.Interface;
 //;
 namespace BankManagementDB.db
 {
-    public class TransactionOperations
+    public class TransactionOperations : IQueryOperations<Transaction>
     {
 
-        private static string connectionString = "Data source=database.sqlite3";
+        private static readonly string connectionString = "Data source=database.sqlite3";
 
-
-        public async static Task<bool> Upsert(Transaction transaction)
+        public async Task<bool> UpdateOrInsert(Transaction transaction)
         {
             bool result = false;
             try
@@ -27,6 +24,7 @@ namespace BankManagementDB.db
                     using (SQLiteCommand cmd = new SQLiteCommand(con))
                     {
                         await con.OpenAsync();
+
                         cmd.CommandText = @"INSERT INTO Transactions(
                                     ID, Balance, Amount, TransactionType, Description, AccountID, RecordedOn) 
                                     VALUES(@ID, @Balance, @Amount, @TransactionType, @Description, @AccountID, @RecordedOn)
@@ -40,12 +38,10 @@ namespace BankManagementDB.db
                         cmd.Parameters.AddWithValue("@TransactionType", transaction.TransactionType.ToString());
                         cmd.Parameters.AddWithValue("@Description", transaction.Description);
                         cmd.Parameters.AddWithValue("@AccountID", transaction.AccountID.ToString());
-                        cmd.Parameters.AddWithValue("@RecordedOn", transaction.RecordedOn);
+                        cmd.Parameters.AddWithValue("@RecordedOn", DateTimeHelper.GetEpoch(transaction.RecordedOn));
 
                         await cmd.ExecuteNonQueryAsync();
-                        cmd.Dispose();
                     }
-                    con.Close();
                 }
                 return true;
             }
@@ -54,9 +50,9 @@ namespace BankManagementDB.db
             return result;
         }
 
-        public async static Task<DataTable> Get(string accountID)
+        public async Task<IList<Transaction>> Get(string accountID)
         {
-            DataTable dataTable = new DataTable();
+            IList<Transaction> transactions = new List<Transaction>();
             try
             {
                 using (SQLiteConnection conn = new SQLiteConnection(connectionString))
@@ -71,16 +67,28 @@ namespace BankManagementDB.db
 
                         await cmd.ExecuteNonQueryAsync();
                         using (var reader = await cmd.ExecuteReaderAsync())
-                            dataTable.Load(reader);
-
-                        cmd.Dispose();
+                        {
+                            while(reader.Read())
+                            {
+                                var transaction = new Transaction()
+                                {
+                                    ID = new Guid(reader.GetString(0)),
+                                    Balance= reader.GetDecimal(1),
+                                    Amount = reader.GetDecimal(2),    
+                                    TransactionType = (TransactionTypes)Enum.Parse(typeof(TransactionTypes),reader.GetString(3)),
+                                    Description = reader.GetString(4),  
+                                    AccountID = new Guid(reader.GetString(5)),  
+                                    RecordedOn = DateTimeHelper.ConvertEpochToDateTime(reader.GetInt64(6)),
+                                };
+                                transactions.Add(transaction);
+                            }
+                        }
                     }
-                    conn.Close();
                 }
             }
             catch (Exception err)
             { Console.WriteLine(err); }
-            return dataTable;
+            return transactions;
         }
     }
 }

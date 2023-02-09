@@ -14,6 +14,7 @@ namespace BankManagementDB.db
     {
         public static void CreateTableIfNotExists()
         {
+
             string customerQuery = @"CREATE TABLE IF NOT EXISTS Customer (
                                     'ID' VARCHAR UNIQUE PRIMARY KEY NOT NULL, 
                                     'Name' TEXT, 
@@ -21,9 +22,9 @@ namespace BankManagementDB.db
                                     'Phone' TEXT UNIQUE,
                                     'Email' TEXT,
                                     'HashedPassword' TEXT,
-                                    'LastLoggedOn' DATETIME DEFAULT CURRENT_TIMESTAMP,
-                                    'CreatedOn' DATETIME DEFAULT CURRENT_TIMESTAMP);";
-             
+                                    'LastLoggedOn' INTEGER,
+                                    'CreatedOn' INTEGER);";
+
             string accountQuery = @"CREATE TABLE IF NOT EXISTS 'Account' (
                                  'ID' VARCHAR NOT NULL UNIQUE,
                                  'Balance' DECIMAL, 
@@ -31,14 +32,14 @@ namespace BankManagementDB.db
                                  'Status' TEXT, 
                                  'MinimumBalance' DECIMAL, 
                                  'Type' TEXT, 
-                                 'CreatedOn' DATETIME DEFAULT CURRENT_TIMESTAMP, 
+                                 'CreatedOn' INTEGER, 
                                  'UserID' VARCHAR NOT NULL,
                                  PRIMARY KEY('ID'))";
 
             string transactionsQuery = @"CREATE TABLE IF NOT EXISTS 'Transactions' (
                                       'ID' VARCHAR NOT NULL UNIQUE,
                                       'Balance' DECIMAL,
-                                      'RecordedOn' DATETIME DEFAULT CURRENT_TIMESTAMP,
+                                      'RecordedOn' INTEGER,
                                       'Amount' DECIMAL,
                                       'TransactionType' TEXT,
                                       'Description' TEXT,
@@ -130,7 +131,7 @@ namespace BankManagementDB.db
                     i += 1;
                     if (pairs.Key != "ID")
                         query += pairs.Key + "= @" + pairs.Key;
-                    if(i+1 < updateFields.Count) query+= ", "; 
+                    if (i + 1 < updateFields.Count) query += ", ";
                 }
                 query += " WHERE ID = @ID";
 
@@ -143,56 +144,5 @@ namespace BankManagementDB.db
             return result;
         }
 
-        public static void PrintDataTable(DataTable Table)
-        {
-            if (Table.Rows.Count > 0)
-            {
-                Console.WriteLine(" ");
-                Dictionary<string, int> colWidths = new Dictionary<string, int>();
-
-                foreach (DataColumn col in Table.Columns)
-                {
-                    Console.Write(col.ColumnName);
-                    var maxLabelSize = Table.Rows.OfType<DataRow>()
-                            .Select(m => (m.Field<dynamic>(col.ColumnName)?.ToString() ?? "").Length)
-                            .OrderByDescending(m => m).FirstOrDefault();
-
-                    colWidths.Add(col.ColumnName, maxLabelSize);
-                    for (int i = 0; i < maxLabelSize - col.ColumnName.Length + 10; i++) Console.Write(" ");
-                }
-
-                Console.WriteLine();
-
-                foreach (DataRow dataRow in Table.Rows)
-                {
-                    for (int j = 0; j < dataRow.ItemArray.Length; j++)
-                    {
-                        Console.Write(dataRow.ItemArray[j]);
-                        for (int i = 0; i < colWidths[Table.Columns[j].ColumnName] - dataRow.ItemArray[j].ToString().Length + 10; i++) Console.Write(" ");
-                    }
-                    Console.WriteLine();
-                }
-            }
-            else
-            {
-                Notification.Info("No records found.");
-            }
-        }
-
-        public static void Get()
-        {
-            var connectionString = "Data Source=database.sqlite";
-            using (var db = new DatabaseContext(connectionString))
-            {
-                //var people = from p in db.Customers
-                //             select p;
-                //Console.WriteLine(db.);
-                //foreach (var person in people)
-                //{
-                //    Console.WriteLine(person.Name);
-                //}
-            }
-            
-        }
     }
 }

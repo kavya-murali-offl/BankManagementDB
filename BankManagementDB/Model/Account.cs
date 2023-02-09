@@ -28,29 +28,15 @@ namespace BankManagement.Models
         
         public AccountStatus Status { get; set; }
 
-        public bool Deposit(decimal amount)
+        public void Deposit(decimal amount)
         {
-            if(amount > 0)
-            {
                 Balance += amount;
-                return true;
-            }
-            return false;
         }
 
 
-        public bool Withdraw(decimal amount)
+        public void Withdraw(decimal amount)
         {
-            if (Balance > amount)
-            {
-                Balance -= amount;
-                return true;
-            }
-            else
-            {
-                Notification.Error($"Insufficient Balance");
-                return false;
-            }
+             Balance -= amount;
         }
 
         public override string ToString() => $"Account ID: {ID} \nAccount Status: {Status} \nBalance: Rs. {Balance}"; 

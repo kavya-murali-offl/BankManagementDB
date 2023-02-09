@@ -127,8 +127,7 @@ namespace BankManagement.Utility
                 if (lastWithdrawDate.HasValue)
                 {
                     int numberOfDays = (int)(DateTime.Now - lastWithdrawDate)?.TotalDays;
-                    if(numberOfDays > 30) return numberOfDays;
-                    else return 0;
+                    if (numberOfDays > 30) return numberOfDays;
                 }
             }catch(Exception e)
             {

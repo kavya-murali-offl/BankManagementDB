@@ -73,10 +73,10 @@
   <ItemGroup>
     <Compile Include="db\AccountOperations.cs" />
     <Compile Include="db\CustomerOperations.cs" />
-    <Compile Include="db\DatabaseContext.cs" />
     <Compile Include="db\DatabaseOperations.cs" />
     <Compile Include="db\TransactionOperations.cs" />
     <Compile Include="Interface\ICustomerServices.cs" />
+    <Compile Include="Interface\IQueryOperations.cs" />
     <Compile Include="Utility\AuthServices.cs" />
     <Compile Include="Controller\AccountFactory.cs" />
     <Compile Include="Controller\AccountsController.cs" />
@@ -98,7 +98,6 @@
     <Compile Include="Utility\DateTimeHelper.cs" />
     <Compile Include="Utility\Helper.cs" />
     <Compile Include="Utility\InterestRate.cs" />
-    <Compile Include="Utility\GenericPair.cs" />
     <Compile Include="Utility\Printer.cs" />
     <Compile Include="Utility\Validation.cs" />
     <Compile Include="View\AccountsView.cs" />

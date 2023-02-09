@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Linq;
+using System.Runtime.InteropServices;
 using BankManagement.Controller;
 using BankManagement.Enums;
+using BankManagement.Model;
 using BankManagement.Models;
+using BankManagement.Utility;
 using BankManagementDB.View;
 
 namespace BankManagement.View
@@ -28,7 +31,7 @@ namespace BankManagement.View
                 {
                     string option = Console.ReadLine().Trim();
                     int entryOption = int.Parse(option);
-
+                    Helper helper = new Helper();
                     if (entryOption != 0 && entryOption <= Enum.GetNames(typeof(AccountTypes)).Count())
                     {
                         AccountTypes accountType = (AccountTypes)entryOption - 1;
@@ -36,7 +39,6 @@ namespace BankManagement.View
 
                         if(account != null)
                             return account;
-
                     }
 
                     else if(entryOption == 3)

@@ -81,7 +81,7 @@ namespace BankManagement.View
             Notification.Info("Age: " + profileController.Customer.Age);
             Notification.Info("Phone: " + profileController.Customer.Phone);
             Notification.Info("Email: " + profileController.Customer.Email);
-            Notification.Info("No. of Accounts: " + AccountsController.AccountTable.Rows.Count);
+            Notification.Info("No. of Accounts: " + AccountsController.AccountsList.Count);
             Notification.Info("\n ==============================================\n");
         }
 

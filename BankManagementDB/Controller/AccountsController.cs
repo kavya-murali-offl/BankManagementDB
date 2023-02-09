@@ -16,19 +16,19 @@ namespace BankManagement.Controller
 
     delegate bool UpdateAccountDelegate(Account account);
     delegate bool InsertAccountDelegate(Account account);
+
     public class AccountsController 
     {
-
         public AccountsController() { }    
 
         public AccountsController(ITransactionServices transactionController)
         {
             TransactionController = transactionController;
         }
+        public static IList<Account> AccountsList { get; set; }
 
         public ITransactionServices TransactionController { get; private set; }    
 
-        public static DataTable AccountTable { get; set; }
 
         public bool InsertAccount(Account account)
         {
@@ -36,7 +36,7 @@ namespace BankManagement.Controller
             InsertAccountDelegate insertAccount = InsertAccountToDB;
             if (insertAccount(account))
             {
-                insertAccount = InsertAccountToDataTable;
+                insertAccount = InsertAccountToList;
                 isAdded = insertAccount(account);
             }
             return isAdded;
@@ -46,7 +46,8 @@ namespace BankManagement.Controller
         {
             try
             {
-                return AccountOperations.Upsert(account).Result;
+                IQueryOperations<Account> accountOperations = new AccountOperations();
+                 return accountOperations.UpdateOrInsert(account).Result;
             }
             catch(Exception ex)
             {
@@ -57,24 +58,13 @@ namespace BankManagement.Controller
 
         
 
-        private bool InsertAccountToDataTable(Account account)
+        private bool InsertAccountToList(Account account)
         {
             try
             {
-                AccountTable ??= new DataTable();
-
-                DataRow newRow = AccountTable.NewRow();
-                newRow["ID"] = account.ID.ToString();
-                newRow["Balance"] = account.Balance;
-                newRow["InterestRate"] = account.InterestRate;
-                newRow["UserID"] = account.UserID.ToString();
-                newRow["Type"] = account.Type.ToString();
-                newRow["Status"] = account.Status.ToString();
-
-                AccountTable.Rows.Add(newRow);
-
+                AccountsList ??= new List<Account>();
+                AccountsList.Add(account);
                 return true;
-                
             }
             catch(Exception ex)
             {
@@ -91,7 +81,7 @@ namespace BankManagement.Controller
                 bool success = updateAccount(account);
                 if (success)
                 {
-                updateAccount = UpdateAccountInDataTable;
+                updateAccount = UpdateAccountInList;
                 return updateAccount(account);
                 }
             }
@@ -105,26 +95,24 @@ namespace BankManagement.Controller
         {
             try
             {
-                return AccountOperations.Upsert(account).Result;
+                IQueryOperations<Account> accountOperations = new AccountOperations();
+
+                return accountOperations.UpdateOrInsert(account).Result;
             }catch(Exception ex)
             {
                 return false;   
             }
         }
 
-        private bool UpdateAccountInDataTable(Account account)
+        private bool UpdateAccountInList(Account updatedAccount)
         {
             try
             {
-                if(AccountTable?.Rows?.Count > 0)
-                {
-                DataRow[] rows = AccountTable.Select("ID = '" + account.ID.ToString() + "'");
-                if (rows.Length > 0)
-                {
-                DataRow row = rows.LastOrDefault();
+                Account account = AccountsList.FirstOrDefault(acc => acc.ID == updatedAccount.ID);
+                account.Balance = updatedAccount.Balance;
+                account.Status = updatedAccount.Status;
+                account.InterestRate = updatedAccount.InterestRate;
                 return true;
-                }
-                }
             }
             catch(Exception ex) {
                 Console.WriteLine(ex);
@@ -136,7 +124,8 @@ namespace BankManagement.Controller
         {
             try
             {
-                AccountTable = AccountOperations.Get(id.ToString()).Result;
+                IQueryOperations<Account> accountOperations = new AccountOperations();
+                AccountsList = accountOperations.Get(id.ToString()).Result;
             }
             catch (Exception ex)
             {
@@ -144,16 +133,12 @@ namespace BankManagement.Controller
             }
         }
 
-        public Account GetAccountByQuery(string query)
+        public Account GetAccountByQuery(string key, object value)
         {
             Account account = null;
             try
             {
-                if (AccountTable != null)
-                {
-                DataRow row = AccountTable.Select(query).LastOrDefault();
-                account = RowToAccount(row);
-                }
+                account = AccountsList.FirstOrDefault(acc => acc.GetType().GetProperty(key).GetValue(acc).Equals(value));
             }
             catch (Exception ex)
             {
@@ -162,46 +147,6 @@ namespace BankManagement.Controller
             return account;
         }
 
-        public IList<Account> GetAllAccounts()
-        {
-            IList<Account> accountsList = new List<Account>();
-            try
-            {
-                foreach (DataRow row in AccountTable.Rows)
-                {
-                Account account = RowToAccount(row);
-                accountsList.Add(account);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-            return accountsList;
-        }
-
-        private Account RowToAccount(DataRow row)
-        {
-            Account account = null;
-            try
-            {
-                
-                AccountTypes enumType = (AccountTypes)Enum.Parse(typeof(AccountTypes), row.Field<string>("Type"));
-                account = AccountFactory.GetAccountByType(enumType);
-                account.Balance = row.Field<decimal>("Balance");
-                account.InterestRate = row.Field<decimal>("InterestRate");
-                account.Status = (AccountStatus)Enum.Parse(typeof(AccountStatus), row.Field<string>("Status"));
-                account.ID = Guid.Parse(row.Field<string>("ID"));
-                account.Type = enumType;
-                account.UserID = Guid.Parse(row.Field<string>("UserID"));
-                return account;
-
-            } 
-            catch(Exception e)
-            {
-                Console.WriteLine(e);
-            }
-            return account;
-        }
+        public IList<Account> GetAllAccounts() => AccountsList ?? new List<Account>();
     }
 }

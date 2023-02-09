@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Data;
 using System.Collections.Generic;
 using System.Linq;
 using BankManagement.Enums;
 using BankManagement.Model;
 using BankManagement.Models;
-using BankManagement.Utility;
 using BankManagementDB.db;
 using BankManagementDB.Interface;
 using BankManagementDB.View;
@@ -13,22 +11,13 @@ using BankManagementDB.View;
 namespace BankManagement.Controller
 {
     delegate bool InsertTransactionDelegate(Transaction transaction);
+    delegate bool TransferDelegate(decimal amount, Account account);
 
     public class TransactionController : ITransactionServices
     {
         public event Action<string> BalanceChanged;
 
-        public static DataTable TransactionTable { get; set; }
-
-        public decimal GetInitialAmount(CurrentAccount currentAccount)
-        {
-            Helper helper = new Helper();
-            decimal amount = helper.GetAmount();
-            if (amount < currentAccount.MinimumBalance)
-                GetInitialAmount(currentAccount);
-
-            return amount;
-        }
+        public static IList<Transaction> TransactionsList { get; set; }
 
         public bool Deposit(decimal amount, Account account)
         {
@@ -76,10 +65,7 @@ namespace BankManagement.Controller
                     CreateTransaction("Withdraw", amount, account, TransactionTypes.WITHDRAW);
                 }
                 else
-                {
-                    Notification.Error("Withdraw failed");
                     account.Deposit(amount);    
-                }
 
             }
             catch (Exception ex) { Console.WriteLine(ex.Message); }
@@ -99,11 +85,12 @@ namespace BankManagement.Controller
         {
                 if (currentAccount.Balance < currentAccount.MinimumBalance && currentAccount.Balance > currentAccount.CHARGES)
                 {
-                    if (currentAccount.Withdraw(currentAccount.CHARGES))
-                    {
+                        currentAccount.Withdraw(currentAccount.CHARGES);
                         Notification.Info("You have been charged for not maintaining minimum balance");
-                        bool isMinBalanceTransacted = CreateTransaction("Minimum Balance Charge", currentAccount.CHARGES, currentAccount, TransactionTypes.WITHDRAW);
-                    }
+                        bool isMinBalanceTransacted = 
+                            CreateTransaction("Minimum Balance Charge", 
+                            currentAccount.CHARGES, currentAccount,
+                            TransactionTypes.WITHDRAW);
                 }
         }
 
@@ -128,37 +115,21 @@ namespace BankManagement.Controller
             try
             {
                 AccountsController accountsController = new AccountsController();
-                Account transferAccount = accountsController.GetAccountByQuery($"ID = '{toAccountID.ToString()}'");
+                Account transferAccount = accountsController.GetAccountByQuery("ID", toAccountID);
 
                 if (transferAccount != null)
                 {
-                    using (System.Transactions.TransactionScope scope = new System.Transactions.TransactionScope(System.Transactions.TransactionScopeOption.Required, new System.Transactions.TransactionOptions { IsolationLevel = System.Transactions.IsolationLevel.Serializable }))
+                    TransferDelegate transfer = Withdraw;
+                    bool isWithdrawn = transfer(amount, account);
+                    if (isWithdrawn)
                     {
-                        try
-                        {
-                            bool isWithdrawn = Withdraw(amount, account);
-                            if (!isWithdrawn)
-                            {
-                                throw new Exception("Withdraw operation failed.");
-                            }
-
-                            bool isDeposited = Deposit(amount, account);
-                            if (!isDeposited)
-                            {
-                                throw new Exception("Deposit operation failed.");
-                            }
-                            scope.Complete();
-                            BalanceChanged?.Invoke("Transfer successful");
-                        }
-                        catch (Exception ex)
-                        {
-                            Notification.Error("Transfer failed");
-                        }
+                        transfer = Deposit;
+                        bool isDeposited = transfer(amount, transferAccount);
+                        return isDeposited;
                     }
                 }
                 else
                     Notification.Error("Enter a valid account ID to transfer");
-
             }
             catch(Exception ex)
             {
@@ -167,14 +138,21 @@ namespace BankManagement.Controller
             return false;
         }
 
-        public bool CreateTransaction(string description, decimal amount, Account account, TransactionTypes type)
+        private bool CreateTransaction(string description, decimal amount, Account account, TransactionTypes type)
         {
-            Transaction transaction = new Transaction(description, amount, account.Balance, type);
-            transaction.AccountID = account.ID;
-            return InsertTransaction(transaction);
+            try
+            {
+                Transaction transaction = new Transaction(description, amount, account.Balance, type);
+                transaction.AccountID = account.ID;
+                return InsertTransaction(transaction);
+            }catch(Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+            return false;
         }
 
-        public bool InsertTransaction(Transaction transaction)
+        private bool InsertTransaction(Transaction transaction)
         {
             bool success = false;
             try
@@ -183,7 +161,7 @@ namespace BankManagement.Controller
                 success = insertTransaction(transaction);
                 if (success)
                 {
-                    insertTransaction = InsertTransactionToDataTable;
+                    insertTransaction = InsertTransactionToList;
                     bool inserted = insertTransaction(transaction);
                     return inserted;
                 }
@@ -195,23 +173,14 @@ namespace BankManagement.Controller
             return success;
         }
 
-        public bool InsertTransactionToDataTable(Transaction transaction)
+        private bool InsertTransactionToList(Transaction transaction)
         {
             bool success = false;
             try
             {
-                if (TransactionTable != null)
+                if (TransactionsList != null)
                 {
-                    DataRow newRow = TransactionTable.NewRow();
-                    newRow["ID"] = transaction.ID.ToString();
-                    newRow["AccountID"] = transaction.AccountID.ToString();
-                    newRow["RecordedOn"] = transaction.RecordedOn;
-                    newRow["TransactionType"] = transaction.TransactionType.ToString();
-                    newRow["Description"] = transaction.Description;
-                    newRow["Amount"] = transaction.Amount;
-                    newRow["Balance"] = transaction.Balance;
-                    newRow["ID"] = transaction.ID;
-                    TransactionTable.Rows.Add(newRow);
+                    TransactionsList.Add(transaction);
                     success = true;
                 }
             }
@@ -221,12 +190,12 @@ namespace BankManagement.Controller
             return success;
         }
 
-        public bool InsertTransactionInDB(Transaction transaction)
+        private bool InsertTransactionInDB(Transaction transaction)
         {
             try
             {
-                
-                return TransactionOperations.Upsert(transaction).Result;
+                IQueryOperations<Transaction> transactionOperations = new TransactionOperations();
+                return transactionOperations.UpdateOrInsert(transaction).Result;
             }catch(Exception e)
             {
                 return false;   
@@ -235,62 +204,29 @@ namespace BankManagement.Controller
 
         public void FillTable(Guid accountID)
         {
-            TransactionTable = TransactionOperations.Get(accountID.ToString()).Result;
-        }
-
-        public Transaction RowToTransaction(DataRow row)
-        {
-            Transaction transaction = new Transaction();
             try
             {
-                transaction.Balance = row.Field<decimal>("Balance");
-                transaction.Amount = row.Field<decimal>("Amount");
-                transaction.AccountID = Guid.Parse(row.Field<string>("AccountID"));
-                transaction.ID = Guid.Parse(row.Field<string>("ID"));
-                transaction.Description = row.Field<string>("Description");
-                transaction.TransactionType = (TransactionTypes)Enum.Parse(typeof(TransactionTypes), row.Field<string>("TransactionType"));
-                transaction.RecordedOn = DateTime.Parse(row.Field<string>("RecordedOn"));
-           
+                IQueryOperations<Transaction> transactionOperations = new TransactionOperations();
+                TransactionsList = transactionOperations.Get(accountID.ToString()).Result;
+            }catch(Exception e) {
+                Console.WriteLine(e);
             }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-            }
-            return transaction;
         }
 
         public DateTime? GetLastWithdrawDate()
         {
-            if(TransactionTable?.Rows?.Count > 0)
+            if(TransactionsList.Count > 0)
             {
-                DataRow row = TransactionTable.AsEnumerable().Where((r) => r.Field<string>("TransactionType") == "WITHDRAW").LastOrDefault();
+                Transaction transaction = TransactionsList.LastOrDefault(data => data.TransactionType.ToString() == "WITHDRAW");
 
-                if (row == null)
-                    row = TransactionTable.AsEnumerable().Where((r) => r.Field<string>("TransactionType") == "DEPOSIT").LastOrDefault();
+                if (transaction == null)
+                    transaction = TransactionsList.LastOrDefault(data => data.TransactionType.ToString() == "DEPOSIT");
 
-                return DateTime.Parse(row.Field<string>("RecordedOn"));
+                return transaction.RecordedOn;
             }
-            return new DateTime?();
+            return null;
         }
 
-       
-
-        public IList<Transaction> GetAllTransactions()
-        {
-            IList<Transaction> transactionList = new List<Transaction>();
-            try
-            {
-                foreach (DataRow row in TransactionTable.Rows)
-                {
-                    Transaction transaction = RowToTransaction(row);
-                    transactionList.Add(transaction);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-            return transactionList;
-        }
+        public IList<Transaction> GetAllTransactions() => TransactionsList ?? new List<Transaction>();
     }
 }
