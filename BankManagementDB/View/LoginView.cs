@@ -4,6 +4,8 @@ using System.Data;
 using BankManagement.Utility;
 using BankManagementDB.View;
 using BankManagement.Models;
+using BankManagementDB.db;
+using BankManagementDB.Interface;
 
 namespace BankManagement.View
 {
@@ -11,12 +13,11 @@ namespace BankManagement.View
     {
         public event Action<string> UserChanged;
         
-        public void Login()
+        public void Login(ICustomerServices customersController)
         {
             try
             {
                 bool isValidated;
-                CustomersController customersController = new CustomersController();
                 Helper helper = new Helper();
                 string phoneNumber = helper.GetPhoneNumber();
                 isValidated = ValidateLogin(phoneNumber, customersController);
@@ -36,6 +37,7 @@ namespace BankManagement.View
                         dashboard.ViewDashboard(profile);
 
                         UserChanged?.Invoke($"User {profile.Customer.Name} logged out successfully.");
+                        profile.Customer = null;
                 }
             }
             catch(Exception ex) {
@@ -43,17 +45,17 @@ namespace BankManagement.View
             }
         }
 
-        public bool ValidateLogin(string phoneNumber, CustomersController customersController)
+        public bool ValidateLogin(string phoneNumber, ICustomerServices customerServices)
         {
             bool isValidated = false;
             try
             {
-                Customer customer = customersController.GetCustomer(phoneNumber);
+                Customer customer = customerServices.GetCustomer(phoneNumber);
                 if (customer != null)
                 {
                     Helper helper = new Helper();
                     string password = helper.GetPassword("Enter password: ");
-                    isValidated = customersController.ValidatePassword(phoneNumber, password);
+                    isValidated = customerServices.ValidatePassword(phoneNumber, password);
                     if (!isValidated) Notification.Error("Incorrect Password");
                 }
                 else

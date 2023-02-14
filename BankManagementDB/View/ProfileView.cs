@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using BankManagement.Controller;
 using BankManagement.Models;
+using BankManagementDB.db;
 using BankManagementDB.Interface;
 using BankManagementDB.Utility;
 using BankManagementDB.View;
@@ -136,7 +137,9 @@ namespace BankManagement.View
 
         public void UpdateProfile(Customer updatedCustomer, ProfileController profile)
         {
-            CustomersController customersController = new CustomersController();
+            CustomerOperations customerOperations = new CustomerOperations();
+            CustomersController customersController = new CustomersController(customerOperations, customerOperations);
+
             Customer customer = customersController.UpdateCustomer(updatedCustomer);
 
             if (customer != null)

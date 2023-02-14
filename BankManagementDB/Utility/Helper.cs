@@ -8,6 +8,8 @@ namespace BankManagement.Utility
 {
     public class Helper
     {
+        public static T StringToEnum<T>(string data) => (T)Enum.Parse(typeof(T), data);
+
         public decimal GetAmount()
         {
             while (true)

@@ -1,6 +1,8 @@
 ﻿using System;
-using System.Data;
+using System.Collections.Generic;
 using BankManagement.Models;
+using BankManagementCipher.Model;
+using BankManagementCipher.Utility;
 using BankManagementDB.db;
 using BankManagementDB.Interface;
 using BankManagementDB.View;
@@ -10,12 +12,26 @@ namespace BankManagement.Controller
     public class CustomersController : ICustomerServices
     {
 
+        public CustomersController(IQueryServices<CustomerDTO> queryOperations, IAuthenticationServices authenticationServices)
+        {
+            CustomerOperations = queryOperations;
+            PasswordServices = authenticationServices;
+        }
+
+        public IQueryServices<CustomerDTO> CustomerOperations { get; set; }
+        public IAuthenticationServices PasswordServices { get; set; }
+
         public Customer GetCustomer(string phoneNumber)
         {
             try
             {
-                return CustomerOperations.Get(phoneNumber).Result;
-            }catch(Exception ex)
+                CustomerOperations customerOperations = new CustomerOperations();
+                IList<CustomerDTO> customerDTOs = customerOperations.Get(phoneNumber).Result;
+                if (customerDTOs.Count > 0)
+                    return Mapping.DtoToCustomer(customerDTOs[0]);
+
+            }
+            catch(Exception ex)
             {
                 Console.WriteLine(ex);
             }
@@ -26,8 +42,10 @@ namespace BankManagement.Controller
         {
             try
             {
+
                 string hashedPassword = AuthServices.ComputeHash(password);
-                return CustomerOperations.UpdateOrInsert(customer, hashedPassword).Result;
+                CustomerDTO customerDTO = Mapping.CustomerToDto(customer, hashedPassword);
+                return CustomerOperations.InsertOrReplace(customerDTO).Result;
             }
             catch (Exception ex)
             {
@@ -40,7 +58,9 @@ namespace BankManagement.Controller
         {
             try
             {
-                bool success = CustomerOperations.UpdateOrInsert(customer, null).Result;
+                string password = PasswordServices.GetHashedPassword(customer.Phone);
+                CustomerDTO customerDTO = Mapping.CustomerToDto(customer, password);  
+                bool success = CustomerOperations.InsertOrReplace(customerDTO).Result;
                 return GetCustomer(customer.Phone);
             }
             catch (Exception ex)
@@ -55,7 +75,7 @@ namespace BankManagement.Controller
             try
             {
                 string hashedInput = AuthServices.ComputeHash(password);
-                string passwordFromDB = CustomerOperations.GetHashedPassword(phoneNumber);
+                string passwordFromDB = PasswordServices.GetHashedPassword(phoneNumber);
                 return hashedInput == passwordFromDB ? true : false;
             }
             catch (Exception ex)

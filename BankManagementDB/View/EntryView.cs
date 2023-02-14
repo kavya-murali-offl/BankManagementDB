@@ -1,5 +1,6 @@
 ﻿using System;
 using BankManagement.Controller;
+using BankManagementDB.db;
 using BankManagementDB.Interface;
 using BankManagementDB.View;
 
@@ -44,20 +45,21 @@ namespace BankManagement.View
         
         public bool EntryOperations(EntryCases option)
         {
+            CustomerOperations customerOperations = new CustomerOperations();
+            CustomersController customersController = new CustomersController(customerOperations, customerOperations);
             switch (option)
             {
                 case EntryCases.LOGIN:
 
                     LoginView loginView = new LoginView();
                     loginView.UserChanged += onUserChanged;
-                    loginView.Login();
+                    loginView.Login(customersController);
                     return false;
 
                 case EntryCases.SIGNUP:
-
-                    CustomersController customersController = new CustomersController();
-                    SignupView signupView = new SignupView(customersController);
-                    signupView.Signup();
+                    
+                    SignupView signupView = new SignupView();
+                    signupView.Signup(customersController);
                     return false;
 
                 case EntryCases.EXIT:

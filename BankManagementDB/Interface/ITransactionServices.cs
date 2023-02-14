@@ -1,4 +1,6 @@
-﻿using BankManagement.Models;
+﻿using BankManagement.Model;
+using BankManagement.Models;
+using BankManagementCipher.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,9 +11,12 @@ namespace BankManagementDB.Interface
 {
     public interface ITransactionServices
     {
-        event Action<string> BalanceChanged;
-        bool Deposit(decimal amount, Account account);
-        bool Withdraw(decimal amount, Account account);
-        bool Transfer(decimal amount, Account account, Guid transferAccountID);
+
+        public bool InsertTransaction(Transaction transaction);
+
+        IList<Transaction> GetAllTransactions();
+
+        void FillTable(Guid accountID);
+
     }
 }

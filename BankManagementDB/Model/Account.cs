@@ -4,7 +4,7 @@ using System;
 
 namespace BankManagement.Models
 {
-    public class Account
+    public abstract class Account
     {
         public Account() {
             ID = Guid.NewGuid();
@@ -39,6 +39,6 @@ namespace BankManagement.Models
              Balance -= amount;
         }
 
-        public override string ToString() => $"Account ID: {ID} \nAccount Status: {Status} \nBalance: Rs. {Balance}"; 
+        public abstract override string ToString(); 
     }
 }

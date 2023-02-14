@@ -1,94 +1,49 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.SQLite;
-using System.Threading.Tasks;
-using BankManagement.Model;
+﻿using BankManagement.Model;
 using BankManagementDB.Utility;
 using BankManagement.Enums;
 using BankManagementDB.Interface;
-//;
+using BankManagement.Models;
+using BankManagementCipher.Model;
+using BankManagementCipher.Utility;
+using SQLite;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
 namespace BankManagementDB.db
 {
-    public class TransactionOperations : IQueryOperations<Transaction>
+    public class TransactionOperations : IQueryServices<TransactionDTO>
     {
+        private readonly SQLiteConnectionString Options = new SQLiteConnectionString(@"C:\Users\kavya-pt6688\source\repos\BankManagementDB\BankManagementDB\Database.sqlite3", true, key: "pass");
 
-        private static readonly string connectionString = "Data source=database.sqlite3";
-
-        public async Task<bool> UpdateOrInsert(Transaction transaction)
+        public async Task<IList<TransactionDTO>> Get(Guid accountID)
         {
-            bool result = false;
+
             try
             {
-                using (SQLiteConnection con = new SQLiteConnection(connectionString))
+                SQLiteAsyncConnection connection = new SQLiteAsyncConnection(Options);
                 {
-                    using (SQLiteCommand cmd = new SQLiteCommand(con))
-                    {
-                        await con.OpenAsync();
+                    IList<TransactionDTO> transactionDTOs = await connection.QueryAsync<TransactionDTO>("Select * from Transactions where AccountID = ?", accountID);
+                    await connection.CloseAsync();
 
-                        cmd.CommandText = @"INSERT INTO Transactions(
-                                    ID, Balance, Amount, TransactionType, Description, AccountID, RecordedOn) 
-                                    VALUES(@ID, @Balance, @Amount, @TransactionType, @Description, @AccountID, @RecordedOn)
-                                    ON CONFLICT(ID) 
-                                    DO UPDATE SET 
-                                    Balance = @Balance";
-
-                        cmd.Parameters.AddWithValue("@ID", transaction.ID.ToString());
-                        cmd.Parameters.AddWithValue("@Balance", transaction.Balance);
-                        cmd.Parameters.AddWithValue("@Amount", transaction.Amount);
-                        cmd.Parameters.AddWithValue("@TransactionType", transaction.TransactionType.ToString());
-                        cmd.Parameters.AddWithValue("@Description", transaction.Description);
-                        cmd.Parameters.AddWithValue("@AccountID", transaction.AccountID.ToString());
-                        cmd.Parameters.AddWithValue("@RecordedOn", DateTimeHelper.GetEpoch(transaction.RecordedOn));
-
-                        await cmd.ExecuteNonQueryAsync();
-                    }
+                    return transactionDTOs;
                 }
-                return true;
             }
-            catch (Exception err)
-            { Console.WriteLine(err.Message); }
-            return result;
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+            return new List<TransactionDTO>();
+
         }
 
-        public async Task<IList<Transaction>> Get(string accountID)
+        public async Task<bool> InsertOrReplace(TransactionDTO transactionDTO)
         {
-            IList<Transaction> transactions = new List<Transaction>();
-            try
-            {
-                using (SQLiteConnection conn = new SQLiteConnection(connectionString))
-                {
-                    await conn.OpenAsync();
-                    using (SQLiteCommand cmd = new SQLiteCommand(conn))
-                    {
-                        string query = @"Select ID, Balance, Amount, TransactionType, Description, AccountID, RecordedOn FROM Transactions WHERE AccountID = @AccountID";
-                        cmd.CommandText = query;
-
-                        cmd.Parameters.AddWithValue("AccountID", accountID);
-
-                        await cmd.ExecuteNonQueryAsync();
-                        using (var reader = await cmd.ExecuteReaderAsync())
-                        {
-                            while(reader.Read())
-                            {
-                                var transaction = new Transaction()
-                                {
-                                    ID = new Guid(reader.GetString(0)),
-                                    Balance= reader.GetDecimal(1),
-                                    Amount = reader.GetDecimal(2),    
-                                    TransactionType = (TransactionTypes)Enum.Parse(typeof(TransactionTypes),reader.GetString(3)),
-                                    Description = reader.GetString(4),  
-                                    AccountID = new Guid(reader.GetString(5)),  
-                                    RecordedOn = DateTimeHelper.ConvertEpochToDateTime(reader.GetInt64(6)),
-                                };
-                                transactions.Add(transaction);
-                            }
-                        }
-                    }
-                }
-            }
-            catch (Exception err)
-            { Console.WriteLine(err); }
-            return transactions;
+            SQLiteAsyncConnection connection = new SQLiteAsyncConnection(Options);
+            int rowsModified = await connection.InsertOrReplaceAsync(transactionDTO);
+            await connection.CloseAsync();
+            if (rowsModified > 0) return true;
+            return false;
         }
     }
 }

@@ -15,8 +15,7 @@ namespace BankManagementDB
         static void Main(string[] args)
         {
 
-            DatabaseOperations.CreateTableIfNotExists();
-
+            CipherOperations.CreateTablesIfNotExists();
 
             EntryView entryView = new EntryView();
             entryView.Entry();

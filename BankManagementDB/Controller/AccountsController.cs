@@ -10,6 +10,8 @@ using BankManagement.Utility;
 using BankManagement.Model;
 using BankManagementDB.View;
 using BankManagementDB.Interface;
+using BankManagementCipher.Model;
+using BankManagementCipher.Utility;
 
 namespace BankManagement.Controller
 {
@@ -25,6 +27,7 @@ namespace BankManagement.Controller
         {
             TransactionController = transactionController;
         }
+
         public static IList<Account> AccountsList { get; set; }
 
         public ITransactionServices TransactionController { get; private set; }    
@@ -34,6 +37,7 @@ namespace BankManagement.Controller
         {
             bool isAdded = false;
             InsertAccountDelegate insertAccount = InsertAccountToDB;
+
             if (insertAccount(account))
             {
                 insertAccount = InsertAccountToList;
@@ -42,12 +46,12 @@ namespace BankManagement.Controller
             return isAdded;
         }
 
-        private bool InsertAccountToDB(Account account)
+        public bool InsertAccountToDB(Account account)
         {
             try
             {
-                IQueryOperations<Account> accountOperations = new AccountOperations();
-                 return accountOperations.UpdateOrInsert(account).Result;
+                IQueryServices<AccountDTO> accountOperations = new AccountOperations();
+                 return accountOperations.InsertOrReplace(Mapping.AccountToDto(account)).Result;
             }
             catch(Exception ex)
             {
@@ -81,8 +85,8 @@ namespace BankManagement.Controller
                 bool success = updateAccount(account);
                 if (success)
                 {
-                updateAccount = UpdateAccountInList;
-                return updateAccount(account);
+                    updateAccount = UpdateAccountInList;
+                    return updateAccount(account);
                 }
             }
             catch(Exception ex) {
@@ -95,9 +99,9 @@ namespace BankManagement.Controller
         {
             try
             {
-                IQueryOperations<Account> accountOperations = new AccountOperations();
+                IQueryServices<AccountDTO> accountOperations = new AccountOperations();
 
-                return accountOperations.UpdateOrInsert(account).Result;
+                return accountOperations.InsertOrReplace(Mapping.AccountToDto(account)).Result;
             }catch(Exception ex)
             {
                 return false;   
@@ -108,11 +112,16 @@ namespace BankManagement.Controller
         {
             try
             {
-                Account account = AccountsList.FirstOrDefault(acc => acc.ID == updatedAccount.ID);
-                account.Balance = updatedAccount.Balance;
-                account.Status = updatedAccount.Status;
-                account.InterestRate = updatedAccount.InterestRate;
+                AccountsList ??= new List<Account>();
+                if (AccountsList.Count > 0) { 
+
+                    Account account = AccountsList.FirstOrDefault(acc => acc.ID.Equals(updatedAccount.ID));
+                    account.Balance = updatedAccount.Balance;
+                    account.Status = updatedAccount.Status;
+                    account.InterestRate = updatedAccount.InterestRate;
+                }
                 return true;
+
             }
             catch(Exception ex) {
                 Console.WriteLine(ex);
@@ -124,8 +133,13 @@ namespace BankManagement.Controller
         {
             try
             {
-                IQueryOperations<Account> accountOperations = new AccountOperations();
-                AccountsList = accountOperations.Get(id.ToString()).Result;
+                AccountsList ??= new List<Account>();   
+                IQueryServices<AccountDTO> accountOperations = new AccountOperations();
+                var accountDTOs = accountOperations.Get(id).Result;
+
+                foreach(var accountDTO in accountDTOs)
+                    AccountsList.Add(Mapping.DtoToAccount(accountDTO));
+                
             }
             catch (Exception ex)
             {

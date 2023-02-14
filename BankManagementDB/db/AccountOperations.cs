@@ -1,96 +1,46 @@
 ﻿using BankManagement.Models;
+using BankManagementCipher.Model;
+using BankManagementDB.Interface;
+using SQLite;
 using System;
 using System.Collections.Generic;
-using System.Data.SQLite;
 using System.Threading.Tasks;
-using BankManagementDB.Utility;
-using BankManagement.Controller;
-using BankManagement.Enums;
-using BankManagementDB.Interface;
 
 namespace BankManagementDB.db
 {
     
-    public class AccountOperations : IQueryOperations<Account>
+    public class AccountOperations : IQueryServices<AccountDTO>
     {
-        private static string connectionString = "Data source=database.sqlite3";
+        private readonly SQLiteConnectionString Options = new SQLiteConnectionString(@"C:\Users\kavya-pt6688\source\repos\BankManagementDB\BankManagementDB\Database.sqlite3", true, key: "pass");
 
-        public async Task<bool> UpdateOrInsert(Account account)
+        public async Task<IList<AccountDTO>> Get(Guid userID)
         {
-            bool result = false;
-            
+            IList<AccountDTO> accounts = new List<AccountDTO>();
+
             try
             {
-                using (SQLiteConnection con = new SQLiteConnection(connectionString))
+                SQLiteAsyncConnection connection = new SQLiteAsyncConnection(Options);
                 {
-                    using (SQLiteCommand cmd = new SQLiteCommand(con))
-                    {
-                        await con.OpenAsync();
-                        cmd.CommandText = @"INSERT INTO Account(
-                                    ID, Balance, MinimumBalance, InterestRate, Status, UserID, Type, CreatedOn) 
-                                    VALUES(@ID, @Balance, @MinimumBalance, @InterestRate, @Status, @UserID, @Type, @CreatedOn)
-                                    ON CONFLICT(ID)
-                                    DO UPDATE SET 
-                                    Balance = @Balance";
 
-                        cmd.Parameters.AddWithValue("@ID", account.ID.ToString());
-                        cmd.Parameters.AddWithValue("@Balance", account.Balance);
-                        cmd.Parameters.AddWithValue("@MinimumBalance", account.MinimumBalance);
-                        cmd.Parameters.AddWithValue("@InterestRate", account.InterestRate);
-                        cmd.Parameters.AddWithValue("@Status", account.Status.ToString());
-                        cmd.Parameters.AddWithValue("@UserID", account.UserID.ToString());
-                        cmd.Parameters.AddWithValue("@Type", account.Type.ToString());
-                        cmd.Parameters.AddWithValue("@CreatedOn", DateTimeHelper.GetEpoch(account.CreatedOn));
-                        
-                        await cmd.ExecuteNonQueryAsync();
-                    }
+                    accounts = await connection.QueryAsync<AccountDTO>("Select * from Account where UserID = ? ORDER BY CreatedOn Desc", userID);
+                    await connection.CloseAsync();
                 }
-                return true;
             }
-            catch (Exception err)
-            { Console.WriteLine(err.Message); }
-            return result;
-        }
-
-        public async Task<IList<Account>> Get(string userID)
-        {
-            IList<Account> accounts = new List<Account>();
-            try
+            catch (Exception e)
             {
-                using (SQLiteConnection conn = new SQLiteConnection(connectionString))
-                {
-                    await conn.OpenAsync();
-                    using (SQLiteCommand cmd = new SQLiteCommand(conn))
-                    {
-                        cmd.CommandText = @"Select ID, Balance, MinimumBalance, InterestRate, Status, UserID, Type, CreatedOn FROM Account WHERE UserID = @UserID";
-
-                        cmd.Parameters.AddWithValue("@UserID", userID);
-
-                        await cmd.ExecuteNonQueryAsync();
-                        using (var reader = await cmd.ExecuteReaderAsync())
-                        {
-                            while (reader.Read())
-                            {
-                                AccountTypes type = (AccountTypes)Enum.Parse(typeof(AccountTypes), reader.GetString(6));
-                                Account account = AccountFactory.GetAccountByType(type);
-                                account.ID = new Guid(reader.GetString(0));
-                                account.Balance = reader.GetDecimal(1);
-                                account.MinimumBalance = reader.GetDecimal(2);
-                                account.InterestRate = reader.GetDecimal(3);
-                                account.Status = (AccountStatus)Enum.Parse(typeof(AccountStatus), reader.GetString(4));
-                                account.UserID = new Guid(reader.GetString(5));
-                                account.Type = type;
-                                account.CreatedOn = DateTimeHelper.ConvertEpochToDateTime(reader.GetInt64(7));
-                                accounts.Add(account);
-                            }
-                        }
-                    }
-                }
+                Console.WriteLine(e);
             }
-            catch (Exception err)
-            { Console.WriteLine(err.Message); }
             return accounts;
+
         }
 
+        public async Task<bool> InsertOrReplace(AccountDTO accountDTO)
+        {
+            SQLiteAsyncConnection connection = new SQLiteAsyncConnection(Options);
+            int rowsModified = await connection.InsertOrReplaceAsync(accountDTO);
+            await connection.CloseAsync();
+            if (rowsModified > 0) return true;
+            return false;
+        }
     }
 }

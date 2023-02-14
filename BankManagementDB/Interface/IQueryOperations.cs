@@ -1,13 +1,20 @@
 ﻿using BankManagement.Models;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace BankManagementDB.Interface
 {
-    public interface IQueryOperations<T>
+    public interface IQueryServices<T>
     {
-        Task<bool> UpdateOrInsert(T t);
+        Task<bool> InsertOrReplace(T t);
 
-        Task<IList<T>> Get(string query);
+        Task<IList<T>> Get(Guid id);
+    }
+
+    public interface IAuthenticationServices
+    {
+        string GetHashedPassword(string phoneNumber);
+
     }
 }

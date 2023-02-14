@@ -7,8 +7,8 @@ using BankManagementDB.View;
 using BankManagementDB.Interface;
 using BankManagement.Model;
 using BankManagement.Utility;
-using System.Runtime.Remoting.Messaging;
-using System.Security.Principal;
+using BankManagementDB.Controller;
+using BankManagementDB.db;
 
 namespace BankManagement.View
 {
@@ -32,6 +32,7 @@ namespace BankManagement.View
                     DashboardCases cases = (DashboardCases)i;
                     Console.WriteLine($"{i + 1}. {cases.ToString().Replace("_", " ")}");
                 }
+
                 Console.Write("\nEnter your choice: ");
 
                 try
@@ -66,7 +67,8 @@ namespace BankManagement.View
             ProfileController profileController
             )
         {
-            ITransactionServices transactionController = new TransactionController();
+            ITransactionServices transactionController = new TransactionController(new TransactionOperations());
+            IATMTransactionServices transactionATMController = new ATMTransactionsController(transactionController);
             AccountsController accountsController = new AccountsController(transactionController); 
             
             switch (operation)
@@ -77,7 +79,7 @@ namespace BankManagement.View
                     return false;
 
                 case DashboardCases.CREATE_ACCOUNT:
-                    CreateAccount(accountsController, transactionController, profileController);
+                    CreateAccount(accountsController, transactionATMController, profileController);
                     return false;
 
                 case DashboardCases.LIST_ACCOUNTS:
@@ -90,6 +92,7 @@ namespace BankManagement.View
 
                 case DashboardCases.SIGN_OUT:
                     SaveCustomerSession(profileController);
+
                     return true;
 
                 default:
@@ -98,7 +101,7 @@ namespace BankManagement.View
             }
         }
 
-        public Account CreateAccount(AccountsController accountsController, ITransactionServices transactionController, ProfileController profile)
+        public Account CreateAccount(AccountsController accountsController, IATMTransactionServices transactionATMController, ProfileController profile)
         {
 
             AccountsView accountsView = new AccountsView();
@@ -108,7 +111,7 @@ namespace BankManagement.View
             if (inserted)
             {
                 if (account is CurrentAccount)
-                    if (!CheckAmount(account, accountsController, transactionController)) 
+                    if (!CheckAmount(account, transactionATMController)) 
                         Notification.Error("Initial Deposit unsuccessful");
             }
 
@@ -120,7 +123,7 @@ namespace BankManagement.View
             return account;
         }
 
-        public bool CheckAmount(Account account, AccountsController accountsController, ITransactionServices transactionController)
+        public bool CheckAmount(Account account, IATMTransactionServices transactionATMController)
         {
             Helper helper = new Helper();
             while (true)
@@ -128,7 +131,7 @@ namespace BankManagement.View
                 decimal amount = helper.GetAmount();
 
                 if (amount > account.MinimumBalance)
-                    if (transactionController.Deposit(amount, account))
+                    if (transactionATMController.Deposit(amount, account))
                         return true;
                     else
                         Notification.Error("Initial deposit was not done. Try again");
@@ -146,7 +149,7 @@ namespace BankManagement.View
                 Account transactionAccount = ChooseAccountForTransaction(accountController);
                 if (transactionAccount != null)
                 {
-                    TransactionController transactionController = new TransactionController();
+                    TransactionController transactionController = new TransactionController(new TransactionOperations());
                     transactionController.FillTable(transactionAccount.ID);
                     transactionView.GoToAccount(transactionAccount);
                 }
@@ -193,7 +196,8 @@ namespace BankManagement.View
 
         private void SaveCustomerSession(ProfileController profileController)
         {
-            CustomersController customersController = new CustomersController();
+            CustomerOperations customerOperations = new CustomerOperations();
+            CustomersController customersController = new CustomersController(customerOperations, customerOperations);
             customersController.UpdateCustomer(profileController.Customer);
         }
 

@@ -1,125 +1,99 @@
-﻿using BankManagement.Models;
+﻿using SQLite;
+using BankManagement.Models;
+using BankManagementCipher.Model;
+using BankManagementCipher.Utility;
 using BankManagementDB.Interface;
-using BankManagementDB.Utility;
-using System;
 using System.Collections.Generic;
-using System.Data;
-using System.Data.SQLite;
-using System.Linq;
-using System.Security.Policy;
-using System.Text;
 using System.Threading.Tasks;
-using System.Xml.Linq;
+using System;
+using System.Linq;
 
 namespace BankManagementDB.db
 {
-    public class CustomerOperations 
+    public class CustomerOperations : IQueryServices<CustomerDTO>, IAuthenticationServices
     {
-
-        private static string connectionString = "Data source=database.sqlite3";
-
-        public static async Task<bool> UpdateOrInsert(Customer customer, string hashedPassword)
+        private static readonly SQLiteConnectionString Options = new SQLiteConnectionString(@"C:\Users\kavya-pt6688\source\repos\BankManagementDB\BankManagementDB\Database.sqlite3", true, key: "pass");
+        
+        
+        public async Task<IList<CustomerDTO>> Get(Guid id)
         {
-            bool result = false;
+            IList<CustomerDTO> customers = new List<CustomerDTO>();
             try
             {
-                using (SQLiteConnection con = new SQLiteConnection(connectionString))
+                SQLiteAsyncConnection connection = new SQLiteAsyncConnection(Options);
                 {
-                    using (SQLiteCommand cmd = new SQLiteCommand(con))
-                    {
-                        await con.OpenAsync();
-                        cmd.CommandText = @"INSERT INTO Customer(
-                                    ID, Name, Age, Phone, Email, HashedPassword, LastLoggedOn, CreatedOn) 
-                                    VALUES(@ID, @Name, @Age, @Phone, @Email, @HashedPassword, @LastLoggedOn, @CreatedOn)
-                                    ON CONFLICT(ID) 
-                                    DO UPDATE SET 
-                                    Name = @Name, Age = @Age, LastLoggedOn = @LastLoggedOn";
-                        ;
+                    customers = await connection.QueryAsync<CustomerDTO>("Select * from Customer Where ID = ?", id);
 
-                        cmd.Parameters.AddWithValue("@ID", customer.ID.ToString());
-                        cmd.Parameters.AddWithValue("@Name", customer.Name);
-                        cmd.Parameters.AddWithValue("@Age", customer.Age);
-                        cmd.Parameters.AddWithValue("@Phone", customer.Phone);
-                        cmd.Parameters.AddWithValue("@Email", customer.Email);
-                        cmd.Parameters.AddWithValue("@HashedPassword", hashedPassword);
-                        cmd.Parameters.AddWithValue("@CreatedOn", DateTimeHelper.GetEpoch(customer.CreatedOn));
-                        cmd.Parameters.AddWithValue("@LastLoggedOn", DateTimeHelper.GetEpoch(customer.LastLoggedOn));
+                    await connection.CloseAsync();
+                    if (customers != null && customers.Count > 0)
+                        foreach (var customer in customers.ToList())
+                            customers.Add(customer);
 
-                        await cmd.ExecuteNonQueryAsync();
-                        cmd.Dispose();
-                    }
-                    con.Close();
                 }
-                return true;
             }
-            catch (Exception err)
-            { Console.WriteLine(err); }
-            return result;
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+            return customers;
+        }
+        public async Task<bool> InsertOrReplace(CustomerDTO customerDTO)
+        {
+            try
+            {
+
+                SQLiteAsyncConnection connection = new SQLiteAsyncConnection(Options);
+                int rowsModified = await connection.InsertOrReplaceAsync(customerDTO);
+                await connection.CloseAsync();
+                if (rowsModified > 0) return true;
+
+            }catch(Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+            return false;
         }
 
-        public static async Task<Customer> Get(string phoneNumber)
+        public string GetHashedPassword(string? phoneNumber)
         {
             try
             {
-                using (SQLiteConnection conn = new SQLiteConnection(connectionString))
-                {
-                    await conn.OpenAsync();
-                    using (SQLiteCommand cmd = new SQLiteCommand(conn))
-                    {
-                        cmd.CommandText = @"Select ID, Name, Age, Phone, Email, LastLoggedOn, CreatedOn FROM Customer WHERE Phone = @Phone";
-                        
-                        cmd.Parameters.AddWithValue("@Phone", phoneNumber);
 
-                        await cmd.ExecuteNonQueryAsync();
-                        using (var reader = await cmd.ExecuteReaderAsync())
-                        {
-                            while (reader.Read())
-                            {
-                                Customer customer = new Customer();
-                                customer.ID = new Guid(reader.GetString(0));
-                                customer.Name = reader.GetString(1);
-                                customer.Age = (int)reader.GetInt64(2);
-                                customer.Phone = reader.GetString(3);
-                                customer.Email = reader.GetString(4);
-                                customer.LastLoggedOn = DateTimeHelper.ConvertEpochToDateTime(reader.GetInt64(5));
-                                return customer;
-                            }
-                        }
-                        
-                        cmd.Dispose();
-                    }
-                    conn.Close();
-                }
+                SQLiteConnection connection = new SQLiteConnection(Options);
+                var passwordsList = connection.QueryScalars<string>("Select HashedPassword from Customer where Phone = ?", phoneNumber);
+                var password = passwordsList.FirstOrDefault();
+                connection.Close();
+                return password;
+
             }
-            catch (Exception err)
-            { Console.WriteLine(err.Message); }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
             return null;
         }
 
-        public static string GetHashedPassword(string phoneNumber)
+        public async Task<IList<CustomerDTO>> Get(string phoneNumber)
         {
-            string result = null;
+            IList<CustomerDTO> customers = new List<CustomerDTO>();
             try
             {
-                using (SQLiteConnection conn = new SQLiteConnection(connectionString))
+                SQLiteAsyncConnection connection = new SQLiteAsyncConnection(Options);
                 {
-                    conn.Open();
-                    using (SQLiteCommand cmd = new SQLiteCommand(conn))
-                    {
-                        cmd.CommandText = "Select HashedPassword FROM Customer WHERE Phone = @Phone";
-                        cmd.Parameters.AddWithValue("@Phone", phoneNumber);
-                        
-                        result = (string)cmd.ExecuteScalar();
+                    customers = await connection.QueryAsync<CustomerDTO>("Select * from Customer Where Phone = ?", phoneNumber);
 
-                        cmd.Dispose();
-                    }
-                    conn.Close();
+                    await connection.CloseAsync();
+                    if (customers != null && customers.Count > 0)
+                        foreach (var customer in customers.ToList())
+                            customers.Add(customer);
+
                 }
             }
-            catch (Exception err)
-            { Console.WriteLine(err.Message); }
-
-            return result;
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+            return customers;
         }
     }
 }

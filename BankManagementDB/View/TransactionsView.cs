@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Remoting.Messaging;
+using System.Security.Principal;
 using BankManagement.Controller;
 using BankManagement.Model;
 using BankManagement.Models;
 using BankManagement.Utility;
+using BankManagementDB.Controller;
+using BankManagementDB.db;
 using BankManagementDB.Interface;
 using BankManagementDB.View;
 
@@ -57,34 +61,28 @@ namespace BankManagement.View
         public bool TransactionOperations(AccountCases option, Account account)
         {
             Helper helper = new Helper();
-            ITransactionServices transactionController = new TransactionController();
-            transactionController.BalanceChanged += onBalanceChanged;
+            ITransactionServices transactionController = new TransactionController(new TransactionOperations());
+            IATMTransactionServices transactionATMController = new ATMTransactionsController(transactionController);
+
+            transactionATMController.BalanceChanged += onBalanceChanged;
             decimal amount;
 
             switch (option)
             {
                 case AccountCases.DEPOSIT:
-                    amount = helper.GetAmount();
-                    transactionController.Deposit(amount, account);
+                    Deposit(account, transactionATMController);
                     return false;
 
                 case AccountCases.WITHDRAW:
-                    amount = helper.GetAmount();
-                    if (amount > account.Balance) Notification.Error("Insufficient Balance");
-                    else transactionController.Withdraw(amount, account);
+                    Withdraw(account, transactionATMController);
                     return false;
 
                 case AccountCases.TRANSFER:
-                    amount = helper.GetAmount();
-                    if (amount > account.Balance) Notification.Error("Insufficient Balance");
-                    else {
-                        Guid transferAccountID = GetTransferAccountID(account.ID);
-                        transactionController.Transfer(amount, account, transferAccountID);
-                    }
+                    Transfer(account, transactionATMController);
                     return false;
 
                 case AccountCases.CHECK_BALANCE:
-                    Notification.Info($"\nBALANCE: {account.Balance}\n");
+                    Notification.Info($"\nBALANCE: Rs. {account.Balance}\n");
                     return false;
 
                 case AccountCases.VIEW_STATEMENT:
@@ -101,6 +99,36 @@ namespace BankManagement.View
                 default:
                     Notification.Error("Invalid option. Try again!");
                     return false;
+            }
+        }
+
+        public void Deposit(Account account, IATMTransactionServices transactionATMController)
+        {
+            Helper helper = new Helper();
+
+            decimal amount = helper.GetAmount();
+            transactionATMController.Deposit(amount, account);
+        }
+
+        public void Withdraw(Account account, IATMTransactionServices transactionATMController)
+        {
+            Helper helper = new Helper();
+
+            decimal amount = helper.GetAmount();
+            if (amount > account.Balance) Notification.Error("Insufficient Balance");
+            else transactionATMController.Withdraw(amount, account);
+        }
+
+        public void Transfer(Account account, IATMTransactionServices transactionATMController)
+        {
+            Helper helper = new Helper();
+
+            decimal amount = helper.GetAmount();
+            if (amount > account.Balance) Notification.Error("Insufficient Balance");
+            else
+            {
+                Guid transferAccountID = GetTransferAccountID(account.ID);
+                transactionATMController.Transfer(amount, account, transferAccountID);
             }
         }
 
