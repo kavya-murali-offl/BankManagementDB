@@ -1,5 +1,4 @@
-﻿using BankManagement.Models;
-using BankManagementCipher.Model;
+﻿using BankManagementCipher.Model;
 using BankManagementDB.Interface;
 using SQLite;
 using System;
@@ -11,7 +10,8 @@ namespace BankManagementDB.db
     
     public class AccountOperations : IQueryServices<AccountDTO>
     {
-        private readonly SQLiteConnectionString Options = new SQLiteConnectionString(@"C:\Users\kavya-pt6688\source\repos\BankManagementDB\BankManagementDB\Database.sqlite3", true, key: "pass");
+        private readonly SQLiteConnectionString Options = new SQLiteConnectionString(Environment.GetEnvironmentVariable("DATABASE_PATH"),
+    true, key: Environment.GetEnvironmentVariable("DATABASE_PASSWORD"));
 
         public async Task<IList<AccountDTO>> Get(Guid userID)
         {
@@ -21,8 +21,8 @@ namespace BankManagementDB.db
             {
                 SQLiteAsyncConnection connection = new SQLiteAsyncConnection(Options);
                 {
-
-                    accounts = await connection.QueryAsync<AccountDTO>("Select * from Account where UserID = ? ORDER BY CreatedOn Desc", userID);
+                    var result = connection.Table<AccountDTO>().Where(x => x.UserID == userID).OrderByDescending(x => x.CreatedOn);
+                    accounts = result.ToListAsync().Result;
                     await connection.CloseAsync();
                 }
             }

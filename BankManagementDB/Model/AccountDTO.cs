@@ -14,6 +14,8 @@ namespace BankManagementCipher.Model
         [PrimaryKey]
         public Guid ID { get; set; }
 
+        public long AccountNumber { get; set; }
+
         public decimal Balance { get; set; }
 
         public decimal MinimumBalance { get; set; }

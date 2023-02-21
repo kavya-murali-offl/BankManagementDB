@@ -3,11 +3,8 @@ using System.Collections.Generic;
 using System.Data;
 using BankManagement.Enums;
 using BankManagement.Models;
-using BankManagement.View;
 using BankManagementDB.db;
 using System.Linq;
-using BankManagement.Utility;
-using BankManagement.Model;
 using BankManagementDB.View;
 using BankManagementDB.Interface;
 using BankManagementCipher.Model;
@@ -19,19 +16,18 @@ namespace BankManagement.Controller
     delegate bool UpdateAccountDelegate(Account account);
     delegate bool InsertAccountDelegate(Account account);
 
-    public class AccountsController 
+    public class AccountsController : IAccountServices
     {
         public AccountsController() { }    
 
-        public AccountsController(ITransactionServices transactionController)
+        public AccountsController(IQueryServices<AccountDTO> accountServices)
         {
-            TransactionController = transactionController;
+            AccountServices = accountServices;
         }
 
         public static IList<Account> AccountsList { get; set; }
 
-        public ITransactionServices TransactionController { get; private set; }    
-
+        public IQueryServices<AccountDTO> AccountServices { get; private set; }    
 
         public bool InsertAccount(Account account)
         {
@@ -50,8 +46,7 @@ namespace BankManagement.Controller
         {
             try
             {
-                IQueryServices<AccountDTO> accountOperations = new AccountOperations();
-                 return accountOperations.InsertOrReplace(Mapping.AccountToDto(account)).Result;
+                 return AccountServices.InsertOrReplace(Mapping.AccountToDto(account)).Result;
             }
             catch(Exception ex)
             {
@@ -59,8 +54,6 @@ namespace BankManagement.Controller
             }
             return false;   
         }
-
-        
 
         private bool InsertAccountToList(Account account)
         {
@@ -99,9 +92,7 @@ namespace BankManagement.Controller
         {
             try
             {
-                IQueryServices<AccountDTO> accountOperations = new AccountOperations();
-
-                return accountOperations.InsertOrReplace(Mapping.AccountToDto(account)).Result;
+                return AccountServices.InsertOrReplace(Mapping.AccountToDto(account)).Result;
             }catch(Exception ex)
             {
                 return false;   
@@ -129,13 +120,12 @@ namespace BankManagement.Controller
             return false;   
         }
 
-        public void FillTable(Guid id)
+        public void GetAllAccounts(Guid id)
         {
             try
             {
                 AccountsList ??= new List<Account>();   
-                IQueryServices<AccountDTO> accountOperations = new AccountOperations();
-                var accountDTOs = accountOperations.Get(id).Result;
+                var accountDTOs = AccountServices.Get(id).Result;
 
                 foreach(var accountDTO in accountDTOs)
                     AccountsList.Add(Mapping.DtoToAccount(accountDTO));
@@ -161,6 +151,6 @@ namespace BankManagement.Controller
             return account;
         }
 
-        public IList<Account> GetAllAccounts() => AccountsList ?? new List<Account>();
+        public IList<Account> GetAccountsList() => AccountsList ?? new List<Account>();
     }
 }

@@ -4,7 +4,9 @@ using BankManagement.Model;
 using BankManagement.Models;
 using BankManagement.Utility;
 using BankManagementCipher.Model;
-
+using BankManagementDB.Controller;
+using BankManagementDB.Enums;
+using BankManagementDB.Model;
 
 namespace BankManagementCipher.Utility
 {
@@ -82,6 +84,7 @@ namespace BankManagementCipher.Utility
                 TransactionType = Helper.StringToEnum<TransactionTypes>(transactionDTO.TransactionType),
                 Amount = transactionDTO.Amount,
                 RecordedOn = transactionDTO.RecordedOn,
+                ModeOfPayment = Helper.StringToEnum<ModeOfPayment>(transactionDTO.ModeOfPayment)
             };
         }
 
@@ -96,7 +99,50 @@ namespace BankManagementCipher.Utility
                 TransactionType = transaction.TransactionType.ToString(),
                 Amount = transaction.Amount,
                 RecordedOn = transaction.RecordedOn,
+                ModeOfPayment = transaction.ModeOfPayment.ToString()
             };
+        }
+
+        public static Card DtoToCard(CardDTO cardDTO)
+        {
+            var cardType = Helper.StringToEnum<CardType>(cardDTO.Type);
+            Card card = CardFactory.GetCardByType(cardType);
+
+            card.ID = cardDTO.ID;
+            card.Balance = cardDTO.Balance;
+            card.Pin = cardDTO.Pin;
+            card.CardHolder = cardDTO.CardHolder;
+            card.CardNumber = cardDTO.CardNumber;
+            card.APR = cardDTO.APR;
+            card.AccountID = cardDTO.AccountID;
+            card.CreditLimit = cardDTO.CreditLimit;
+            card.CreditPoints = cardDTO.CreditPoints;
+            card.CVV = cardDTO.CVV;
+            card.ExpiryMonth = cardDTO.ExpiryMonth;
+            card.ExpiryYear = cardDTO.ExpiryYear;
+            card.Type = cardType;
+            return card;
+        }
+
+        public static CardDTO CardToDto(Card card)
+        {
+            return new CardDTO()
+            {
+                ID = card.ID,
+                Balance = card.Balance,
+                Pin = card.Pin,
+                CardHolder = card.CardHolder,
+                CardNumber = card.CardNumber,
+                APR = card.APR,
+                AccountID = card.AccountID,
+                CreditLimit = card.CreditLimit,
+                CreditPoints = card.CreditPoints,
+                CVV = card.CVV,
+                ExpiryMonth = card.ExpiryMonth,
+                ExpiryYear = card.ExpiryYear,
+                Type = card.Type.ToString()
+            };
+
         }
     }
 }

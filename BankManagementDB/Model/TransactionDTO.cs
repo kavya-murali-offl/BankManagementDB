@@ -12,6 +12,8 @@ namespace BankManagementCipher.Model
 
         public string TransactionType { get; set; }
 
+        public string ModeOfPayment { get; set; }
+
         public decimal Amount { get; set; }
 
         public DateTime RecordedOn { get; set; }

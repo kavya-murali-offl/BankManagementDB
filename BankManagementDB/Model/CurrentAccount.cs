@@ -17,7 +17,7 @@ namespace BankManagement.Model
             MinimumBalance = 500;
         }
 
-        public override string ToString() => $"Account Type: Current\n Account ID: {ID} \nAccount Status: {Status} \nBalance: Rs. {Balance}\n" +
+        public override string ToString() => $"\nAccount Type: Current\n Account Number: {AccountNumber} \nAccount Status: {Status} \nBalance: Rs. {Balance}\n" +
                 $"Minimum Balance: {MinimumBalance}\n" +
                 "========================================\n";
     }

@@ -12,7 +12,6 @@ using BankManagementDB.Interface;
 namespace BankManagement.Controller
 {
     delegate bool InsertTransactionDelegate(Transaction transaction);
-    delegate bool TransferDelegate(decimal amount, Account account);
 
     public class TransactionController : ITransactionServices
     {
@@ -20,13 +19,13 @@ namespace BankManagement.Controller
 
         public TransactionController(IQueryServices<TransactionDTO> queryServices) {
             TransactionOperations = queryServices;
-        }   
+        }
 
         public event Action<string> BalanceChanged;
 
         public static IList<Transaction> TransactionsList { get; set; }
 
-        public IQueryServices<TransactionDTO> TransactionOperations { get; private set;}
+        public IQueryServices<TransactionDTO> TransactionOperations { get; private set; }
 
         public bool InsertTransaction(Transaction transaction)
         {
@@ -51,9 +50,9 @@ namespace BankManagement.Controller
 
         private bool InsertTransactionToList(Transaction transaction)
         {
-            TransactionsList ??= new List<Transaction>();   
-           TransactionsList.Add(transaction);
-           return true;
+            TransactionsList ??= new List<Transaction>();
+            TransactionsList.Add(transaction);
+            return true;
         }
 
         private bool InsertTransactionInDB(Transaction transaction)
@@ -64,9 +63,9 @@ namespace BankManagement.Controller
                 TransactionDTO dto = Mapping.TransactionToDto(transaction);
                 return TransactionOperations.InsertOrReplace(dto).Result;
 
-            } catch(Exception e)
+            } catch (Exception e)
             {
-                return false;   
+                return false;
             }
         }
 
@@ -80,14 +79,14 @@ namespace BankManagement.Controller
                     TransactionsList.Add(Mapping.DtoToTransaction(transactionDTO));
 
             }
-            catch(Exception e) {
+            catch (Exception e) {
                 Console.WriteLine(e);
             }
         }
 
         public DateTime? GetLastWithdrawDate()
         {
-            if(TransactionsList.Count > 0)
+            if (TransactionsList.Count > 0)
             {
                 Transaction transaction = TransactionsList.LastOrDefault(data => data.TransactionType == TransactionTypes.WITHDRAW);
 
@@ -99,7 +98,11 @@ namespace BankManagement.Controller
             return null;
         }
 
-        public IList<Transaction> GetAllTransactions() => TransactionsList;
+        public IEnumerable<Transaction> GetAllTransactions(Guid accountID)
+        {
+            IEnumerable<Transaction> list = from transaction in TransactionsList where accountID.Equals(transaction.AccountID) select transaction;
+            return list;
+        }
 
     }
 }

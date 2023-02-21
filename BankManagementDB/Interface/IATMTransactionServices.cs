@@ -1,9 +1,6 @@
 ﻿using BankManagement.Models;
+using BankManagementDB.Enums;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BankManagementDB.Interface
 {
@@ -12,10 +9,11 @@ namespace BankManagementDB.Interface
 
         event Action<string> BalanceChanged;
 
-        bool Deposit(decimal amount, Account account);
+        bool Deposit(decimal amount, Account account, ModeOfPayment modeOfPayment);
 
-        bool Withdraw(decimal amount, Account account);
+        bool Withdraw(decimal amount, Account account, ModeOfPayment modeOfPayment);
 
-        bool Transfer(decimal amount, Account account, Guid transferAccountID);
+        bool Transfer(decimal amount, Account account, Guid transferAccountID, ModeOfPayment modeOfPayment);
+
     }
 }

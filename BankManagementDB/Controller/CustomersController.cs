@@ -5,7 +5,6 @@ using BankManagementCipher.Model;
 using BankManagementCipher.Utility;
 using BankManagementDB.db;
 using BankManagementDB.Interface;
-using BankManagementDB.View;
 
 namespace BankManagement.Controller
 {
@@ -15,11 +14,11 @@ namespace BankManagement.Controller
         public CustomersController(IQueryServices<CustomerDTO> queryOperations, IAuthenticationServices authenticationServices)
         {
             CustomerOperations = queryOperations;
-            PasswordServices = authenticationServices;
+            AuthenticationServices = authenticationServices;
         }
 
         public IQueryServices<CustomerDTO> CustomerOperations { get; set; }
-        public IAuthenticationServices PasswordServices { get; set; }
+        public IAuthenticationServices AuthenticationServices { get; set; }
 
         public Customer GetCustomer(string phoneNumber)
         {
@@ -43,7 +42,7 @@ namespace BankManagement.Controller
             try
             {
 
-                string hashedPassword = AuthServices.ComputeHash(password);
+                string hashedPassword = AuthServices.Encrypt(password);
                 CustomerDTO customerDTO = Mapping.CustomerToDto(customer, hashedPassword);
                 return CustomerOperations.InsertOrReplace(customerDTO).Result;
             }
@@ -58,7 +57,7 @@ namespace BankManagement.Controller
         {
             try
             {
-                string password = PasswordServices.GetHashedPassword(customer.Phone);
+                string password = AuthenticationServices.GetHashedPassword(customer.Phone);
                 CustomerDTO customerDTO = Mapping.CustomerToDto(customer, password);  
                 bool success = CustomerOperations.InsertOrReplace(customerDTO).Result;
                 return GetCustomer(customer.Phone);
@@ -68,21 +67,6 @@ namespace BankManagement.Controller
                 Console.WriteLine(ex);
             }
             return null;
-        }
-
-        public bool ValidatePassword(string phoneNumber, string password)
-        {
-            try
-            {
-                string hashedInput = AuthServices.ComputeHash(password);
-                string passwordFromDB = PasswordServices.GetHashedPassword(phoneNumber);
-                return hashedInput == passwordFromDB ? true : false;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-            }
-            return false;
         }
     }
 }

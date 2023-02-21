@@ -1,16 +1,20 @@
-﻿
-using BankManagementDB.Enums;
+﻿using BankManagementDB.Enums;
+using SQLite;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace BankManagementDB.Model
 {
-    public abstract class Card
+    [Table("Card")]
+    public class CardDTO
     {
+        [PrimaryKey]
         public Guid ID { get; set; }
 
         public string CardHolder { get; set; }
-
-        public int CreditPoints { get; set; }
 
         public int Pin { get; set; }
 
@@ -30,13 +34,8 @@ namespace BankManagementDB.Model
 
         public decimal CreditLimit { get; set; }
 
-        public CardType Type { get; set; }
+        public int CreditPoints { get; set; }
 
-        public abstract void Purchase(decimal amount);
-
-        public abstract void Payment(decimal amount);
-
-        public abstract override string ToString();
-
+        public string Type { get; set; }
     }
 }

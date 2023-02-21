@@ -9,6 +9,7 @@ using BankManagement.Model;
 using BankManagement.Utility;
 using BankManagementDB.Controller;
 using BankManagementDB.db;
+using BankManagementDB.Enums;
 
 namespace BankManagement.View
 {
@@ -67,9 +68,9 @@ namespace BankManagement.View
             ProfileController profileController
             )
         {
-            ITransactionServices transactionController = new TransactionController(new TransactionOperations());
-            IATMTransactionServices transactionATMController = new ATMTransactionsController(transactionController);
-            AccountsController accountsController = new AccountsController(transactionController); 
+            TransactionController transactionController = new TransactionController(new TransactionOperations());
+            AccountsController accountsController = new AccountsController(new AccountOperations()); 
+            IATMTransactionServices transactionATMController = new ATMTransactionsController(transactionController, accountsController);
             
             switch (operation)
             {
@@ -87,12 +88,11 @@ namespace BankManagement.View
                     return false;
 
                 case DashboardCases.GO_TO_ACCOUNT:
-                    GoToAccount(accountsController);
+                    GoToAccount(accountsController, transactionATMController, transactionController);
                     return false;
 
                 case DashboardCases.SIGN_OUT:
                     SaveCustomerSession(profileController);
-
                     return true;
 
                 default:
@@ -101,7 +101,7 @@ namespace BankManagement.View
             }
         }
 
-        public Account CreateAccount(AccountsController accountsController, IATMTransactionServices transactionATMController, ProfileController profile)
+        public Account CreateAccount(IAccountServices accountsController, IATMTransactionServices transactionATMController, ProfileController profile)
         {
 
             AccountsView accountsView = new AccountsView();
@@ -131,7 +131,7 @@ namespace BankManagement.View
                 decimal amount = helper.GetAmount();
 
                 if (amount > account.MinimumBalance)
-                    if (transactionATMController.Deposit(amount, account))
+                    if (transactionATMController.Deposit(amount, account, ModeOfPayment.CASH))
                         return true;
                     else
                         Notification.Error("Initial deposit was not done. Try again");
@@ -141,7 +141,7 @@ namespace BankManagement.View
             return false;
         }
 
-        public void GoToAccount(AccountsController accountController)
+        public void GoToAccount(AccountsController accountController,IATMTransactionServices transactionATMController, ITransactionServices transactionServices)
         {
             while (true)
             {
@@ -149,9 +149,8 @@ namespace BankManagement.View
                 Account transactionAccount = ChooseAccountForTransaction(accountController);
                 if (transactionAccount != null)
                 {
-                    TransactionController transactionController = new TransactionController(new TransactionOperations());
-                    transactionController.FillTable(transactionAccount.ID);
-                    transactionView.GoToAccount(transactionAccount);
+                    transactionServices.FillTable(transactionAccount.ID);
+                    transactionView.GoToAccount(transactionAccount, transactionATMController);
                 }
                 else
                     break;
@@ -162,20 +161,27 @@ namespace BankManagement.View
         {
             try
             {
-                IList<Account> accountsList = accountController.GetAllAccounts();
-                ListAccountIDs(accountsList);
-                Console.WriteLine("Choose the account or Press 0 to go back!\n");
-                string index = Console.ReadLine().Trim();
                 int accountIndex;
 
-                if (!int.TryParse(index, out accountIndex))
-                    Notification.Error("Please enter a valid number.");
-                else if (accountIndex == 0)
-                    return null;
-                else if (accountIndex > accountsList.Count)
+                IList<Account> accountsList = accountController.GetAccountsList();
+                if (accountsList.Count() == 1)
+                    accountIndex = 1;
+                else
                 {
-                    Notification.Error("Choose from the listed accounts.");
-                    ChooseAccountForTransaction(accountController);
+                    ListAccountIDs(accountsList);
+
+                    Console.WriteLine("Choose the account or Press 0 to go back!\n");
+                    string index = Console.ReadLine().Trim();
+
+                    if (!int.TryParse(index, out accountIndex))
+                        Notification.Error("Please enter a valid number.");
+                    else if (accountIndex == 0)
+                        return null;
+                    else if (accountIndex > accountsList.Count)
+                    {
+                        Notification.Error("Choose from the listed accounts.");
+                        ChooseAccountForTransaction(accountController);
+                    }
                 }
 
                 return accountsList[accountIndex - 1];
@@ -188,7 +194,8 @@ namespace BankManagement.View
 
         public void ListAllAccounts(AccountsController accountsController)
         {
-            IList<Account> accountsList = accountsController.GetAllAccounts();
+            IList<Account> accountsList = accountsController.GetAccountsList();
+
             foreach(Account account in accountsList) {
                 Console.WriteLine(account);
             }
@@ -204,7 +211,7 @@ namespace BankManagement.View
         public void ListAccountIDs(IList<Account> accounts)
         {
             for(int i = 0; i < accounts.Count(); i++)
-                Notification.Info(i+1 + ". " + accounts[i].ID);
+                Notification.Info(i+1 + ". " + accounts[i].AccountNumber);
         }
     }
 }

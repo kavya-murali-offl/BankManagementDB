@@ -1,6 +1,7 @@
 ﻿using System;
 using BankManagement.Enums;
 using System.Data.Linq.Mapping;
+using BankManagementDB.Enums;
 
 namespace BankManagement.Model
 {
@@ -13,7 +14,7 @@ namespace BankManagement.Model
             RecordedOn = DateTime.Now;
         }
 
-        public Transaction(string description, decimal amount, decimal balance, TransactionTypes transactionType, Guid accountID)
+        public Transaction(string description, decimal amount, decimal balance, TransactionTypes transactionType, Guid accountID, ModeOfPayment modeOfPayment)
         {
             ID = Guid.NewGuid();
             Description = description;
@@ -22,25 +23,22 @@ namespace BankManagement.Model
             Balance = balance;  
             RecordedOn = DateTime.Now;
             AccountID = accountID;
+            ModeOfPayment = modeOfPayment;
         }
-        [Column]
+
         public Guid ID { get; set; }
-        [Column]
 
         public TransactionTypes TransactionType { get; set; }
-        [Column]
+
+        public ModeOfPayment ModeOfPayment { get; set; }
 
         public decimal Amount { get; set; }
-        [Column]
 
         public DateTime RecordedOn { get; set; }
-        [Column]
 
         public decimal Balance { get; set; }
-        [Column]
 
         public Guid AccountID { get; set; }
-        [Column]
 
         public string Description { get; set; }
 
@@ -48,8 +46,9 @@ namespace BankManagement.Model
              $@"
                 Transaction Type: {TransactionType} 
                 Transaction Time: {RecordedOn} 
-                Description: {Amount}
+                Description: {Description}
                 Amount: {Amount}
+                Mode of Payment: {ModeOfPayment}
                 Balance: {Balance}";
     }
 }

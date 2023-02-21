@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BankManagementDB.Enums
+namespace BankManagement.Enums
 {
-    public enum CardType
+    public enum AccountTypes
     {
-        VISA, MASTERCARD
+        CURRENT, SAVINGS
     }
 }

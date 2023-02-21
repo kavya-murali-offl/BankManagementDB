@@ -1,4 +1,5 @@
 ﻿using BankManagement.Enums;
+using BankManagementDB.Utility;
 using BankManagementDB.View;
 using System;
 
@@ -8,12 +9,15 @@ namespace BankManagement.Models
     {
         public Account() {
             ID = Guid.NewGuid();
+            AccountNumber = RandomGenerator.GenerateAccountNumber();
             Balance = 0;
             Status = AccountStatus.ACTIVE;
         }
         
         public Guid ID { get; set; }
-        
+
+        public long AccountNumber { get; set; }
+
         public decimal Balance { get; set; }
         
         public decimal MinimumBalance { get; set; }
@@ -32,7 +36,6 @@ namespace BankManagement.Models
         {
                 Balance += amount;
         }
-
 
         public void Withdraw(decimal amount)
         {

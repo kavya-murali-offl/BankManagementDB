@@ -9,12 +9,14 @@ using SQLite;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace BankManagementDB.db
 {
     public class TransactionOperations : IQueryServices<TransactionDTO>
     {
-        private readonly SQLiteConnectionString Options = new SQLiteConnectionString(@"C:\Users\kavya-pt6688\source\repos\BankManagementDB\BankManagementDB\Database.sqlite3", true, key: "pass");
+        private readonly SQLiteConnectionString Options = new SQLiteConnectionString(Environment.GetEnvironmentVariable("DATABASE_PATH"),
+    true, key: Environment.GetEnvironmentVariable("DATABASE_PASSWORD"));
 
         public async Task<IList<TransactionDTO>> Get(Guid accountID)
         {
@@ -23,7 +25,8 @@ namespace BankManagementDB.db
             {
                 SQLiteAsyncConnection connection = new SQLiteAsyncConnection(Options);
                 {
-                    IList<TransactionDTO> transactionDTOs = await connection.QueryAsync<TransactionDTO>("Select * from Transactions where AccountID = ?", accountID);
+                    var result = connection.Table<TransactionDTO>().Where(x => x.AccountID == accountID).OrderByDescending(x => x.RecordedOn);
+                    IList<TransactionDTO> transactionDTOs = result.ToListAsync().Result;
                     await connection.CloseAsync();
 
                     return transactionDTOs;

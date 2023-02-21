@@ -1,38 +1,43 @@
-﻿using BankManagement.Controller;
+﻿using System;
+using BankManagement.Controller;
 using BankManagement.Enums;
 using BankManagement.Model;
 using BankManagement.Models;
+using BankManagementDB.Enums;
 using BankManagementDB.Interface;
 using BankManagementDB.View;
-using System;
 
 
 namespace BankManagementDB.Controller
 {
+    delegate bool TransferDelegate(decimal amount, Account account, ModeOfPayment modeOfPayment);
+
     public class ATMTransactionsController : IATMTransactionServices
     {
         public event Action<string> BalanceChanged;
 
-        public ATMTransactionsController(ITransactionServices transactionController) {
+        public ATMTransactionsController(ITransactionServices transactionController, AccountsController accountsController) {
             TransactionController = transactionController;
+            AccountController = accountsController;
         }
         
         public ITransactionServices TransactionController { get; set; }
 
-        public bool Deposit(decimal amount, Account account)
+        public AccountsController AccountController { get; set; }
+
+        public bool Deposit(decimal amount, Account account, ModeOfPayment modeOfPayment)
         {
             bool isDeposited = false;
             try
             {
                 account.Deposit(amount);
 
-                AccountsController accountsController = new AccountsController();
-                isDeposited = accountsController.UpdateAccount(account);
-
+                isDeposited = AccountController.UpdateAccount(account);
+                
                 if (isDeposited)
                 {
                     BalanceChanged?.Invoke($"Deposit of Rs. {amount} is successful");
-                    Transaction transaction = new Transaction("Deposit", amount, account.Balance, TransactionTypes.DEPOSIT, account.ID);
+                    Transaction transaction = new Transaction("Deposit", amount, account.Balance, TransactionTypes.DEPOSIT, account.ID, modeOfPayment);
                     bool isTransacted = TransactionController.InsertTransaction(transaction);
                 }
                 else
@@ -48,7 +53,7 @@ namespace BankManagementDB.Controller
             return isDeposited;
         }
 
-        public bool Withdraw(decimal amount, Account account)
+        public bool Withdraw(decimal amount, Account account, ModeOfPayment modeOfPayment)
         {
             bool isWithdrawn = false;
             try
@@ -57,13 +62,12 @@ namespace BankManagementDB.Controller
 
                 account.Withdraw(amount);
 
-                AccountsController accountController = new AccountsController();
-                isWithdrawn = accountController.UpdateAccount(account);
+                isWithdrawn = AccountController.UpdateAccount(account);
 
                 if (isWithdrawn)
                 {
                     BalanceChanged?.Invoke($"Withdrawal of Rs. {amount} is successful");
-                    Transaction transaction = new Transaction("Withdraw", amount, account.Balance, TransactionTypes.WITHDRAW, account.ID);
+                    Transaction transaction = new Transaction("Withdraw", amount, account.Balance, TransactionTypes.WITHDRAW, account.ID, modeOfPayment);
                     bool isTransacted = TransactionController.InsertTransaction(transaction);
                 }
                 else
@@ -94,7 +98,7 @@ namespace BankManagementDB.Controller
                 Notification.Info("You have been charged for not maintaining minimum balance");
                 Transaction transaction = new Transaction("Minimum Balance Charge",
                     currentAccount.CHARGES, currentAccount.Balance,
-                    TransactionTypes.WITHDRAW, currentAccount.ID);
+                    TransactionTypes.WITHDRAW, currentAccount.ID, ModeOfPayment.INTERNAL);
                 bool isMinBalanceTransacted = TransactionController.InsertTransaction(transaction);
                     
             }
@@ -106,9 +110,9 @@ namespace BankManagementDB.Controller
             if (interest > 0)
             {
                 Notification.Info($"Interest deposit of Rs. {interest} has been initiated");
-                if (Deposit(interest, account))
+                if (Deposit(interest, account, ModeOfPayment.INTERNAL))
                 {
-                    Transaction transaction = new Transaction("Interest", interest, account.Balance, TransactionTypes.DEPOSIT, account.ID);
+                    Transaction transaction = new Transaction("Interest", interest, account.Balance, TransactionTypes.DEPOSIT, account.ID, ModeOfPayment.INTERNAL);
                     TransactionController.InsertTransaction(transaction);
                     return interest;
                 }
@@ -117,21 +121,20 @@ namespace BankManagementDB.Controller
             }
             return 0;
         }
-        public bool Transfer(decimal amount, Account account, Guid toAccountID)
+        public bool Transfer(decimal amount, Account account, Guid toAccountID, ModeOfPayment modeOfPayment)
         {
             try
             {
-                AccountsController accountsController = new AccountsController();
-                Account transferAccount = accountsController.GetAccountByQuery("ID", toAccountID);
+                Account transferAccount = AccountController.GetAccountByQuery("ID", toAccountID);
 
                 if (transferAccount != null)
                 {
                     TransferDelegate transfer = Withdraw;
-                    bool isWithdrawn = transfer(amount, account);
+                    bool isWithdrawn = transfer(amount, account, modeOfPayment);
                     if (isWithdrawn)
                     {
                         transfer = Deposit;
-                        bool isDeposited = transfer(amount, transferAccount);
+                        bool isDeposited = transfer(amount, transferAccount, modeOfPayment);
                         return isDeposited;
                     }
                 }

@@ -100,18 +100,30 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controller\ATMTransactionsController.cs" />
-    <Compile Include="db\AccountOperations.cs" />
-    <Compile Include="db\CipherOperations.cs" />
-    <Compile Include="db\CustomerOperations.cs" />
-    <Compile Include="db\DatabaseOperations.cs" />
-    <Compile Include="db\TransactionOperations.cs" />
-    <Compile Include="Enums\CardType.cs" />
+    <Compile Include="Controller\AuthController.cs" />
+    <Compile Include="Controller\CardController.cs" />
+    <Compile Include="Controller\CardCredentialsController.cs" />
+    <Compile Include="Controller\CardFactory.cs" />
+    <Compile Include="Database\AccountOperations.cs" />
+    <Compile Include="Database\CardOperations.cs" />
+    <Compile Include="Database\CipherOperations.cs" />
+    <Compile Include="Database\CustomerOperations.cs" />
+    <Compile Include="Database\TransactionOperations.cs" />
+    <Compile Include="Enum\CardType.cs" />
+    <Compile Include="Enum\ModeOfPayment.cs" />
+    <Compile Include="Interface\IAccountServices.cs" />
     <Compile Include="Interface\IATMTransactionServices.cs" />
+    <Compile Include="Interface\IAuthenticationServices.cs" />
+    <Compile Include="Interface\ICardServices.cs" />
     <Compile Include="Interface\ICustomerServices.cs" />
-    <Compile Include="Interface\IQueryOperations.cs" />
+    <Compile Include="Interface\IQueryServices.cs" />
+    <Compile Include="Interface\IValidationServices.cs" />
     <Compile Include="Model\AccountDTO.cs" />
     <Compile Include="Model\Card.cs" />
+    <Compile Include="Model\CardDTO.cs" />
+    <Compile Include="Model\CreditCard.cs" />
     <Compile Include="Model\CustomerDTO.cs" />
+    <Compile Include="Model\DebitCard.cs" />
     <Compile Include="Model\TransactionDTO.cs" />
     <Compile Include="Utility\AuthServices.cs" />
     <Compile Include="Controller\AccountFactory.cs" />
@@ -119,10 +131,9 @@
     <Compile Include="Controller\CustomersController.cs" />
     <Compile Include="Controller\ProfileController.cs" />
     <Compile Include="Controller\TransactionController.cs" />
-    <Compile Include="db\QueryExecution.cs" />
-    <Compile Include="Enums\AccountStatus.cs" />
-    <Compile Include="Enums\AccountTypes.cs" />
-    <Compile Include="Enums\TransactionTypes.cs" />
+    <Compile Include="Enum\AccountStatus.cs" />
+    <Compile Include="Enum\AccountTypes.cs" />
+    <Compile Include="Enum\TransactionTypes.cs" />
     <Compile Include="Interface\ITransactionServices.cs" />
     <Compile Include="Model\Account.cs" />
     <Compile Include="Model\CurrentAccount.cs" />
@@ -131,6 +142,8 @@
     <Compile Include="Model\Transaction.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utility\RandomGenerator.cs" />
+    <Compile Include="Utility\Config.cs" />
     <Compile Include="Utility\DateTimeHelper.cs" />
     <Compile Include="Utility\Helper.cs" />
     <Compile Include="Utility\InterestRate.cs" />
@@ -138,6 +151,7 @@
     <Compile Include="Utility\Printer.cs" />
     <Compile Include="Utility\Validation.cs" />
     <Compile Include="View\AccountsView.cs" />
+    <Compile Include="View\CardsView.cs" />
     <Compile Include="View\DashboardView.cs" />
     <Compile Include="View\EntryView.cs" />
     <Compile Include="View\LoginView.cs" />
@@ -150,6 +164,7 @@
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

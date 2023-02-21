@@ -10,7 +10,6 @@ namespace BankManagementDB.Interface
 
         Customer UpdateCustomer(Customer customer);
 
-        bool ValidatePassword(string phone, string password);
 
     }
 }

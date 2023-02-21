@@ -4,9 +4,12 @@ using BankManagement.Enums;
 using BankManagement.Model;
 using BankManagement.Models;
 using BankManagement.Utility;
+using BankManagementCipher.Model;
 using BankManagementDB.Controller;
 using BankManagementDB.db;
+using BankManagementDB.Enums;
 using BankManagementDB.Interface;
+using BankManagementDB.Model;
 using BankManagementDB.View;
 
 namespace BankManagement.View
@@ -67,19 +70,30 @@ namespace BankManagement.View
             Account account = AccountFactory.GetAccountByType(AccountTypes.CURRENT);
             account.UserID = signedUpCustomer.ID;
             account.Balance = 0;
-            AccountsController accountsController = new AccountsController();
-            
+            AccountsController accountsController = new AccountsController(new AccountOperations());
+            CardController cardController = new CardController();
+
             if (accountsController.InsertAccountToDB(account))
             {
                 ITransactionServices transactionServices = new TransactionController(new TransactionOperations());
-                IATMTransactionServices ATMTransactionController = new ATMTransactionsController(transactionServices);
+                IATMTransactionServices ATMTransactionController = new ATMTransactionsController(transactionServices, accountsController);
 
                 Helper helper = new Helper();
                 decimal amount = helper.GetAmount(account as CurrentAccount);
-                ATMTransactionController.Deposit(amount, account);
+                ATMTransactionController.Deposit(amount, account, ModeOfPayment.CASH);
 
                 Notification.Success("Account created successfully\n");
 
+                Card card = CardFactory.GetCardByType(CardType.DEBIT);
+                card = cardController.CreateCard(card, account);
+                card.Balance = account.Balance;
+                cardController.GetAllCards(account.ID);
+                if (cardController.InsertCard(card)) {
+                    Notification.Success("Debit card created successfully. Save Card Number and Pin for later use.\n");
+                    Console.WriteLine(card);
+                    Console.WriteLine($" PIN: {card.Pin}");
+                    Console.WriteLine();
+                }
             }
 
         }

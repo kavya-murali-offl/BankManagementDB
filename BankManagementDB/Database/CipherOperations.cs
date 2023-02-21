@@ -1,4 +1,5 @@
 ﻿using BankManagementCipher.Model;
+using BankManagementDB.Model;
 using SQLite;
 using System;
 using System.Collections.Generic;
@@ -10,8 +11,10 @@ namespace BankManagementDB.db
 {
     public class CipherOperations
     {
-        private static readonly SQLiteConnectionString Options = new SQLiteConnectionString(@"C:\Users\kavya-pt6688\source\repos\BankManagementDB\BankManagementDB\Database.sqlite3", true, key: "pass");
-
+        
+        private readonly static SQLiteConnectionString Options = new SQLiteConnectionString(Environment.GetEnvironmentVariable("DATABASE_PATH"),
+    true, key: Environment.GetEnvironmentVariable("DATABASE_PASSWORD"));
+        
         public static async void CreateTablesIfNotExists()
         {
             try
@@ -21,9 +24,9 @@ namespace BankManagementDB.db
                     await connection.CreateTableAsync<CustomerDTO>();
                     await connection.CreateTableAsync<AccountDTO>();
                     await connection.CreateTableAsync<TransactionDTO>();
+                    await connection.CreateTableAsync<CardDTO>();
 
                     await connection.CloseAsync();
-
                 }
             }
             catch (Exception e)

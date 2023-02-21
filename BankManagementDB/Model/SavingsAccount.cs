@@ -24,7 +24,7 @@ namespace BankManagement.Model
         }
 
         public override string ToString() =>
-             $"Account Type: Savings\n Account ID: {ID} \nAccount Status: {Status} \nBalance: Rs. {Balance}\n" +
+             $"\nAccount Type: Savings\n Account ID: {ID} \nAccount Status: {Status} \nBalance: Rs. {Balance}\n" +
                  $"Interest Rate:  {InterestRate}\n" +
                 "========================================\n";
 

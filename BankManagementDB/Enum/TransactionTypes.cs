@@ -6,9 +6,8 @@ using System.Threading.Tasks;
 
 namespace BankManagement.Enums
 {
-    public enum AccountTypes
-    {
-        CURRENT, SAVINGS
-    }
-
+        public enum TransactionTypes
+        {
+            DEPOSIT, WITHDRAW, TRANSFER
+        }
 }

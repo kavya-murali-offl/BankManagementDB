@@ -14,7 +14,7 @@ namespace BankManagementDB.Interface
 
         public bool InsertTransaction(Transaction transaction);
 
-        IList<Transaction> GetAllTransactions();
+        IEnumerable<Transaction> GetAllTransactions(Guid accountID);
 
         void FillTable(Guid accountID);
 

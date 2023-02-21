@@ -1,7 +1,5 @@
 ﻿using SQLite;
-using BankManagement.Models;
 using BankManagementCipher.Model;
-using BankManagementCipher.Utility;
 using BankManagementDB.Interface;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -12,9 +10,10 @@ namespace BankManagementDB.db
 {
     public class CustomerOperations : IQueryServices<CustomerDTO>, IAuthenticationServices
     {
-        private static readonly SQLiteConnectionString Options = new SQLiteConnectionString(@"C:\Users\kavya-pt6688\source\repos\BankManagementDB\BankManagementDB\Database.sqlite3", true, key: "pass");
-        
-        
+        private readonly SQLiteConnectionString Options = new SQLiteConnectionString(Environment.GetEnvironmentVariable("DATABASE_PATH"),
+    true, key: Environment.GetEnvironmentVariable("DATABASE_PASSWORD"));
+
+
         public async Task<IList<CustomerDTO>> Get(Guid id)
         {
             IList<CustomerDTO> customers = new List<CustomerDTO>();
@@ -25,6 +24,7 @@ namespace BankManagementDB.db
                     customers = await connection.QueryAsync<CustomerDTO>("Select * from Customer Where ID = ?", id);
 
                     await connection.CloseAsync();
+
                     if (customers != null && customers.Count > 0)
                         foreach (var customer in customers.ToList())
                             customers.Add(customer);
@@ -37,6 +37,7 @@ namespace BankManagementDB.db
             }
             return customers;
         }
+
         public async Task<bool> InsertOrReplace(CustomerDTO customerDTO)
         {
             try
