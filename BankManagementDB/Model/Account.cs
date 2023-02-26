@@ -1,9 +1,9 @@
-﻿using BankManagement.Enums;
+﻿using BankManagementDB.EnumerationType;
 using BankManagementDB.Utility;
 using BankManagementDB.View;
 using System;
 
-namespace BankManagement.Models
+namespace BankManagementDB.Models
 {
     public abstract class Account
     {
@@ -16,7 +16,7 @@ namespace BankManagement.Models
         
         public Guid ID { get; set; }
 
-        public long AccountNumber { get; set; }
+        public string AccountNumber { get; set; }
 
         public decimal Balance { get; set; }
         
@@ -24,7 +24,7 @@ namespace BankManagement.Models
         
         public decimal InterestRate { get; set; }
         
-        public AccountTypes Type { get; set; }
+        public AccountType Type { get; set; }
         
         public Guid UserID { get; set; }
         

@@ -1,4 +1,4 @@
-﻿using BankManagement.Enums;
+﻿using BankManagementDB.EnumerationType;
 using SQLite;
 using System;
 

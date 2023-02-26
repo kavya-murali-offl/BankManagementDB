@@ -8,6 +8,7 @@ namespace BankManagementDB.Interface
 {
     public interface IValidationServices
     {
-        bool ValidatePassword(string phone, string password);
+        bool ValidatePassword(string phoneNumber, string password);
+
     }
 }

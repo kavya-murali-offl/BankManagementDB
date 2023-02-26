@@ -1,16 +1,16 @@
 ﻿using System;
-using BankManagement.Enums;
-using BankManagement.Models;
-using BankManagement.Utility;
+using BankManagementDB.EnumerationType;
+using BankManagementDB.Models;
+using BankManagementDB.Utility;
 
-namespace BankManagement.Model
+namespace BankManagementDB.Model
 {
     public class SavingsAccount : Account
     {
         public SavingsAccount() : base()
         {
-            InterestRate = AccountInterestRate.SAVINGS_INTEREST_RATE;
-            Type = AccountTypes.SAVINGS;
+            InterestRate = Constants.AccountConstants.SAVINGS_INTEREST_RATE;
+            Type = AccountType.SAVINGS;
             CreatedOn = DateTime.Now;
             MinimumBalance = 0;
         }
@@ -24,7 +24,7 @@ namespace BankManagement.Model
         }
 
         public override string ToString() =>
-             $"\nAccount Type: Savings\n Account ID: {ID} \nAccount Status: {Status} \nBalance: Rs. {Balance}\n" +
+             $"\nAccount Type: Savings\n Account Number: {AccountNumber} \nAccount Status: {Status} \nBalance: Rs. {Balance}\n" +
                  $"Interest Rate:  {InterestRate}\n" +
                 "========================================\n";
 

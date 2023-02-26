@@ -1,26 +1,29 @@
-﻿using System;
+﻿using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using BankManagement.Controller;
-using BankManagement.Models;
-using BankManagementDB.db;
+using BankManagementDB.Controller;
+using BankManagementDB.Models;
+using BankManagementDB.Config;
+using BankManagementDB.EnumerationType;
 using BankManagementDB.Interface;
 using BankManagementDB.Utility;
 using BankManagementDB.View;
 
-namespace BankManagement.View
-{
-    public enum ProfileServiceCases
-    {
-        VIEW_PROFILE,
-        EDIT_PROFILE,
-        EXIT
-    }
+namespace BankManagementDB.View
+{ 
 
     public class ProfileView
     {
-        public void ViewProfileServices(ProfileController profileController)
+
+        public ProfileView(ICustomerController customerController) {
+            CustomerController = customerController;
+        }
+        public ICustomerController CustomerController { get; set; }
+
+        public void ViewProfileServices()
         {
+            Customer currentUser = CustomerController.GetCurrentUser();
             while (true)
             {
                 try
@@ -36,12 +39,13 @@ namespace BankManagement.View
 
                     string option = Console.ReadLine().Trim();
                     int entryOption = int.Parse(option);
-
-                    if (entryOption != 0 && entryOption <= Enum.GetNames(typeof(ProfileServiceCases)).Count())
+                    if (entryOption == 0)
+                        break;
+                    else if (entryOption <= Enum.GetNames(typeof(ProfileServiceCases)).Count())
                     {
                         ProfileServiceCases cases = (ProfileServiceCases)entryOption - 1;
 
-                        if (ProfileOperations(cases, profileController))
+                        if (ProfileOperations(cases, currentUser))
                             break;
                     }
                     else
@@ -54,16 +58,16 @@ namespace BankManagement.View
             }
         }
 
-        public bool ProfileOperations(ProfileServiceCases cases, ProfileController profileController)
+        public bool ProfileOperations(ProfileServiceCases cases, Customer currentUser)
         {
             switch (cases)
             {
                 case ProfileServiceCases.VIEW_PROFILE:
-                    ViewProfileDetails(profileController);
+                    ViewProfileDetails(currentUser);
                     return false;
 
                 case ProfileServiceCases.EDIT_PROFILE:
-                    EditProfile(profileController);
+                    EditProfile(currentUser);
                     return false;
 
                 case ProfileServiceCases.EXIT:
@@ -75,20 +79,20 @@ namespace BankManagement.View
             }
         }
 
-        public void ViewProfileDetails(ProfileController profileController)
+        public void ViewProfileDetails(Customer currentUser)
         {
             Notification.Info("\n ================== PROFILE ===================\n");
-            Notification.Info($"Name: {profileController.Customer.Name}");
-            Notification.Info("Age: " + profileController.Customer.Age);
-            Notification.Info("Phone: " + profileController.Customer.Phone);
-            Notification.Info("Email: " + profileController.Customer.Email);
-            Notification.Info("No. of Accounts: " + AccountsController.AccountsList.Count);
+            Notification.Info($"Name: {currentUser.Name}");
+            Notification.Info("Age: " + currentUser.Age);
+            Notification.Info("Phone: " + currentUser.Phone);
+            Notification.Info("Email: " + currentUser.Email);
+            Notification.Info("No. of Accounts: " + (AccountController.AccountsList != null ? AccountController.AccountsList.Count() : 0));
             Notification.Info("\n ==============================================\n");
         }
 
-        public void EditProfile(ProfileController profile)
+        public void EditProfile(Customer currentUser)
         {
-            Customer customer = (Customer)profile.Customer.Clone();
+            Customer customer = (Customer)currentUser.Clone();
 
             IDictionary<string, Action<string>> fields = new Dictionary<string, Action<string>>(){
                      { "NAME", (value) => customer.Name = value },
@@ -130,23 +134,20 @@ namespace BankManagement.View
                 }
             }
             
-            if (customer.Name != profile.Customer.Name || customer.Age != profile.Customer.Age)
-                UpdateProfile(customer, profile);
+            if (customer.Name != currentUser.Name || customer.Age != currentUser.Age)
+                UpdateProfile(customer);
         }
 
-
-        public void UpdateProfile(Customer updatedCustomer, ProfileController profile)
+            
+        public void UpdateProfile(Customer updatedCustomer)
         {
-            CustomerOperations customerOperations = new CustomerOperations();
-            CustomersController customersController = new CustomersController(customerOperations, customerOperations);
-
-            Customer customer = customersController.UpdateCustomer(updatedCustomer);
-
-            if (customer != null)
+            if (CustomerController.UpdateCustomer(updatedCustomer))
             {
                 Notification.Success("Profile Updated Successfully");
-                profile.Customer = customer;
+                CustomerController.SetCurrentUser(updatedCustomer);
             }
+
         }
+
     }
 }

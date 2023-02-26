@@ -1,107 +1,193 @@
 ﻿using System;
-using BankManagement.Controller;
-using BankManagement.Enums;
-using BankManagement.Model;
-using BankManagement.Models;
-using BankManagement.Utility;
-using BankManagementCipher.Model;
 using BankManagementDB.Controller;
-using BankManagementDB.db;
-using BankManagementDB.Enums;
+using BankManagementDB.Model;
+using BankManagementDB.Models;
+using BankManagementDB.Utility;
+using BankManagementDB.Config;
+using BankManagementDB.Controller;
+using BankManagementDB.EnumerationType;
 using BankManagementDB.Interface;
 using BankManagementDB.Model;
 using BankManagementDB.View;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace BankManagement.View
+namespace BankManagementDB.View
 {
     public class SignupView
     {
-        public ICustomerServices CustomersController { get; set; }
+        public SignupView(
+            ICustomerController customerController,
+            ICardController cardController,
+            IAccountFactory accountFactory,
+            ICardFactory cardFactory,
+            IAccountController accountController,
+            ITransactionProcessController transactionProcessController)
+        {
+            CardController = cardController;
+            AccountFactory = accountFactory;
+            AccountController = accountController;
+            TransactionProcessController = transactionProcessController;
+            CardFactory = cardFactory;
+            CustomerController = customerController;
+        }
 
-        public void Signup(ICustomerServices customerController)
+        public ICardController CardController { get; set; }
+        public ICustomerController CustomerController { get; set; }
+
+        public IAccountController AccountController { get; set; }
+
+        public IAccountFactory AccountFactory { get; set; }
+
+        public ICardFactory CardFactory { get; set; }
+
+        public ITransactionProcessController TransactionProcessController { get; set; }
+
+        public void Signup()
         {
 
-            CustomersController = customerController;
-            Validation validation = new Validation();
             Helper helper = new Helper();
             string email, password, phone, name;
             int age;
 
-            while (true)
+            phone = GetPhoneNumber();
+            if (phone != null)
             {
-                phone = helper.GetPhoneNumber();
-                if (validation.CheckNotEmpty(phone))
+                name = GetValue("Name");
+                if (name != null)
                 {
-                    if (CheckUniquePhoneNumber(phone))
-                        break;
-                    else
-                        Notification.Error("Phone Number Already Registered");
+                    email = GetEmail();
+                    if (email != null)
+                    {
+                        age = GetInteger("Age: ");
+                        if (age > 0)
+                        {
+                            Console.WriteLine("Enter password: ");
+                            password = helper.GetPassword();
+                            if (password != null)
+                            {
+                                bool isVerified = VerifyPassword(password);
+
+                                if (isVerified)
+                                {
+                                    CreateCustomer(name, password, email, phone, age);
+                                    Customer signedUpCustomer = CustomerController.GetCustomer(phone);
+                                    CreateAccountAndDeposit(signedUpCustomer);
+                                }
+                            }
+                        }
+                    }
                 }
             }
+        }
 
-          
 
-            name = GetValue("Name");
+        public string GetPhoneNumber()
+        {
+            Validation validation = new Validation();
+            string phoneNumber;
 
             while (true)
             {
-                email = GetValue("Email");
-                if (validation.IsValidEmail(email)) break;
-                else Notification.Error("Please enter a valid email.");
+                Console.Write("Enter Mobile Number: ");
+                phoneNumber = Console.ReadLine().Trim();
+
+                if (phoneNumber == "0")
+                    break;
+
+                if (!string.IsNullOrEmpty(phoneNumber))
+                {
+
+                    if (validation.IsPhoneNumber(phoneNumber))
+                        if (CheckUniquePhoneNumber(phoneNumber))
+                            return phoneNumber;
+                        else
+                            Notification.Error("Phone Number Already Registered");
+
+                    else
+                        Notification.Error("Enter a valid Phone Number");
+                }
+                else
+                    Notification.Error("Phone Number should not be empty");
+
             }
+            return null;
+        }
 
-            age = helper.GetInteger("Age: ");
-
-            do
+        public int GetInteger(string message)
+        {
+            int number = 0;
+            while (true)
             {
-                password = helper.GetPassword("Enter password: ");
-            } while (!validation.CheckNotEmpty(password));
-
-            VerifyPassword(password);
-
-            CreateCustomer(name, password, email, phone, age);
-            Customer signedUpCustomer = CustomersController.GetCustomer(phone);
-            CreateAccountAndDeposit(signedUpCustomer);
+                try
+                {
+                    Console.Write(message);
+                    string input = Console.ReadLine().Trim();
+                    if (int.TryParse(input, out number))
+                        break;
+                    else
+                        Notification.Error("Enter a valid number.");
+                }
+                catch (Exception error)
+                {
+                    Notification.Error("Enter a valid number. Try Again!");
+                }
+            }
+            return number;
         }
 
         public void CreateAccountAndDeposit(Customer signedUpCustomer)
         {
-
-            Account account = AccountFactory.GetAccountByType(AccountTypes.CURRENT);
-            account.UserID = signedUpCustomer.ID;
-            account.Balance = 0;
-            AccountsController accountsController = new AccountsController(new AccountOperations());
-            CardController cardController = new CardController();
-
-            if (accountsController.InsertAccountToDB(account))
+            try
             {
-                ITransactionServices transactionServices = new TransactionController(new TransactionOperations());
-                IATMTransactionServices ATMTransactionController = new ATMTransactionsController(transactionServices, accountsController);
+                Account account = AccountFactory.GetAccountByType(AccountType.CURRENT);
+                account.UserID = signedUpCustomer.ID;
+                account.Balance = 0;
 
-                Helper helper = new Helper();
-                decimal amount = helper.GetAmount(account as CurrentAccount);
-                ATMTransactionController.Deposit(amount, account, ModeOfPayment.CASH);
 
-                Notification.Success("Account created successfully\n");
+                if (AccountController.InsertAccount(account))
+                {
+                    decimal amount;
+                    TransactionView transactionsView = new TransactionView();
+                    while (true)
+                    {
+                        amount = transactionsView.GetAmount();
+                        if (amount < account.MinimumBalance)
+                            Notification.Error($"Initial Amount should be greater than Minimum Balance Rs. {account.MinimumBalance}");
+                        else
+                            break;
+                    }
 
-                Card card = CardFactory.GetCardByType(CardType.DEBIT);
-                card = cardController.CreateCard(card, account);
-                card.Balance = account.Balance;
-                cardController.GetAllCards(account.ID);
-                if (cardController.InsertCard(card)) {
-                    Notification.Success("Debit card created successfully. Save Card Number and Pin for later use.\n");
-                    Console.WriteLine(card);
-                    Console.WriteLine($" PIN: {card.Pin}");
-                    Console.WriteLine();
+                    if (TransactionProcessController.Deposit(amount, account, ModeOfPayment.CASH))
+                    {
+                        Notification.Success("Account created successfully\n");
+
+                        Card card = CardController.CreateCard(CardType.DEBIT, account.ID, signedUpCustomer.ID);
+                        CardController.GetAllCards(account.ID);
+                        if (CardController.InsertCard(card))
+                        {
+                            Notification.Success("Debit card created successfully. Save Card Number and Pin for later use.\n");
+                            Console.WriteLine(card);
+                            Console.WriteLine($" PIN: {card.Pin}");
+                            Console.WriteLine();
+                        }
+                    }
+                    else
+                    {
+                        Notification.Error("Deposit unsuccessful");
+                    }
                 }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
             }
 
         }
 
         public bool CheckUniquePhoneNumber(string phoneNumber)
         {
-            Customer customer = CustomersController.GetCustomer(phoneNumber);
-            return customer == null ? true : false;
+            Customer customer = CustomerController.GetCustomer(phoneNumber);
+            return customer == null;
         }
 
         private bool CreateCustomer(string name, string password, string email, string phone, int age)
@@ -118,8 +204,7 @@ namespace BankManagement.View
                 CreatedOn = DateTime.Now
             };
 
-            bool customerAdded = CustomersController.InsertCustomer(customer, password);
-
+            bool customerAdded = CustomerController.InsertCustomer(customer, password);
             if (customerAdded) Notification.Success("\nSignup successful");
 
             return customerAdded;
@@ -132,22 +217,52 @@ namespace BankManagement.View
                 Console.Write(label + ": ");
                 Validation validation = new Validation();
                 string value = Console.ReadLine().Trim();
-                if (validation.CheckNotEmpty(value)) return value;
+                if (value == "0") return null;
+                else if (!string.IsNullOrEmpty(value)) return value;
+                else return null;
             }
         }
 
-        private void VerifyPassword(string password)
+        private string GetEmail()
+        {
+            string email;
+            Validation validation = new Validation();
+            while (true)
+            {
+                Console.Write("Enter email: ");
+                email = Console.ReadLine().Trim();
+                if (email == "0")
+                    email = null;
+                else if (string.IsNullOrEmpty(email))
+                    Notification.Error("Field should not be empty");
+                else
+                {
+                    if (validation.IsValidEmail(email)) break;
+                    else Notification.Error("Please enter a valid email.");
+                }
+            }
+            return email;
+        }
+
+
+        private bool VerifyPassword(string password)
         {
             Validation validation = new Validation();
             Helper helper = new Helper();
             while (true)
             {
-                string rePassword = helper.GetPassword("Re-enter password: ");
-                if (validation.ValidatePassword(password, rePassword) && rePassword != null)
+                Console.WriteLine("Re-enter password: ");
+                string rePassword = helper.GetPassword();
+
+                if (rePassword == null)
                     break;
+                if (validation.ValidatePassword(password, rePassword) && rePassword != null)
+                    return true;
                 else
                     Notification.Error("Password not matching, Enter again");
             }
+
+            return false;
         }
     }
 }

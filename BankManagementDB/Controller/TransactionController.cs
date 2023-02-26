@@ -1,31 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using BankManagement.Enums;
-using BankManagement.Model;
-using BankManagement.Models;
+using BankManagementDB.EnumerationType;
+using BankManagementDB.Model;
+using BankManagementDB.Models;
 using BankManagementCipher.Model;
 using BankManagementCipher.Utility;
-using BankManagementDB.db;
 using BankManagementDB.Interface;
 
-namespace BankManagement.Controller
+namespace BankManagementDB.Controller
 {
     delegate bool InsertTransactionDelegate(Transaction transaction);
 
-    public class TransactionController : ITransactionServices
+    public class TransactionController : ITransactionController
     {
-        public TransactionController() { }
-
-        public TransactionController(IQueryServices<TransactionDTO> queryServices) {
-            TransactionOperations = queryServices;
+        public TransactionController(ITransactionRepository transactionRepository) {
+            TransactionRepository = transactionRepository;
         }
-
-        public event Action<string> BalanceChanged;
 
         public static IList<Transaction> TransactionsList { get; set; }
 
-        public IQueryServices<TransactionDTO> TransactionOperations { get; private set; }
+        public ITransactionRepository TransactionRepository { get; private set; }
 
         public bool InsertTransaction(Transaction transaction)
         {
@@ -61,7 +56,7 @@ namespace BankManagement.Controller
             {
 
                 TransactionDTO dto = Mapping.TransactionToDto(transaction);
-                return TransactionOperations.InsertOrReplace(dto).Result;
+                return TransactionRepository.InsertOrReplace(dto).Result;
 
             } catch (Exception e)
             {
@@ -74,7 +69,7 @@ namespace BankManagement.Controller
             try
             {
                 TransactionsList = new List<Transaction>();
-                var transactionDTOs = TransactionOperations.Get(accountID).Result;
+                var transactionDTOs = TransactionRepository.Get(accountID).Result;
                 foreach (TransactionDTO transactionDTO in transactionDTOs)
                     TransactionsList.Add(Mapping.DtoToTransaction(transactionDTO));
 
@@ -88,10 +83,10 @@ namespace BankManagement.Controller
         {
             if (TransactionsList.Count > 0)
             {
-                Transaction transaction = TransactionsList.LastOrDefault(data => data.TransactionType == TransactionTypes.WITHDRAW);
+                Transaction transaction = TransactionsList.LastOrDefault(data => data.TransactionType == TransactionType.WITHDRAW);
 
                 if (transaction == null)
-                    transaction = TransactionsList.LastOrDefault(data => data.TransactionType == TransactionTypes.DEPOSIT);
+                    transaction = TransactionsList.LastOrDefault(data => data.TransactionType == TransactionType.DEPOSIT);
 
                 return transaction.RecordedOn;
             }

@@ -1,38 +1,46 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using BankManagement.Models;
+using BankManagementDB.Models;
 using BankManagementCipher.Utility;
-using BankManagementDB.db;
-using BankManagementDB.Enums;
+using BankManagementDB.Config;
+using BankManagementDB.EnumerationType;
 using BankManagementDB.Interface;
 using BankManagementDB.Model;
+using BankManagementDB.Repository;
 using BankManagementDB.Utility;
-
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BankManagementDB.Controller
 {
-    public class CardController : ICardServices
+    public class CardController : ICardController
     {
+        public CardController(ICardFactory cardFactory, ICardRepository cardRepository) {
+            CardFactory = cardFactory;
+            CardRepository = cardRepository;
+        }
+
+        public ICardFactory CardFactory { get; private set; }
+        public ICardRepository CardRepository { get; private set; }
+
         public static IList<Card> CardsList { get; set; }
 
-        public Card CreateCard(Card card, Account account)
+        public Card CreateCard(CardType cardType, Guid accountID, Guid customerID)
         {
-            RandomGenerator cardHelper= new RandomGenerator();    
             try
             {
-                card.AccountID = account.ID;
-                card.CardHolder = "Test";
-                card.CardNumber = cardHelper.GenerateCardNumber();  
-                card.CVV = cardHelper.GenerateCVV();
-                card.Pin = cardHelper.GeneratePin();
+                Card card = CardFactory.GetCardByType(cardType);
+                card.AccountID = accountID;
+                card.CustomerID = customerID;
+                card.CardNumber = RandomGenerator.GenerateCardNumber();  
+                card.CVV = RandomGenerator.GenerateCVV();
+                card.Pin = RandomGenerator.GeneratePin();
+                return card;
             }
-            catch(Exception ex) {
+            catch (Exception ex) {
                 Console.WriteLine(ex);
             }
-
-            return card;
+            return null;
         }
 
         public bool IsDebitCardEnabled()
@@ -45,14 +53,30 @@ namespace BankManagementDB.Controller
             return CardsList.Where(c => c is CreditCard).Count() > 0 ? true : false;
         }
 
+        public Card GetCardByType(CardType cardType)
+        {
+            return CardsList.Where<Card>(card => card.Type == cardType).FirstOrDefault();
+        }
+
+        public bool IsCardNumber(string cardNumber)
+        {
+           return CardsList.Where<Card>(card => card.CardNumber == cardNumber).Any();
+        }
+
+        public bool ResetPin(string cardNumber, string pin)
+        {
+            Card card = GetCard(cardNumber);
+            if(card != null)
+                card.Pin = pin;
+            return UpdateCard(card);
+        }
+
         public bool InsertCard(Card card)
         {
             
             try
             {
-                
-                CardOperations cardOperations  = new CardOperations();
-                bool success = cardOperations.InsertOrReplace(Mapping.CardToDto(card)).Result;
+                bool success = CardRepository.InsertOrReplace(Mapping.CardToDto(card)).Result;
                 if (success) CardsList.Add(card);
                 return success;
             }
@@ -64,14 +88,18 @@ namespace BankManagementDB.Controller
             return false;
         }
 
-        public bool UpdateCard(Card card)
+        public bool UpdateCard(Card updatedCard)
         {
-
             try
             {
-                CardOperations cardOperations = new CardOperations();
-                bool success = cardOperations.InsertOrReplace(Mapping.CardToDto(card)).Result;
-                if(success) CardsList.Add(card);
+                bool success = CardRepository.InsertOrReplace(Mapping.CardToDto(updatedCard)).Result;
+                if (success)
+                {
+                    Card card = CardsList.FirstOrDefault(acc => acc.ID.Equals(updatedCard.ID));
+                    CardsList.Remove(card);
+                    CardsList.Insert(0, updatedCard);
+                }
+                return success;
             }
             catch (Exception ex)
             {
@@ -80,48 +108,12 @@ namespace BankManagementDB.Controller
             return false;
         }
 
-        public bool MakePurchase(Card card, decimal amount)
+        public void GetAllCards(Guid customerID)
         {
-
             try
             {
-                CardOperations cardOperations = new CardOperations();
-                card.Purchase(amount);
-                bool success = cardOperations.InsertOrReplace(Mapping.CardToDto(card)).Result;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-            }
-
-            return false;
-        }
-
-        public bool MakePayment(Card card, decimal amount)
-        {
-            bool success = false;
-            try
-            {
-                CardOperations cardOperations = new CardOperations();
-                card.Payment(amount);
-                success = cardOperations.InsertOrReplace(Mapping.CardToDto(card)).Result;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-            }
-
-            return success;
-        }
-
-        public IList<Card> GetAllCards(Guid accountID)
-        {
-            IList<Card> cards = new List<Card>();
-            try
-            {
-                CardOperations cardOperations = new CardOperations();
-                var cardsList = cardOperations.Get(accountID).Result;
-
+                var cardsList = CardRepository.Get(customerID).Result;
+                IList<Card> cards = new List<Card>();
                 if (cardsList.Count() > 0)
                     foreach (var card in cardsList)
                         cards.Add(Mapping.DtoToCard(card));
@@ -133,25 +125,13 @@ namespace BankManagementDB.Controller
                 Console.WriteLine(ex);
             }
 
-            return cards;
         }
 
-        public Card GetCard(long cardNumber)
+        public Card GetCard(string cardNumber)
         {
             try
             {
-                CardOperations cardOperations = new CardOperations();
-                var cardsList = cardOperations.Get(cardNumber).Result;
-
-                if (cardsList.Count() > 0)
-                {
-                    CardDTO cardDTO = cardsList.FirstOrDefault();
-                    return Mapping.DtoToCard(cardDTO);
-                }
-                else
-                {
-                    return null;
-                }
+                return CardsList.Where<Card>(card => card.CardNumber == cardNumber).FirstOrDefault();
             }
             catch (Exception ex)
             {
@@ -160,6 +140,7 @@ namespace BankManagementDB.Controller
 
             return null;
         }
-
+        public IList<Card> GetCardsList() => CardsList ??= new List<Card>();
+       
     }
 }

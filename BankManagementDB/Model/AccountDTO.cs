@@ -1,4 +1,4 @@
-﻿using BankManagement.Enums;
+﻿using BankManagementDB.EnumerationType;
 using SQLite;
 using System;
 using System.Collections.Generic;
@@ -14,7 +14,7 @@ namespace BankManagementCipher.Model
         [PrimaryKey]
         public Guid ID { get; set; }
 
-        public long AccountNumber { get; set; }
+        public string AccountNumber { get; set; }
 
         public decimal Balance { get; set; }
 

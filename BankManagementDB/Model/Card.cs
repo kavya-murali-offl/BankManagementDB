@@ -1,30 +1,42 @@
-﻿
-using BankManagementDB.Enums;
+﻿using BankManagementDB.EnumerationType;
 using System;
 
 namespace BankManagementDB.Model
 {
     public abstract class Card
     {
+        public Card()
+        {
+            ID = Guid.NewGuid();
+            ExpiryMonth = DateTime.Now.Month.ToString();
+            ExpiryYear = (DateTime.Now.Year + 7).ToString();
+            CreatedOn = DateTime.Now;
+            Balance = 0;
+        }
+
         public Guid ID { get; set; }
 
-        public string CardHolder { get; set; }
+        public DateTime CreatedOn { get; set; }
 
         public int CreditPoints { get; set; }
 
-        public int Pin { get; set; }
+        public string Pin { get; set; }
 
-        public long CardNumber { get; set; }
+        public string CardNumber { get; set; }
 
         public Guid AccountID { get; set; }
 
+        public CreditCardType CreditCardType { get; set; }
+
+        public Guid CustomerID { get; set; }
+
         public decimal Balance { get; set; }
 
-        public int CVV { get; set; }
+        public string CVV { get; set; }
 
-        public int ExpiryMonth { get; set; }
+        public string ExpiryMonth { get; set; }
 
-        public int ExpiryYear { get; set; }
+        public string ExpiryYear { get; set; }
 
         public decimal APR { get; set; }
 

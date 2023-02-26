@@ -1,23 +1,26 @@
-﻿using BankManagementDB.Model;
+﻿using BankManagementDB.Interface;
+using BankManagementDB.Model;
 
 namespace BankManagementDB.Controller
 {
     public class CardCredentialsController
     {
+        public CardCredentialsController(ICardController cardController) {
+            CardController = cardController;
+        }  
 
-        public bool Authenticate(long cardNumber, long pin)
+        public ICardController CardController { get; set; }    
+
+        public bool Authenticate(string cardNumber, string pin)
         {
-            CardController cardController = new CardController();
-            Card card = cardController.GetCard(cardNumber);
+            Card card = CardController.GetCard(cardNumber);
             if (card.Pin == pin) return true;
             return false;
         }
 
-
-        public bool ValidateCardNumber(long cardNumber)
+        public bool ValidateCardNumber(string cardNumber)
         {
-            CardController cardController = new CardController();   
-            if(cardController.GetCard(cardNumber) == null) return false;
+            if(CardController.GetCard(cardNumber) == null) return false;
             return true;
         }
     }

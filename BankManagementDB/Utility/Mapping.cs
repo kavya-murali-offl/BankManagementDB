@@ -1,17 +1,28 @@
-﻿using BankManagement.Controller;
-using BankManagement.Enums;
-using BankManagement.Model;
-using BankManagement.Models;
-using BankManagement.Utility;
+﻿using BankManagementDB.Model;
+using BankManagementDB.Models;
+using BankManagementDB.Utility;
 using BankManagementCipher.Model;
-using BankManagementDB.Controller;
-using BankManagementDB.Enums;
+using BankManagementDB.Config;
+using BankManagementDB.EnumerationType;
+using BankManagementDB.Interface;
 using BankManagementDB.Model;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BankManagementCipher.Utility
 {
     public class Mapping
     {
+
+        static Mapping()
+        {
+            CardFactory = DependencyContainer.ServiceProvider.GetRequiredService<ICardFactory>();
+            AccountFactory = DependencyContainer.ServiceProvider.GetRequiredService<IAccountFactory>();
+        }
+
+        public static IAccountFactory AccountFactory { get; private set; } 
+
+        public static ICardFactory CardFactory { get; private set; }
+
         public static Customer DtoToCustomer(CustomerDTO customerDTO)
         {
            return new Customer()
@@ -22,7 +33,7 @@ namespace BankManagementCipher.Utility
                 LastLoggedOn = customerDTO.LastLoggedOn,
                 CreatedOn = customerDTO.CreatedOn,
                 Phone = customerDTO.Phone,
-                Email = customerDTO.Email
+                Email = customerDTO.Email,
            };
         }
 
@@ -43,7 +54,7 @@ namespace BankManagementCipher.Utility
 
         public static Account DtoToAccount(AccountDTO accountDTO)
         {
-            var accountType = Helper.StringToEnum<AccountTypes>(accountDTO.Type);
+            var accountType = Helper.StringToEnum<AccountType>(accountDTO.Type);
             var account = AccountFactory.GetAccountByType(accountType);
 
             account.ID = accountDTO.ID;
@@ -54,6 +65,7 @@ namespace BankManagementCipher.Utility
             account.MinimumBalance = accountDTO.MinimumBalance;
             account.CreatedOn = accountDTO.CreatedOn;
             account.UserID = accountDTO.UserID;
+            account.AccountNumber = accountDTO.AccountNumber;
 
             return account;
         }
@@ -70,7 +82,8 @@ namespace BankManagementCipher.Utility
                 MinimumBalance = account.MinimumBalance,
                 CreatedOn = account.CreatedOn,
                 UserID = account.UserID,
-            };
+                AccountNumber = account.AccountNumber
+        };
         }
 
         public static Transaction DtoToTransaction(TransactionDTO transactionDTO)
@@ -81,7 +94,7 @@ namespace BankManagementCipher.Utility
                 Balance = transactionDTO.Balance,
                 Description = transactionDTO.Description,
                 AccountID = transactionDTO.AccountID,
-                TransactionType = Helper.StringToEnum<TransactionTypes>(transactionDTO.TransactionType),
+                TransactionType = Helper.StringToEnum<TransactionType>(transactionDTO.TransactionType),
                 Amount = transactionDTO.Amount,
                 RecordedOn = transactionDTO.RecordedOn,
                 ModeOfPayment = Helper.StringToEnum<ModeOfPayment>(transactionDTO.ModeOfPayment)
@@ -107,12 +120,13 @@ namespace BankManagementCipher.Utility
         {
             var cardType = Helper.StringToEnum<CardType>(cardDTO.Type);
             Card card = CardFactory.GetCardByType(cardType);
-
+            
             card.ID = cardDTO.ID;
             card.Balance = cardDTO.Balance;
             card.Pin = cardDTO.Pin;
-            card.CardHolder = cardDTO.CardHolder;
             card.CardNumber = cardDTO.CardNumber;
+            card.CustomerID = cardDTO.CustomerID;
+            card.CreditCardType = Helper.StringToEnum<CreditCardType>(cardDTO.CreditCardType);
             card.APR = cardDTO.APR;
             card.AccountID = cardDTO.AccountID;
             card.CreditLimit = cardDTO.CreditLimit;
@@ -131,9 +145,10 @@ namespace BankManagementCipher.Utility
                 ID = card.ID,
                 Balance = card.Balance,
                 Pin = card.Pin,
-                CardHolder = card.CardHolder,
                 CardNumber = card.CardNumber,
                 APR = card.APR,
+                CreditCardType = card.CreditCardType.ToString(),
+                CustomerID = card.CustomerID,
                 AccountID = card.AccountID,
                 CreditLimit = card.CreditLimit,
                 CreditPoints = card.CreditPoints,

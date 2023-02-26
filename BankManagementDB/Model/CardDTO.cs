@@ -1,10 +1,6 @@
-﻿using BankManagementDB.Enums;
+﻿using System;
+using BankManagementDB.EnumerationType;
 using SQLite;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BankManagementDB.Model
 {
@@ -14,21 +10,24 @@ namespace BankManagementDB.Model
         [PrimaryKey]
         public Guid ID { get; set; }
 
-        public string CardHolder { get; set; }
+        public string Pin { get; set; }
 
-        public int Pin { get; set; }
-
-        public long CardNumber { get; set; }
+        [Unique]
+        public string CardNumber { get; set; }
 
         public Guid AccountID { get; set; }
 
+        public Guid CustomerID { get; set; }
+
+        public string CreditCardType { get; set; }
+
         public decimal Balance { get; set; }
 
-        public int CVV { get; set; }
+        public string CVV { get; set; }
 
-        public int ExpiryMonth { get; set; }
+        public string ExpiryMonth { get; set; }
 
-        public int ExpiryYear { get; set; }
+        public string ExpiryYear { get; set; }
 
         public decimal APR { get; set; }
 

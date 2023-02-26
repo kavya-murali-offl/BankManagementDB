@@ -8,28 +8,63 @@ namespace BankManagementDB.Utility
 {
     public class RandomGenerator
     {
-        public long GenerateCardNumber()
+        static Random random = new Random();
+
+         public static string GenerateCardNumber()
+         {
+            StringBuilder builder = new StringBuilder();
+
+            for (int i = 0; i < 16; i++)
+            {
+                int digit = random.Next(0, 10);
+                builder.Append(digit);
+
+                if (i == 3 || i == 7 || i == 11)
+                {
+                    builder.Append("-");
+                }
+            }
+
+            return builder.ToString();
+         }
+
+        public static string GeneratePin()
         {
-            Random random = new Random();
-            return random.Next(100000000, 999999999);
+            StringBuilder builder = new StringBuilder();
+
+            for (int i = 0; i < 4; i++)
+            {
+                int digit = random.Next(0, 10);
+                builder.Append(digit);
+            }
+
+            return builder.ToString();
         }
 
-        public int GeneratePin()
+        public static string GenerateCVV()
         {
-            Random random = new Random();
-            return random.Next(1000, 9999);
+            StringBuilder builder = new StringBuilder();
+
+            for (int i = 0; i < 3; i++)
+            {
+                int digit = random.Next(0, 10);
+                builder.Append(digit);
+            }
+
+            return builder.ToString();
         }
 
-        public int GenerateCVV()
+        public static string GenerateAccountNumber()
         {
-            Random random = new Random();
-            return random.Next(100, 999);
-        }
+            StringBuilder builder = new StringBuilder();
 
-        public static long GenerateAccountNumber()
-        {
-            Random random = new Random();
-            return random.Next(10000000, 999999999);
+            for (int i = 0; i < 12; i++)
+            {
+                int digit = random.Next(0, 10);
+                builder.Append(digit);
+            }
+
+            return builder.ToString();
         }
     }
 }

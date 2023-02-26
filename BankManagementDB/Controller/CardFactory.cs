@@ -1,19 +1,13 @@
-﻿using BankManagement.Enums;
-using BankManagement.Model;
-using BankManagement.Models;
-using BankManagementDB.Enums;
+﻿
+using BankManagementDB.EnumerationType;
+using BankManagementDB.Interface;
 using BankManagementDB.Model;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BankManagementDB.Controller
 {
-    public class CardFactory
+    public class CardFactory : ICardFactory
     {
-        public static Card GetCardByType(CardType cardType)
+        public Card GetCardByType(CardType cardType)
         {
             switch (cardType)
             {

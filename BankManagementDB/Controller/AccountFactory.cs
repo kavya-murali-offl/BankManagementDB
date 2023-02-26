@@ -1,21 +1,22 @@
-﻿using BankManagement.Enums;
-using BankManagement.Model;
-using BankManagement.Models;
+﻿using BankManagementDB.EnumerationType;
+using BankManagementDB.Model;
+using BankManagementDB.Models;
+using BankManagementDB.Interface;
 
-namespace BankManagement.Controller
+namespace BankManagementDB.Controller
 {
-    public static class AccountFactory
+    public class AccountFactory : IAccountFactory
     {
-        public static Account GetAccountByType(AccountTypes accountType)
+        public Account GetAccountByType(AccountType accountType)
         {
             switch (accountType)
             {
-                case AccountTypes.CURRENT:
+                case AccountType.CURRENT:
                     {
                         CurrentAccount currentAccount = new CurrentAccount();
                         return currentAccount;
                     }
-                case AccountTypes.SAVINGS:
+                case AccountType.SAVINGS:
                     {
                         SavingsAccount savingsAccount = new SavingsAccount();
                         return savingsAccount;

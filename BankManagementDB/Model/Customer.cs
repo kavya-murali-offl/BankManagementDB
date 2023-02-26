@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BankManagement.Models
+namespace BankManagementDB.Models
 {
     public class Customer : ICloneable
     {

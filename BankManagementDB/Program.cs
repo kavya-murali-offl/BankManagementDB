@@ -1,13 +1,6 @@
-﻿using BankManagement;
-using BankManagement.Controller;
-using BankManagement.Models;
-using BankManagement.View;
-using BankManagementDB.db;
-using BankManagementDB.Utility;
+﻿using BankManagementDB.View;
+using BankManagementDB.Repository;
 using System;
-using System.Data.Linq;
-using System.Data.SQLite;
-using System.Linq;
 
 namespace BankManagementDB
 {
@@ -15,12 +8,12 @@ namespace BankManagementDB
     {
         static void Main(string[] args)
         {
-            Config config = new Config();
-            config.SetVariables();
 
-            CipherOperations.CreateTablesIfNotExists();
+            Environment.SetEnvironmentVariable("DATABASE_PATH", "Database.sqlite3");
+            Environment.SetEnvironmentVariable("DATABASE_PASSWORD", "pass");
+
+            DBRepository.CreateTablesIfNotExists();
             
-
             EntryView entryView = new EntryView();
             entryView.Entry();
 

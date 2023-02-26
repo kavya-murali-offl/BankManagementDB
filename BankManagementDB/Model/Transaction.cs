@@ -1,9 +1,8 @@
 ﻿using System;
-using BankManagement.Enums;
 using System.Data.Linq.Mapping;
-using BankManagementDB.Enums;
+using BankManagementDB.EnumerationType;
 
-namespace BankManagement.Model
+namespace BankManagementDB.Model
 {
     [Table(Name = "Transactions")]
     public class Transaction
@@ -14,7 +13,7 @@ namespace BankManagement.Model
             RecordedOn = DateTime.Now;
         }
 
-        public Transaction(string description, decimal amount, decimal balance, TransactionTypes transactionType, Guid accountID, ModeOfPayment modeOfPayment)
+        public Transaction(string description, decimal amount, decimal balance, TransactionType transactionType, Guid accountID, ModeOfPayment modeOfPayment)
         {
             ID = Guid.NewGuid();
             Description = description;
@@ -28,7 +27,7 @@ namespace BankManagement.Model
 
         public Guid ID { get; set; }
 
-        public TransactionTypes TransactionType { get; set; }
+        public TransactionType TransactionType { get; set; }
 
         public ModeOfPayment ModeOfPayment { get; set; }
 

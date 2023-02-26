@@ -1,4 +1,4 @@
-﻿using BankManagement;
+﻿using BankManagementDB;
 using System;
 using BankManagementDB.Interface;
 
@@ -6,11 +6,11 @@ namespace BankManagementDB.Controller
 {
     public class AuthController : IValidationServices
     {
-        public AuthController(IAuthenticationServices authenticationServices) {
+        public AuthController(ICustomerRepository authenticationServices) {
              AuthenticationServices = authenticationServices;
         }
         
-        public IAuthenticationServices AuthenticationServices { get; set; } 
+        public ICustomerRepository AuthenticationServices { get; set; } 
 
         public bool ValidatePassword(string phoneNumber, string password)
         {

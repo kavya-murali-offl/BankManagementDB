@@ -3,21 +3,24 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace BankManagement
+namespace BankManagementDB
 {
     public class AuthServices
     {
         public static string key = "b14ca5898a4e4133bbce2ea2315a1916";
 
-
         public static string Encrypt(string plainInput)
         {
+            // Initialization Vector - Random
             byte[] iv = new byte[16];
             byte[] array;
+
+            // Advanced Encryption Algorithm
             using (Aes aes = Aes.Create())
             {
                 aes.Key = Encoding.UTF8.GetBytes(key);
                 aes.IV = iv;
+
                 ICryptoTransform encryptor = aes.CreateEncryptor(aes.Key, aes.IV);
                 using (MemoryStream memoryStream = new MemoryStream())
                 {
@@ -55,20 +58,6 @@ namespace BankManagement
                         }
                     }
                 }
-            }
-        }
-        public static string ComputeHash(string plainText)
-        {
-            using (SHA256 sha256Hash = SHA256.Create())
-            {
-
-                byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(plainText));
-
-                StringBuilder stringbuilder = new StringBuilder();
-                for (int i = 0; i < bytes.Length; i++)
-                    stringbuilder.Append(bytes[i].ToString("x2"));
-
-                return stringbuilder.ToString();
             }
         }
     }

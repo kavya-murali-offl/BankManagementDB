@@ -1,103 +1,19 @@
 ﻿using System;
 using System.Text;
-using BankManagement.Controller;
-using BankManagement.Model;
+using BankManagementDB.Controller;
+using BankManagementDB.Config;
+using BankManagementDB.Interface;
 using BankManagementDB.View;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace BankManagement.Utility
+namespace BankManagementDB.Utility
 {
     public class Helper
     {
         public static T StringToEnum<T>(string data) => (T)Enum.Parse(typeof(T), data);
 
-        public decimal GetAmount()
+        public string GetPassword()
         {
-            while (true)
-            {
-                Console.Write("Enter amount: ");
-                try
-                {
-                    decimal amount = Decimal.Parse(Console.ReadLine().Trim());
-                    if (amount > 0) return amount;
-                    else Console.WriteLine("Amount should be greater than zero.");
-                }
-                catch (Exception error)
-                {
-                    Notification.Error("Enter a valid amount. Try Again!");
-                }
-            }
-        }
-
-        public int GetInteger(string message)
-        {
-            int number = 0;
-            while (true)
-            {
-                try
-                {
-                    Console.Write(message);
-                    int input = int.Parse(Console.ReadLine().Trim());
-                    if (input > 0)
-                    {
-                        number = input;
-                        break;
-                    }
-                    else
-                        Notification.Error("Enter a valid number.");
-                }
-                catch (Exception error)
-                {
-                    Notification.Error("Enter a valid number. Try Again!");
-                }
-            }
-            return number;
-        }
-
-        public decimal GetAmount(CurrentAccount currentAccount)
-        {
-            while (true)
-            {
-                Console.Write("Enter amount: ");
-                try
-                {
-                    decimal amount = decimal.Parse(Console.ReadLine().Trim());
-                    if (amount > 0)
-                    {
-                        if(amount < currentAccount.MinimumBalance)
-                            Notification.Error($"Initial Amount should be greater than Minimum Balance Rs. {currentAccount.MinimumBalance}");
-                        
-                        else
-                            return amount;
-                    }
-                    else Notification.Error("Amount should be greater than zero.");
-                }
-                catch (Exception error)
-                {
-                    Notification.Error(error.Message);
-                }
-            }
-        }
-
-        public string GetPhoneNumber()
-        {
-            string phoneNumber;
-            while (true)
-            {
-                Console.Write("Enter Mobile Number: ");
-                phoneNumber = Console.ReadLine().Trim();
-                Validation validation = new Validation();
-
-                if (!validation.IsPhoneNumber(phoneNumber))
-                    Notification.Error("Please enter a valid mobile number. ");
-
-                else break;
-            }
-            return phoneNumber;
-        }
-
-        public string GetPassword(string message)
-        {
-            Console.WriteLine(message);
             StringBuilder passwordBuilder = new StringBuilder();
             bool continueReading = true;
             char newLineChar = '\r';
@@ -112,10 +28,10 @@ namespace BankManagement.Utility
                 else
                     passwordBuilder.Append(passwordChar.ToString());
             }
-
-            Validation validation = new Validation();
-            if (validation.CheckNotEmpty(passwordBuilder.ToString()))
-                return passwordBuilder.ToString();
+            string password = passwordBuilder.ToString();
+           
+            if (!string.IsNullOrEmpty(password) && password != "0")
+                return password;
 
             return null;
         }
@@ -124,7 +40,7 @@ namespace BankManagement.Utility
         {
             try
             {
-                TransactionController transactionController = new TransactionController();
+                ITransactionController transactionController = DependencyContainer.ServiceProvider.GetRequiredService<TransactionController>();   
                 DateTime? lastWithdrawDate = transactionController.GetLastWithdrawDate();
                 if (lastWithdrawDate.HasValue)
                 {
@@ -138,10 +54,5 @@ namespace BankManagement.Utility
             return 0;
         }
 
-        public static bool IsValidGuid(string str)
-        {
-            Guid guid;
-            return Guid.TryParse(str, out guid);
-        }
     }
 }

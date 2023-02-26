@@ -1,22 +1,21 @@
 ﻿using System;
-using BankManagement.Controller;
-using BankManagementDB.db;
+using BankManagementDB.Controller;
+using BankManagementDB.Config;
+using BankManagementDB.Controller;
+using BankManagementDB.EnumerationType;
 using BankManagementDB.Interface;
 using BankManagementDB.View;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace BankManagement.View
+namespace BankManagementDB.View
 {
-    public enum EntryCases
-    {
-        LOGIN, SIGNUP, EXIT
-    }
-
     public class EntryView
     {
         public void Entry()
         {
             while (true)
             {
+                Console.WriteLine();
                 for (int i = 0; i < Enum.GetNames(typeof(EntryCases)).Length; i++)
                 {
                     EntryCases cases = (EntryCases)i;
@@ -45,21 +44,25 @@ namespace BankManagement.View
         
         public bool EntryOperations(EntryCases option)
         {
-            CustomerOperations customerOperations = new CustomerOperations();
-            CustomersController customersController = new CustomersController(customerOperations, customerOperations);
+            ICustomerController customersController = DependencyContainer.ServiceProvider.GetRequiredService<ICustomerController>();
+            IAccountController accountController = DependencyContainer.ServiceProvider.GetRequiredService<IAccountController>();
+            ITransactionProcessController transactionProcessController = DependencyContainer.ServiceProvider.GetRequiredService<ITransactionProcessController>();
+            IAccountFactory accountFactory = DependencyContainer.ServiceProvider.GetRequiredService<IAccountFactory>();
+            ICardFactory cardFactory = DependencyContainer.ServiceProvider.GetRequiredService<ICardFactory>();
+            ICardController cardController = DependencyContainer.ServiceProvider.GetRequiredService<ICardController>();
             switch (option)
             {
                 case EntryCases.LOGIN:
 
-                    LoginView loginView = new LoginView();
+                    LoginView loginView = new LoginView(customersController);
                     loginView.UserChanged += onUserChanged;
-                    loginView.Login(customersController);
+                    loginView.Login();
                     return false;
 
                 case EntryCases.SIGNUP:
                     
-                    SignupView signupView = new SignupView();
-                    signupView.Signup(customersController);
+                    SignupView signupView = new SignupView(customersController, cardController, accountFactory, cardFactory, accountController, transactionProcessController);
+                    signupView.Signup();
                     return false;
 
                 case EntryCases.EXIT:

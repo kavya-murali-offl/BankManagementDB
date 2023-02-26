@@ -1,31 +1,37 @@
-﻿using BankManagement.Models;
-using BankManagement.Controller;
+﻿using BankManagementDB.Models;
 using System.Collections.Generic;
 using System;
 using System.Linq;
 using BankManagementDB.View;
 using BankManagementDB.Interface;
-using BankManagement.Model;
-using BankManagement.Utility;
-using BankManagementDB.Controller;
-using BankManagementDB.db;
-using BankManagementDB.Enums;
+using BankManagementDB.Model;
+using BankManagementDB.EnumerationType;
+using BankManagementDB.Config;
+using Microsoft.Extensions.DependencyInjection;
+using System.Security.Principal;
 
-namespace BankManagement.View
+namespace BankManagementDB.View
 {
-    public enum DashboardCases
-    {
-        PROFILE_SERVICES,
-        CREATE_ACCOUNT,
-        LIST_ACCOUNTS,
-        GO_TO_ACCOUNT,
-        SIGN_OUT
-    }
-
     public class DashboardView
     {
-        public void ViewDashboard(ProfileController profileController)
+
+        public DashboardView() {
+            AccountController = DependencyContainer.ServiceProvider.GetRequiredService<IAccountController>();
+            CustomerController = DependencyContainer.ServiceProvider.GetRequiredService<ICustomerController>();
+            TransactionProcessingController = DependencyContainer.ServiceProvider.GetRequiredService<ITransactionProcessController>();
+        }  
+
+        public ITransactionProcessController TransactionProcessingController { get; set; }   
+        public IAccountController AccountController { get; set; }
+
+        public ICustomerController CustomerController { get; set; }
+
+        public Customer CurrentUserController { get; set; } 
+
+
+        public void ViewDashboard(Customer currentUser)
         {
+            AccountController.GetAllAccounts(currentUser.ID);
             while (true)
             {
                 for (int i = 0; i < Enum.GetNames(typeof(DashboardCases)).Length; i++)
@@ -50,7 +56,7 @@ namespace BankManagement.View
                     if (entryOption != 0 && entryOption <= Enum.GetNames(typeof(DashboardCases)).Count())
                     {
                         DashboardCases cases = (DashboardCases)entryOption - 1;
-                        if (DashboardOperations(cases, profileController))
+                        if (DashboardOperations(cases, currentUser))
                             break;
                     }
                     else
@@ -65,34 +71,36 @@ namespace BankManagement.View
 
         private bool DashboardOperations(
             DashboardCases operation,
-            ProfileController profileController
+            Customer currentUser
             )
         {
-            TransactionController transactionController = new TransactionController(new TransactionOperations());
-            AccountsController accountsController = new AccountsController(new AccountOperations()); 
-            IATMTransactionServices transactionATMController = new ATMTransactionsController(transactionController, accountsController);
+
             
             switch (operation)
             {
                 case DashboardCases.PROFILE_SERVICES:
-                    ProfileView profileView = new ProfileView();
-                    profileView.ViewProfileServices(profileController);
+                    ProfileView profileView = new ProfileView(CustomerController);
+                    profileView.ViewProfileServices();
                     return false;
 
                 case DashboardCases.CREATE_ACCOUNT:
-                    CreateAccount(accountsController, transactionATMController, profileController);
+                    CreateAccount();
                     return false;
 
                 case DashboardCases.LIST_ACCOUNTS:
-                    ListAllAccounts(accountsController); 
+                    ListAllAccounts(); 
                     return false;
 
                 case DashboardCases.GO_TO_ACCOUNT:
-                    GoToAccount(accountsController, transactionATMController, transactionController);
+                    GoToAccount();
+                    return false;
+
+                case DashboardCases.CARD_SERVICES:
+                    GoToCardServices(currentUser);
                     return false;
 
                 case DashboardCases.SIGN_OUT:
-                    SaveCustomerSession(profileController);
+                    SaveCustomerSession();
                     return true;
 
                 default:
@@ -101,111 +109,145 @@ namespace BankManagement.View
             }
         }
 
-        public Account CreateAccount(IAccountServices accountsController, IATMTransactionServices transactionATMController, ProfileController profile)
+        public void GoToCardServices(Customer currentUser)
+        {
+            CardView cardsView = new CardView();
+            cardsView.ShowCards(currentUser.ID);
+        }
+
+        public void CreateAccount()
         {
 
-            AccountsView accountsView = new AccountsView();
+            AccountView accountsView = new AccountView();
             Account account = accountsView.GenerateAccount();
-            account.UserID = profile.Customer.ID;
-            bool inserted = accountsController.InsertAccount(account);
+            if (account != null)
+            {
+                account.UserID = CustomerController.GetCurrentUser().ID;
+                InsertAccount(account);
+            }
+        }
+
+        public void InsertAccount(Account account)
+        {
+            bool inserted = AccountController.InsertAccount(account);
             if (inserted)
             {
                 if (account is CurrentAccount)
-                    if (!CheckAmount(account, transactionATMController)) 
-                        Notification.Error("Initial Deposit unsuccessful");
+                    DepositAmount(account);
+                       
             }
 
             if (account != null)
                 Notification.Success("Account created successfully");
             else
                 Notification.Error("Account not created");
-
-            return account;
         }
 
-        public bool CheckAmount(Account account, IATMTransactionServices transactionATMController)
+        public bool DepositAmount(Account account)
         {
-            Helper helper = new Helper();
             while (true)
             {
-                decimal amount = helper.GetAmount();
-
-                if (amount > account.MinimumBalance)
-                    if (transactionATMController.Deposit(amount, account, ModeOfPayment.CASH))
+                decimal amount = GetAmount();
+                if (amount == 0)
+                    return false;
+                else if (amount > account.MinimumBalance)
+                    if (TransactionProcessingController.Deposit(amount, account, ModeOfPayment.CASH))
                         return true;
                     else
                         Notification.Error("Initial deposit was not done. Try again");
                 else
                     Notification.Error($"Initial deposit amount must be greater than Minimum Balance (Rs. {account.MinimumBalance}). Try again");
             }
-            return false;
         }
 
-        public void GoToAccount(AccountsController accountController,IATMTransactionServices transactionATMController, ITransactionServices transactionServices)
+        public decimal GetAmount()
         {
             while (true)
             {
-                TransactionsView transactionView = new TransactionsView();
-                Account transactionAccount = ChooseAccountForTransaction(accountController);
-                if (transactionAccount != null)
+                Console.Write("Enter amount: ");
+                try
                 {
-                    transactionServices.FillTable(transactionAccount.ID);
-                    transactionView.GoToAccount(transactionAccount, transactionATMController);
+                    decimal amount = Decimal.Parse(Console.ReadLine().Trim());
+                    if (amount > 0) return amount;
+                    else Console.WriteLine("Amount should be greater than zero.");
                 }
-                else
-                    break;
+                catch (Exception error)
+                {
+                    Notification.Error("Enter a valid amount. Try Again!");
+                }
             }
         }
 
-        public Account ChooseAccountForTransaction(AccountsController accountController)
+        public void GoToAccount()
+        {
+            try
+            {
+                while (true)
+                {
+                    TransactionView transactionView = new TransactionView();
+                    Account transactionAccount = ChooseAccountForTransaction();
+
+                    if (transactionAccount != null)
+                        transactionView.GoToAccount(transactionAccount);
+                    else
+                        break;
+                }
+            }catch(Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+        }
+
+        public Account ChooseAccountForTransaction()
         {
             try
             {
                 int accountIndex;
 
-                IList<Account> accountsList = accountController.GetAccountsList();
+                IList<Account> accountsList = AccountController.GetAccountsList();
+
                 if (accountsList.Count() == 1)
                     accountIndex = 1;
                 else
                 {
-                    ListAccountIDs(accountsList);
-
-                    Console.WriteLine("Choose the account or Press 0 to go back!\n");
-                    string index = Console.ReadLine().Trim();
-
-                    if (!int.TryParse(index, out accountIndex))
-                        Notification.Error("Please enter a valid number.");
-                    else if (accountIndex == 0)
-                        return null;
-                    else if (accountIndex > accountsList.Count)
+                    while (true)
                     {
-                        Notification.Error("Choose from the listed accounts.");
-                        ChooseAccountForTransaction(accountController);
+                        ListAccountIDs(accountsList);
+
+                        Console.WriteLine("Choose the account or Press 0 to go back!\n");
+                        string index = Console.ReadLine().Trim();
+
+                        if (!int.TryParse(index, out accountIndex))
+                            Notification.Error("Please enter a valid number.");
+                        else if (accountIndex > accountsList.Count())
+                            Notification.Error("Choose from the listed accounts.");
+                        else if (accountIndex <= accountsList.Count())
+                            break;
                     }
                 }
 
-                return accountsList[accountIndex - 1];
+                if(accountIndex > 0) 
+                    return accountsList[accountIndex - 1];
+
             }
             catch(Exception e) {
                 Console.WriteLine(e);
-                return null;
             }
+            return null;
         }
 
-        public void ListAllAccounts(AccountsController accountsController)
+        public void ListAllAccounts()
         {
-            IList<Account> accountsList = accountsController.GetAccountsList();
+            IList<Account> accountsList = AccountController.GetAccountsList();
 
             foreach(Account account in accountsList) {
                 Console.WriteLine(account);
             }
         }
 
-        private void SaveCustomerSession(ProfileController profileController)
+        private void SaveCustomerSession()
         {
-            CustomerOperations customerOperations = new CustomerOperations();
-            CustomersController customersController = new CustomersController(customerOperations, customerOperations);
-            customersController.UpdateCustomer(profileController.Customer);
+            CustomerController.UpdateCustomer(CustomerController.GetCurrentUser());
         }
 
         public void ListAccountIDs(IList<Account> accounts)

@@ -1,18 +1,17 @@
-﻿using BankManagement.Controller;
-using BankManagement.Enums;
-using BankManagement.Models;
-using BankManagement.Utility;
-using System;
+﻿using System;
+using BankManagementDB.EnumerationType;
+using BankManagementDB.Models;
+using BankManagementDB.Constants;
 
-namespace BankManagement.Model
+namespace BankManagementDB.Model
 {
     public class CurrentAccount : Account
     {
         public readonly decimal CHARGES = 50;
         
         public CurrentAccount(): base() {
-            InterestRate = AccountInterestRate.CURRENT_INTEREST_RATE;
-            Type = AccountTypes.CURRENT;
+            InterestRate = Constants.AccountConstants.CURRENT_INTEREST_RATE;
+            Type = AccountType.CURRENT;
             CreatedOn = DateTime.Now;
             MinimumBalance = 500;
         }

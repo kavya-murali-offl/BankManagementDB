@@ -1,4 +1,4 @@
-﻿using BankManagementDB.Enums;
+﻿using BankManagementDB.EnumerationType;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,15 +9,11 @@ namespace BankManagementDB.Model
 {
     public class CreditCard : Card
     {
-        public CreditCard()
+        public CreditCard() : base()
         {
-            ID = Guid.NewGuid();
             CreditLimit = 10000;
             APR = 0.060m;
-            ExpiryMonth = DateTime.Now.Month;
-            ExpiryYear = DateTime.Now.Year + 7;
             CreditPoints = 100;
-            Balance = 0;
             Type = CardType.CREDIT;
         }
 
@@ -31,8 +27,10 @@ namespace BankManagementDB.Model
             Balance -= amount;
         }
 
+
+
         public override string ToString() =>
-           $"Card Type: CREDIT\n Card ID: {ID}\n Card Number: {CardNumber}\n CardHolderName: {CardHolder}\n Balance: {Balance}";
+           $"\nCard Type: CREDIT\nCard Number: {CardNumber}\nBalance: {Balance}\nExpiry Month: {ExpiryMonth}\nExpiry Year: {ExpiryYear}\n=====================================================\n";
 
     }
 }
