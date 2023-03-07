@@ -1,19 +1,20 @@
 ﻿using System;
-using System.Data.Linq.Mapping;
 using BankManagementDB.EnumerationType;
+using SQLite;
 
 namespace BankManagementDB.Model
 {
-    [Table(Name = "Transactions")]
+    [Table("Transactions")]
     public class Transaction
     {
+
         public Transaction()
         {
             ID = Guid.NewGuid();
             RecordedOn = DateTime.Now;
         }
 
-        public Transaction(string description, decimal amount, decimal balance, TransactionType transactionType, Guid accountID, ModeOfPayment modeOfPayment)
+        public Transaction(string description, decimal amount, decimal balance, TransactionType transactionType, Guid accountID, ModeOfPayment modeOfPayment, string cardNumber)
         {
             ID = Guid.NewGuid();
             Description = description;
@@ -23,8 +24,10 @@ namespace BankManagementDB.Model
             RecordedOn = DateTime.Now;
             AccountID = accountID;
             ModeOfPayment = modeOfPayment;
+            CardNumber = cardNumber;
         }
 
+        [PrimaryKey]
         public Guid ID { get; set; }
 
         public TransactionType TransactionType { get; set; }
@@ -41,8 +44,10 @@ namespace BankManagementDB.Model
 
         public string Description { get; set; }
 
+        public string CardNumber { get; set; }
+
         public override string ToString() =>
-             $@"
+                $@"
                 Transaction Type: {TransactionType} 
                 Transaction Time: {RecordedOn} 
                 Description: {Description}

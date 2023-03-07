@@ -1,10 +1,7 @@
 ﻿using System;
-using BankManagementDB.Controller;
 using BankManagementDB.Config;
-using BankManagementDB.Controller;
 using BankManagementDB.EnumerationType;
 using BankManagementDB.Interface;
-using BankManagementDB.View;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BankManagementDB.View
@@ -37,31 +34,28 @@ namespace BankManagementDB.View
                 }
                 catch (Exception err)
                 {
-                    Notification.Error("Enter a valid option. Try Again!");
+                    Notification.Error(err.ToString());
                 }
             }
         }
         
         public bool EntryOperations(EntryCases option)
         {
-            ICustomerController customersController = DependencyContainer.ServiceProvider.GetRequiredService<ICustomerController>();
-            IAccountController accountController = DependencyContainer.ServiceProvider.GetRequiredService<IAccountController>();
-            ITransactionProcessController transactionProcessController = DependencyContainer.ServiceProvider.GetRequiredService<ITransactionProcessController>();
             IAccountFactory accountFactory = DependencyContainer.ServiceProvider.GetRequiredService<IAccountFactory>();
-            ICardFactory cardFactory = DependencyContainer.ServiceProvider.GetRequiredService<ICardFactory>();
-            ICardController cardController = DependencyContainer.ServiceProvider.GetRequiredService<ICardController>();
+
             switch (option)
             {
                 case EntryCases.LOGIN:
 
-                    LoginView loginView = new LoginView(customersController);
+                    LoginView loginView = new LoginView();
                     loginView.UserChanged += onUserChanged;
                     loginView.Login();
+                    loginView.UserChanged -= onUserChanged;
                     return false;
 
                 case EntryCases.SIGNUP:
                     
-                    SignupView signupView = new SignupView(customersController, cardController, accountFactory, cardFactory, accountController, transactionProcessController);
+                    SignupView signupView = new SignupView(accountFactory);
                     signupView.Signup();
                     return false;
 

@@ -1,9 +1,11 @@
 ﻿using BankManagementDB.EnumerationType;
+using SQLite;
 using System;
 
 namespace BankManagementDB.Model
 {
-    public abstract class Card
+    [Table("Card")]
+    public class Card
     {
         public Card()
         {
@@ -11,14 +13,12 @@ namespace BankManagementDB.Model
             ExpiryMonth = DateTime.Now.Month.ToString();
             ExpiryYear = (DateTime.Now.Year + 7).ToString();
             CreatedOn = DateTime.Now;
-            Balance = 0;
         }
 
-        public Guid ID { get; set; }
+        [PrimaryKey]
+        public virtual Guid ID { get; set; }
 
         public DateTime CreatedOn { get; set; }
-
-        public int CreditPoints { get; set; }
 
         public string Pin { get; set; }
 
@@ -26,11 +26,7 @@ namespace BankManagementDB.Model
 
         public Guid AccountID { get; set; }
 
-        public CreditCardType CreditCardType { get; set; }
-
-        public Guid CustomerID { get; set; }
-
-        public decimal Balance { get; set; }
+        public virtual Guid CustomerID { get; set; }
 
         public string CVV { get; set; }
 
@@ -38,17 +34,7 @@ namespace BankManagementDB.Model
 
         public string ExpiryYear { get; set; }
 
-        public decimal APR { get; set; }
-
-        public decimal CreditLimit { get; set; }
-
         public CardType Type { get; set; }
-
-        public abstract void Purchase(decimal amount);
-
-        public abstract void Payment(decimal amount);
-
-        public abstract override string ToString();
 
     }
 }

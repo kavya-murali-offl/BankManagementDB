@@ -1,14 +1,10 @@
 ﻿using System;
-using BankManagementDB.Controller;
 using BankManagementDB.Model;
 using BankManagementDB.Models;
 using BankManagementDB.Utility;
-using BankManagementDB.Config;
-using BankManagementDB.Controller;
 using BankManagementDB.EnumerationType;
 using BankManagementDB.Interface;
-using BankManagementDB.Model;
-using BankManagementDB.View;
+using BankManagementDB.Config;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BankManagementDB.View
@@ -16,31 +12,26 @@ namespace BankManagementDB.View
     public class SignupView
     {
         public SignupView(
-            ICustomerController customerController,
-            ICardController cardController,
-            IAccountFactory accountFactory,
-            ICardFactory cardFactory,
-            IAccountController accountController,
-            ITransactionProcessController transactionProcessController)
+            IAccountFactory accountFactory
+            )
         {
-            CardController = cardController;
             AccountFactory = accountFactory;
-            AccountController = accountController;
-            TransactionProcessController = transactionProcessController;
-            CardFactory = cardFactory;
-            CustomerController = customerController;
+            InsertAccountDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IInsertAccountDataManager>();
+            InsertCustomerDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IInsertCustomerDataManager>();
+            GetCustomerDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IGetCustomerDataManager>();
         }
 
-        public ICardController CardController { get; set; }
-        public ICustomerController CustomerController { get; set; }
+        public IGetCardDataManager GetCardDataManager { get; set; }
 
-        public IAccountController AccountController { get; set; }
+        public IInsertCardDataManager InsertCardDataManager { get; set; }
+
+        public IInsertCustomerDataManager InsertCustomerDataManager { get; set; }
+
+        public IGetCustomerDataManager GetCustomerDataManager { get; set; }
+
+        public IInsertAccountDataManager InsertAccountDataManager { get; set; }
 
         public IAccountFactory AccountFactory { get; set; }
-
-        public ICardFactory CardFactory { get; set; }
-
-        public ITransactionProcessController TransactionProcessController { get; set; }
 
         public void Signup()
         {
@@ -70,7 +61,7 @@ namespace BankManagementDB.View
                                 if (isVerified)
                                 {
                                     CreateCustomer(name, password, email, phone, age);
-                                    Customer signedUpCustomer = CustomerController.GetCustomer(phone);
+                                    Customer signedUpCustomer = GetCustomerDataManager.GetCustomer(phone);
                                     CreateAccountAndDeposit(signedUpCustomer);
                                 }
                             }
@@ -115,24 +106,23 @@ namespace BankManagementDB.View
 
         public int GetInteger(string message)
         {
-            int number = 0;
-            while (true)
+            try
             {
-                try
+                while (true)
                 {
                     Console.Write(message);
                     string input = Console.ReadLine().Trim();
-                    if (int.TryParse(input, out number))
-                        break;
+                    if (int.TryParse(input, out int number))
+                        return number;
                     else
                         Notification.Error("Enter a valid number.");
                 }
-                catch (Exception error)
-                {
-                    Notification.Error("Enter a valid number. Try Again!");
-                }
             }
-            return number;
+            catch (Exception error)
+            {
+                Notification.Error("Enter a valid number. Try Again!");
+            }
+            return 0;
         }
 
         public void CreateAccountAndDeposit(Customer signedUpCustomer)
@@ -143,50 +133,76 @@ namespace BankManagementDB.View
                 account.UserID = signedUpCustomer.ID;
                 account.Balance = 0;
 
-
-                if (AccountController.InsertAccount(account))
+                if (InsertAccountDataManager.InsertAccount(account))
                 {
-                    decimal amount;
-                    TransactionView transactionsView = new TransactionView();
-                    while (true)
+                    decimal amount = GetAmount(account.MinimumBalance);
+                    if (amount > 0)
                     {
-                        amount = transactionsView.GetAmount();
-                        if (amount < account.MinimumBalance)
-                            Notification.Error($"Initial Amount should be greater than Minimum Balance Rs. {account.MinimumBalance}");
+                        TransactionView transactionView = new TransactionView();
+                        if (transactionView.Deposit(account, amount, ModeOfPayment.CASH, null))
+                        {
+                            Notification.Success("Account created successfully\n");
+
+                            Console.WriteLine("Do you need Debit Card for this account? Press y to accept or n to decline");
+                            while (true)
+                            {
+                                string input = Console.ReadLine().Trim();
+                                if(CreateCard(input, account, signedUpCustomer))
+                                    break;
+                            }
+                        }
                         else
-                            break;
+                            Notification.Error("Deposit unsuccessful");
                     }
+                }
+            }
+            catch (Exception e)
+            {
+                Notification.Error(e.ToString());
+            }
+        }
 
-                    if (TransactionProcessController.Deposit(amount, account, ModeOfPayment.CASH))
-                    {
-                        Notification.Success("Account created successfully\n");
+        public decimal GetAmount(decimal minimumBalance) {
+            TransactionView transactionsView = new TransactionView();
+            decimal amount;
+            while (true)
+            {
+                amount = transactionsView.GetAmount();
+                if (amount < minimumBalance)
+                    Notification.Error($"Initial Amount should be greater than Minimum Balance Rs. {minimumBalance}");
+                else
+                    break;
+            }
+            return amount;  
+        }
 
-                        Card card = CardController.CreateCard(CardType.DEBIT, account.ID, signedUpCustomer.ID);
-                        CardController.GetAllCards(account.ID);
-                        if (CardController.InsertCard(card))
+        public bool CreateCard(string input, Account account, Customer signedUpCustomer)
+        {
+            CardView cardView= new CardView();
+                switch (input.ToLower())
+                {
+                    case "y":
+                        Card card = cardView.CreateCard(CardType.DEBIT, account.ID, signedUpCustomer.ID);
+                        GetCardDataManager.GetAllCards(signedUpCustomer.ID);
+                        if (InsertCardDataManager.InsertCard(card))
                         {
                             Notification.Success("Debit card created successfully. Save Card Number and Pin for later use.\n");
                             Console.WriteLine(card);
                             Console.WriteLine($" PIN: {card.Pin}");
                             Console.WriteLine();
                         }
-                    }
-                    else
-                    {
-                        Notification.Error("Deposit unsuccessful");
-                    }
+                        return true;
+                    case "n":
+                        return true;
+                    default:
+                        Notification.Error("Please enter a valid input");
+                        return false;
                 }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
-
         }
 
         public bool CheckUniquePhoneNumber(string phoneNumber)
         {
-            Customer customer = CustomerController.GetCustomer(phoneNumber);
+            Customer customer = GetCustomerDataManager.GetCustomer(phoneNumber);
             return customer == null;
         }
 
@@ -204,7 +220,7 @@ namespace BankManagementDB.View
                 CreatedOn = DateTime.Now
             };
 
-            bool customerAdded = CustomerController.InsertCustomer(customer, password);
+            bool customerAdded = InsertCustomerDataManager.InsertCustomer(customer, password);
             if (customerAdded) Notification.Success("\nSignup successful");
 
             return customerAdded;

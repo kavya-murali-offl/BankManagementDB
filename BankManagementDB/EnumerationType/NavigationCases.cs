@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -18,7 +20,7 @@ namespace BankManagementDB.EnumerationType
         PROFILE_SERVICES,
         CREATE_ACCOUNT,
         LIST_ACCOUNTS,
-        GO_TO_ACCOUNT,
+        ACCOUNT_SERVICES,
         CARD_SERVICES,
         SIGN_OUT
     }
@@ -39,14 +41,23 @@ namespace BankManagementDB.EnumerationType
         VIEW_STATEMENT,
         PRINT_STATEMENT,
         VIEW_ACCOUNT_DETAILS,
-        CARD_SERVICES,
         BACK
     }
 
     public enum CardCases
     {
         VIEW_CARDS,
+        ADD_CARD,
         RESET_PIN,
+        CREDIT_CARD_SERVICES,
+        EXIT
+    }
+
+    public enum CreditCardCases
+    {
+        PURCHASE,
+        PAYMENT,
+        VIEW_STATEMENT,
         EXIT
     }
 

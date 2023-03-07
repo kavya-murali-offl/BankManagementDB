@@ -7,26 +7,26 @@ using BankManagementDB.Utility;
 using BankManagementDB.Config;
 using BankManagementDB.EnumerationType;
 using BankManagementDB.Interface;
-using BankManagementDB.Model;
-using BankManagementDB.View;
 using Microsoft.Extensions.DependencyInjection;
+using System.Security.Principal;
 
 namespace BankManagementDB.View
 {
     public class TransactionView
     {
         public TransactionView() {
-            TransactionProcessingController = DependencyContainer.ServiceProvider.GetRequiredService<ITransactionProcessController>(); ;
-            TransactionController = DependencyContainer.ServiceProvider.GetRequiredService<ITransactionController>();
+            TransactionController = DependencyContainer.ServiceProvider.GetRequiredService<ITransactionDataManager>();
+            UpdateAccountDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IUpdateAccountDataManager>();
+            GetAccountDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IGetAccountDataManager>();
         }
 
-        public ITransactionProcessController TransactionProcessingController { get; set; }
+        public ITransactionDataManager TransactionController { get; set; }
 
-        public ITransactionController TransactionController { get; set; }
+        public IUpdateAccountDataManager UpdateAccountDataManager { get; private set; }
+        public IGetAccountDataManager GetAccountDataManager { get; private set; }
 
         public void GoToAccount(Account account)
         {
-
             TransactionController.FillTable(account.ID);
             while (true)
             {
@@ -39,40 +39,34 @@ namespace BankManagementDB.View
 
                 Console.Write("\nEnter your choice: ");
 
-                try
+                string option = Console.ReadLine().Trim();
+                int entryOption = int.Parse(option);
+                if (entryOption != 0 && entryOption <= Enum.GetNames(typeof(AccountCases)).Count())
                 {
-                    string option = Console.ReadLine().Trim();
-                    int entryOption = int.Parse(option);
-                    if (entryOption != 0 && entryOption <= Enum.GetNames(typeof(AccountCases)).Count())
-                    {
-                        AccountCases operation = (AccountCases)entryOption - 1;
-                        if (TransactionOperations(operation, account))
-                            break;
-                    }
-                    else
-                        Notification.Error("Enter a valid input.");
+                    AccountCases operation = (AccountCases)entryOption - 1;
+                    if (TransactionOperations(operation, account))
+                        break;
                 }
-                catch (Exception error)
-                {
-                    Notification.Error("Enter a valid option. Try Again!");
-                }
+                else
+                    Notification.Error("Enter a valid input.");
             }
         }
        
         public bool TransactionOperations(AccountCases option, Account account)
         {
+
             switch (option)
             {
                 case AccountCases.DEPOSIT:
-                    Deposit(account);
+                    Initiate(account, TransactionType.DEPOSIT);
                     return false;
 
                 case AccountCases.WITHDRAW:
-                    Withdraw(account);
+                    Initiate(account, TransactionType.WITHDRAW);
                     return false;
 
                 case AccountCases.TRANSFER:
-                    Transfer(account);
+                    Initiate(account, TransactionType.TRANSFER);
                     return false;
 
                 case AccountCases.CHECK_BALANCE:
@@ -88,7 +82,7 @@ namespace BankManagementDB.View
                     return false;
 
                 case AccountCases.VIEW_ACCOUNT_DETAILS:
-                    ViewAccountDetails(account);
+                    Console.WriteLine(account);
                     return false;
 
                 case AccountCases.BACK:
@@ -101,136 +95,209 @@ namespace BankManagementDB.View
 
         }
 
-        public ModeOfPayment? GetModeOfPayment(Guid id)
-        {
-            while (true)
-            {
-                for (int i = 0; i < Enum.GetNames(typeof(MoneyServices)).Length; i++)
-                {
-                    MoneyServices cases = (MoneyServices)i;
-                    Console.WriteLine($"{i + 1}. {cases.ToString().Replace("_", " ")}");
-                }
-                Console.WriteLine("Press 0 to go back!");
-                Console.Write("\nEnter your choice: ");
-
-                try
-                {
-                    string option = Console.ReadLine().Trim();
-                    int entryOption = int.Parse(option);
-                    if(entryOption == 0)
-                    {
-                        return null;
-                    }
-                    else if (entryOption <= Enum.GetNames(typeof(MoneyServices)).Count())
-                    {
-                        ModeOfPayment operation = (ModeOfPayment)entryOption - 1;
-                        return operation;
-                    }
-                    else
-                        Notification.Error("Enter a valid input.");
-                }
-                catch (Exception error)
-                {
-                    Notification.Error("Enter a valid option. Try Again!");
-                }
-            }
-        }
-
-        public void Deposit(Account account)
+        public void Initiate(Account account, TransactionType transactionType)
         {
             CardView cardsView = new CardView();
-            ModeOfPayment? nullableMode = GetModeOfPayment(account.ID);
+            bool isAuthenticated = false;
+            string cardNumber = null;
 
-            if (nullableMode != null)
+            ModeOfPayment modeOfPayment = GetModeOfPayment(transactionType);
+
+            if (modeOfPayment != ModeOfPayment.DEFAULT)
             {
-                ModeOfPayment modeOfPayment = (ModeOfPayment)nullableMode;
-
-                TransactionProcessingController.BalanceChanged += onBalanceChanged;
-
-                if (cardsView.ValidateModeOfPayment(account.ID, modeOfPayment))
-                {
-
-                    if (IsAuthenticated(modeOfPayment))
+                if (cardsView.ValidateModeOfPayment(account.ID, modeOfPayment)) { 
+                    if (modeOfPayment == ModeOfPayment.CASH)
+                        isAuthenticated = true;
+                    else if (modeOfPayment == ModeOfPayment.DEBIT_CARD || modeOfPayment == ModeOfPayment.CREDIT_CARD)
                     {
-                        decimal amount = GetAmount();
-                        TransactionProcessingController.Deposit(amount, account, modeOfPayment);
+                        cardNumber = cardsView.GetCardNumber();
+                        if (cardNumber != null)
+                            isAuthenticated = IsAuthenticated(modeOfPayment, cardNumber);
                     }
-                    else
+                   if(!isAuthenticated) 
                         Notification.Error("Authentication failed. Please try again");
                 }
                 else
-                    Notification.Error("Selected mode of payment is not enabled.");
+                    Notification.Error("Selected Mode of payment is not enabled");
+            }
+            if (isAuthenticated)
+            {
+                decimal amount = GetAmount();
+                if (amount > 0)
+                {
+                    switch (transactionType)
+                    {
+                        case TransactionType.DEPOSIT:
+                            Deposit(account, amount, modeOfPayment, cardNumber);
+                            break;
 
-                TransactionProcessingController.BalanceChanged -= onBalanceChanged;
+                        case TransactionType.WITHDRAW:
+                            Withdraw(account, amount, modeOfPayment, cardNumber);
+                            break;
+
+                        case TransactionType.TRANSFER:
+                            Transfer(account, amount, modeOfPayment, cardNumber);
+                            break;
+
+                        default:
+                            break;
+                    }
+                }
             }
         }
 
-
-
-        public void Withdraw(Account account)
+        public bool Deposit(Account account, decimal amount, ModeOfPayment modeOfPayment, string cardNumber)
         {
-            CardView cardsView = new CardView();
-            ModeOfPayment? nullableMode = GetModeOfPayment(account.ID);
-
-            if (nullableMode != null)
+            //AccountDataManager.BalanceChanged += onBalanceChanged;
+            if (UpdateAccountDataManager.UpdateBalance(account, amount, TransactionType.DEPOSIT))
             {
-                ModeOfPayment modeOfPayment = (ModeOfPayment)nullableMode;
+                RecordTransaction("Deposit", amount, account.Balance, TransactionType.DEPOSIT, account.ID, modeOfPayment, cardNumber);
+                Notification.Success($"Deposit of Rs. {amount} is successful");
+                return true;
+            }
+            else
+                Notification.Error("Deposit unsuccessful");
+            //AccountDataManager.BalanceChanged -= onBalanceChanged;
+            return false;
+        }
 
-                TransactionProcessingController.BalanceChanged += onBalanceChanged;
 
-                if (cardsView.ValidateModeOfPayment(account.ID, modeOfPayment))
+        public ModeOfPayment GetModeOfPayment(TransactionType transactionType)
+        {
+            string input;
+            ModeOfPayment modeOfPayment = ModeOfPayment.DEFAULT;
+            Console.WriteLine("Choose mode of payment:\n1. CASH\n2. DEBIT CARD\n");
+            input = Console.ReadLine().Trim();
+            if (input == "0") modeOfPayment = ModeOfPayment.DEFAULT;
+            else if (input == "1") modeOfPayment = ModeOfPayment.CASH;
+            else if (input == "2") modeOfPayment = ModeOfPayment.DEBIT_CARD;
+            return modeOfPayment;
+        }
+
+        public bool RecordTransaction(string description, decimal amount, decimal balance, TransactionType transactionType, Guid accountID, ModeOfPayment modeOfPayment, string cardNumber)
+        {
+            Transaction transaction =
+            new Transaction(description, amount, balance, transactionType, accountID, modeOfPayment, cardNumber);
+            return TransactionController.InsertTransaction(transaction);
+        }
+
+        public bool Withdraw(Account account, decimal amount, ModeOfPayment modeOfPayment, string cardNumber)
+        {
+            try
+            {
+                if (amount > account.Balance)
+                    Notification.Error("Insufficient Balance");
+                else
                 {
+                    WithdrawHandlers(account);
 
-                    if (IsAuthenticated(modeOfPayment))
+                    //AccountDataManager.BalanceChanged += onBalanceChanged;
+                    if (UpdateAccountDataManager.UpdateBalance(account, amount, TransactionType.DEPOSIT))
                     {
-                        decimal amount = GetAmount();
-                        if (amount > account.Balance) Notification.Error("Insufficient Balance");
-                        else TransactionProcessingController.Withdraw(amount, account, modeOfPayment);
+
+                            Notification.Success("Withdraw successful");
+                            bool isTransactionRecorded = RecordTransaction("Withdraw", amount, account.Balance, TransactionType.WITHDRAW, account.ID, modeOfPayment, cardNumber);
+                            return true;
                     }
                     else
-                        Notification.Error("Authentication failed. Please try again");
+                        Notification.Error("Withdraw unsuccessful");
+                    //AccountDataManager.BalanceChanged -= onBalanceChanged;
                 }
+            }
+            catch(Exception ex) { 
+                Notification.Error(ex.Message);
+            }
+            return false;
+        }
 
-                TransactionProcessingController.BalanceChanged -= onBalanceChanged;
+        private void WithdrawHandlers(Account account)
+        {
+            if (account is SavingsAccount)
+                DepositInterest(account as SavingsAccount);
+
+            else if (account is CurrentAccount)
+                ChargeForMinBalance(account as CurrentAccount);
+        }
+
+        private void ChargeForMinBalance(CurrentAccount currentAccount)
+        {
+            try
+            {
+                if (currentAccount.Balance < currentAccount.MinimumBalance && currentAccount.Balance > currentAccount.CHARGES)
+                {
+                    UpdateAccountDataManager.UpdateBalance(currentAccount, currentAccount.CHARGES, TransactionType.WITHDRAW);
+                    Notification.Info("You have been charged for not maintaining minimum balance");
+                    RecordTransaction("Minimum Balance Charge",
+                        currentAccount.CHARGES, currentAccount.Balance,
+                        TransactionType.WITHDRAW, currentAccount.ID, ModeOfPayment.INTERNAL, null);
+                }
+            }
+            catch (Exception error)
+            {
+                Notification.Error(error.Message);  
             }
         }
 
-        public void Transfer(Account account)
+        private decimal DepositInterest(SavingsAccount account)
         {
-            ModeOfPayment? nullableMode = GetModeOfPayment(account.ID);
-            if (nullableMode != null)
+            try
             {
-                ModeOfPayment modeOfPayment = (ModeOfPayment)nullableMode;
-                TransactionProcessingController.BalanceChanged += onBalanceChanged;
-                CardView cardsView = new CardView();
-                if (cardsView.ValidateModeOfPayment(account.ID, modeOfPayment))
+                decimal interest = account.GetInterest();
+                if (interest > 0)
                 {
-                    if (IsAuthenticated(modeOfPayment))
+                    Notification.Info($"Interest deposit of Rs. {interest} has been initiated");
+                    UpdateAccountDataManager.UpdateBalance(account, interest, TransactionType.DEPOSIT);
+                    RecordTransaction("Interest", interest, account.Balance, TransactionType.DEPOSIT, account.ID, ModeOfPayment.INTERNAL, null);
+                    return interest;
+                }
+            }
+            catch (Exception error) { 
+                Notification.Error(error.ToString());
+            }
+            return 0;
+        }
+
+        public void Transfer(Account account, decimal amount, ModeOfPayment modeOfPayment, string cardNumber)
+        {
+            
+            if (amount > account.Balance) Notification.Error("Insufficient Balance");
+            else
+            {
+                Account transferAccount = GetTransferAccount(account.AccountNumber);
+                if (transferAccount != null)
+                {
+                    if (UpdateAccountDataManager.UpdateBalance(account, amount, TransactionType.WITHDRAW))
                     {
-                        decimal amount = GetAmount();
-                        if (amount > account.Balance) Notification.Error("Insufficient Balance");
+                        if (UpdateAccountDataManager.UpdateBalance(transferAccount, amount, TransactionType.DEPOSIT))
+                        {
+                            Console.WriteLine("Transfer successful");
+                            RecordTransaction("Transferred", amount, account.Balance, TransactionType.TRANSFER, account.ID, modeOfPayment, cardNumber);
+                            RecordTransaction("Received", amount, account.Balance, TransactionType.RECEIVED, account.ID, modeOfPayment, cardNumber);
+                        }
                         else
                         {
-                            Guid transferAccountID = GetTransferAccountID(account.ID);
-                            if(transferAccountID != Guid.Empty)
-                                TransactionProcessingController.Transfer(amount, account, transferAccountID, modeOfPayment);
+                            Notification.Error("Transfer unsuccessful");
+                            UpdateAccountDataManager.UpdateBalance(account, amount, TransactionType.DEPOSIT);
                         }
                     }
                     else
-                        Notification.Error("Authentication failed. Please try again");
+                        Notification.Error("Transfer unsuccessful");
                 }
-                else
-                    Notification.Error("Selected mode of payment is not enabled.");
-
-                TransactionProcessingController.BalanceChanged -= onBalanceChanged;
             }
         }
 
         public void ViewAllTransactions(Guid accountID)
         {
-            IEnumerable<Transaction> statements = TransactionController.GetAllTransactions(accountID);
-            foreach (Transaction transaction in statements)
-                Console.WriteLine(transaction);
+            try
+            {
+                IEnumerable<Transaction> statements = TransactionController.GetAllTransactions(accountID).Where(transaction=> transaction.AccountID.Equals(accountID));
+                foreach (Transaction transaction in statements)
+                    Console.WriteLine(transaction);
+            }
+            catch(Exception error)
+            {
+                Notification.Error(error.Message);  
+            }
         }
 
         public void PrintStatement(Guid accountID)
@@ -239,38 +306,37 @@ namespace BankManagementDB.View
             Printer.PrintStatement(statements);
         }
 
-        public void ViewAccountDetails(Account account)
+        public Account GetTransferAccount(string accountNumber)
         {
-            Console.WriteLine(account);
-        }
-
-        public Guid GetTransferAccountID(Guid ID)
-        {
-            while (true)
+            try
             {
-                try
+                while (true)
                 {
-                    Console.Write("Enter Account ID to transfer: ");
-                    string id = Console.ReadLine().Trim();
-                    Guid inputID;
-                    if (id == "0")
-                        inputID = Guid.Empty;
+                    Console.Write("Enter Account Number to transfer: ");
+                    string transferAccountNumber = Console.ReadLine().Trim();
+                    if (transferAccountNumber == "0")
+                        break;
                     else
-                    {
-                        inputID = new Guid(id);
-                        if (inputID.Equals(ID))
-                        {
+
+                        if (accountNumber == transferAccountNumber)
                             Notification.Error("Choose a different account number to transfer.");
-                            continue;
+                        else
+                        {
+                            Account transferAccount = GetAccountDataManager.GetAccount(accountNumber);
+                            if (transferAccount == null)
+                            {
+                                Notification.Error("Enter a valid Account Number");
+                                break;
+                            }
+                            else return transferAccount;
                         }
-                    }
-                    return inputID;
-                }
-                catch (Exception error)
-                {
-                    Notification.Error("Enter a valid ID.");
                 }
             }
+            catch (Exception error)
+            {
+                Notification.Error(error.ToString());
+            }
+            return null;
         }
 
         public void onBalanceChanged(string message)
@@ -278,33 +344,33 @@ namespace BankManagementDB.View
             Notification.Success(message);
         }
 
-        public bool IsAuthenticated(ModeOfPayment modeOfPayment)
+        public bool IsAuthenticated(ModeOfPayment modeOfPayment, string cardNumber)
         {
-
             CardView cardsView = new CardView();
+
             if (modeOfPayment == ModeOfPayment.CASH)
                return true;
             else
-               return cardsView.Authenticate();
+               return cardsView.Authenticate(cardNumber);
         }
 
         public decimal GetAmount()
         {
-            while (true)
+            try
             {
-                Console.Write("Enter amount: ");
-                try
+                while (true)
                 {
-                    decimal amount = Decimal.Parse(Console.ReadLine().Trim());
-                    if (amount > 0) return amount;
-                    else Notification.Error("Amount should be greater than zero.");
-                }
-                catch (Exception error)
-                {
-                    Notification.Error("Enter a valid amount. Try Again!");
+                    Console.Write("Enter amount: ");
+                    decimal amount = decimal.Parse(Console.ReadLine().Trim());
+                    if (amount < 0) Notification.Error("Amount should be greater than zero.");
+                    else return amount;
                 }
             }
+            catch (Exception error)
+            {
+                Notification.Error(error.ToString());
+            }
+            return 0;
         }
-
     }
 }

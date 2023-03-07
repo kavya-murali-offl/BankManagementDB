@@ -1,6 +1,6 @@
 ﻿using BankManagementDB.View;
-using BankManagementDB.Repository;
 using System;
+using System.IO;
 
 namespace BankManagementDB
 {
@@ -8,12 +8,10 @@ namespace BankManagementDB
     {
         static void Main(string[] args)
         {
-
-            Environment.SetEnvironmentVariable("DATABASE_PATH", "Database.sqlite3");
+           
+            Environment.SetEnvironmentVariable("DATABASE_PATH", Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "BankDB.db3"));
             Environment.SetEnvironmentVariable("DATABASE_PASSWORD", "pass");
 
-            DBRepository.CreateTablesIfNotExists();
-            
             EntryView entryView = new EntryView();
             entryView.Entry();
 

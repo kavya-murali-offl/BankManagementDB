@@ -1,25 +1,28 @@
 ﻿using System;
-using BankManagementDB.Controller;
 using BankManagementDB.Utility;
-using BankManagementDB.View;
 using BankManagementDB.Models;
 using BankManagementDB.Interface;
 using BankManagementDB.Config;
 using Microsoft.Extensions.DependencyInjection;
-using System.Text;
 using BankManagementDB.Controller;
+using BankManagementDB.Model;
+using BankManagementDB.DataManager;
 
 namespace BankManagementDB.View
 {
     public class LoginView
     {
-        public event Action<string> UserChanged;
-        
-        public LoginView(ICustomerController customerController) {
-            CustomerController = customerController;
+        public LoginView() {
+            ValidatePasswordDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IValidatePasswordDataManager>(); 
+            GetCustomerDataManager = DependencyContainer.ServiceProvider.GetService<IGetCustomerDataManager>();
         }
-        
-        public ICustomerController CustomerController { get; set; }
+
+        public Action<string> UserChanged;
+
+        public IGetCustomerDataManager GetCustomerDataManager { get; private set; }
+
+        public IValidatePasswordDataManager ValidatePasswordDataManager { get; private set; }
+
         public void Login()
         {
             try
@@ -28,27 +31,27 @@ namespace BankManagementDB.View
                 string phoneNumber = GetPhoneNumber();
                 if(phoneNumber != null)
                 {
-                    if (ValidatePhoneNumber(phoneNumber))
+                    Customer customer = GetCustomerByPhone(phoneNumber);
+                    if(customer != null)
                     {
                         Console.Write("Enter password: ");
                         string password = helper.GetPassword();
 
                         if (password != null)
                         {
-                            bool isValidated = ValidateLogin(phoneNumber, password);
+                            bool isValidated = ValidateLogin(customer, password);
+
                             if (isValidated)
                             {
-                                Customer currentUser = CustomerController.GetCustomer(phoneNumber);
-                                currentUser.LastLoggedOn = DateTime.Now;
-                                CustomerController.SetCurrentUser(currentUser);
-
-                                UserChanged?.Invoke("\nWelcome " + currentUser.Name + "!!!\n");
+                                Customer currentUser = GetCustomerDataManager.GetCustomer(phoneNumber);
+                                
+                                LoginCustomer(currentUser);
 
                                 DashboardView dashboard = new DashboardView();
-                                dashboard.ViewDashboard(currentUser);
+                                dashboard.ViewDashboard();
 
-                                UserChanged?.Invoke($"User {currentUser.Name} logged out successfully.");
-                                CustomerController.SetCurrentUser(null);
+                                LogoutCustomer();
+
                             }
                         }
                     }
@@ -62,11 +65,23 @@ namespace BankManagementDB.View
             }
         }
 
-        public bool ValidatePhoneNumber(string phoneNumber)
+        public void LoginCustomer(Customer customer)
         {
-            Customer customer = CustomerController.GetCustomer(phoneNumber);
-            return customer == null ? false : true;    
-            
+            customer.LastLoggedOn = DateTime.Now;
+            CurrentUserDataManager.CurrentUser = customer;
+            UserChanged?.Invoke("\nWelcome " + customer.Name + "!!!\n");
+        }
+
+        public void LogoutCustomer()
+        {
+            CurrentUserDataManager.CurrentUser = null;
+            UserChanged.Invoke("User logged out successfully");
+
+        }
+
+        public Customer GetCustomerByPhone(string phoneNumber)
+        {
+             return GetCustomerDataManager.GetCustomer(phoneNumber);
         }
 
         public string GetPhoneNumber()
@@ -83,35 +98,25 @@ namespace BankManagementDB.View
                     return phoneNumber;
                 else
                     Notification.Error("Please enter a valid mobile number. ");
-
             }
-            return null; ;
+            return null;
         }
 
-        public bool ValidateLogin(string phoneNumber, string password)
+        public bool ValidateLogin(Customer customer, string password)
         {
             bool isValidated = false;
-            IValidationServices validationServices = DependencyContainer.ServiceProvider.GetRequiredService<IValidationServices>();
-
             try
             {
-                Customer customer = CustomerController.GetCustomer(phoneNumber);
-
-                if (customer != null)
-                {
-                    isValidated = validationServices.ValidatePassword(phoneNumber, password);
-                    if (!isValidated) Notification.Error("Incorrect Password");
-                }
-                else
-                    Notification.Error("This Phone Number is not registered with us. Please try again!");
+                 isValidated = ValidatePasswordDataManager.ValidatePassword(customer.ID, password);
+                 if (!isValidated) Notification.Error("Incorrect Password");
             }
             catch(Exception ex)
             {
                 Console.WriteLine(ex);  
             }
-
             return isValidated;
 
         }
+
     }
 }

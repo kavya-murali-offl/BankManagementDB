@@ -7,26 +7,19 @@ using BankManagementDB.Models;
 using BankManagementDB.Config;
 using BankManagementDB.EnumerationType;
 using BankManagementDB.Interface;
-using BankManagementDB.Utility;
-using BankManagementDB.View;
+using BankManagementDB.DataManager;
 
 namespace BankManagementDB.View
 { 
 
     public class ProfileView
     {
-
-        public ProfileView(ICustomerController customerController) {
-            CustomerController = customerController;
-        }
-        public ICustomerController CustomerController { get; set; }
-
         public void ViewProfileServices()
         {
-            Customer currentUser = CustomerController.GetCurrentUser();
-            while (true)
+            
+            try
             {
-                try
+                while (true)
                 {
                     Console.WriteLine("\n");
                     for (int i = 0; i < Enum.GetNames(typeof(ProfileServiceCases)).Length; i++)
@@ -45,29 +38,29 @@ namespace BankManagementDB.View
                     {
                         ProfileServiceCases cases = (ProfileServiceCases)entryOption - 1;
 
-                        if (ProfileOperations(cases, currentUser))
+                        if (ProfileOperations(cases))
                             break;
                     }
                     else
                         Notification.Error("Enter a valid input.");
                 }
-                catch (Exception error)
-                {
-                    Notification.Error(error.Message);
-                }
+            }
+            catch (Exception error)
+            {
+                Notification.Error(error.Message);
             }
         }
 
-        public bool ProfileOperations(ProfileServiceCases cases, Customer currentUser)
+        public bool ProfileOperations(ProfileServiceCases cases)
         {
             switch (cases)
             {
                 case ProfileServiceCases.VIEW_PROFILE:
-                    ViewProfileDetails(currentUser);
+                    ViewProfileDetails();
                     return false;
 
                 case ProfileServiceCases.EDIT_PROFILE:
-                    EditProfile(currentUser);
+                    EditProfile();
                     return false;
 
                 case ProfileServiceCases.EXIT:
@@ -79,19 +72,28 @@ namespace BankManagementDB.View
             }
         }
 
-        public void ViewProfileDetails(Customer currentUser)
+        public void ViewProfileDetails()
         {
-            Notification.Info("\n ================== PROFILE ===================\n");
-            Notification.Info($"Name: {currentUser.Name}");
-            Notification.Info("Age: " + currentUser.Age);
-            Notification.Info("Phone: " + currentUser.Phone);
-            Notification.Info("Email: " + currentUser.Email);
-            Notification.Info("No. of Accounts: " + (AccountController.AccountsList != null ? AccountController.AccountsList.Count() : 0));
-            Notification.Info("\n ==============================================\n");
+            try
+            {
+                IGetAccountDataManager GetAccountDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IGetAccountDataManager>();
+                Customer currentUser = CurrentUserDataManager.CurrentUser;
+                Notification.Info("\n ================== PROFILE ===================\n");
+                Notification.Info($"Name: {currentUser.Name}");
+                Notification.Info("Age: " + currentUser.Age);
+                Notification.Info("Phone: " + currentUser.Phone);
+                Notification.Info("Email: " + currentUser.Email);
+                Notification.Info("No. of Accounts: " + (GetAccountDataManager.GetAllAccounts(currentUser.ID).Count()));
+                Notification.Info("\n ==============================================\n");
+            }catch(Exception ex)
+            {
+                Notification.Error(ex.ToString());
+            }
         }
 
-        public void EditProfile(Customer currentUser)
+        public void EditProfile()
         {
+            Customer currentUser = CurrentUserDataManager.CurrentUser;
             Customer customer = (Customer)currentUser.Clone();
 
             IDictionary<string, Action<string>> fields = new Dictionary<string, Action<string>>(){
@@ -100,7 +102,10 @@ namespace BankManagementDB.View
                                 {
                                     int age;
                                     if (int.TryParse(value, out age))
-                                        customer.Age = age;
+                                        if(age > 18)
+                                            customer.Age = age;
+                                        else
+                                            Notification.Error("Age should be greater than 18.");
                                     else
                                         Notification.Error("Invalid input! Age should be a number.");
                                 }
@@ -141,10 +146,12 @@ namespace BankManagementDB.View
             
         public void UpdateProfile(Customer updatedCustomer)
         {
-            if (CustomerController.UpdateCustomer(updatedCustomer))
+            IUpdateCustomerDataManager UpdateCustomerDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IUpdateCustomerDataManager>();
+
+            if (UpdateCustomerDataManager.UpdateCustomer(updatedCustomer))
             {
                 Notification.Success("Profile Updated Successfully");
-                CustomerController.SetCurrentUser(updatedCustomer);
+                CurrentUserDataManager.CurrentUser = updatedCustomer;
             }
 
         }

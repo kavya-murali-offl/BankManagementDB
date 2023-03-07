@@ -35,7 +35,6 @@ namespace BankManagementDB
                     }
                 }
             }
-
             return Convert.ToBase64String(array);
         }
 

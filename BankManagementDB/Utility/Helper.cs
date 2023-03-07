@@ -38,18 +38,13 @@ namespace BankManagementDB.Utility
 
         public int CountDays()
         {
-            try
+           
+            ITransactionDataManager transactionController = DependencyContainer.ServiceProvider.GetRequiredService<TransactionDataManager>();   
+            DateTime? lastWithdrawDate = transactionController.GetLastWithdrawDate();
+            if (lastWithdrawDate.HasValue)
             {
-                ITransactionController transactionController = DependencyContainer.ServiceProvider.GetRequiredService<TransactionController>();   
-                DateTime? lastWithdrawDate = transactionController.GetLastWithdrawDate();
-                if (lastWithdrawDate.HasValue)
-                {
-                    int numberOfDays = (int)(DateTime.Now - lastWithdrawDate)?.TotalDays;
-                    if (numberOfDays > 30) return numberOfDays;
-                }
-            }catch(Exception e)
-            {
-                Notification.Error(e.Message);
+               int numberOfDays = (int)(DateTime.Now - lastWithdrawDate)?.TotalDays;
+               if (numberOfDays > 30) return numberOfDays;
             }
             return 0;
         }

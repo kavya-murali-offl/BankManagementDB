@@ -1,11 +1,14 @@
-﻿using System;
+﻿using SQLite;
+using System;
 
 namespace BankManagementDB.Models
 {
+    [Table("Customer")]
     public class Customer : ICloneable
     {
         public Customer() { }
-      
+
+        [PrimaryKey]
         public Guid ID { get; set; }
         
         public int Age { get; set; }

@@ -8,6 +8,6 @@ namespace BankManagementDB.EnumerationType
 {
         public enum TransactionType
         {
-            DEPOSIT, WITHDRAW, TRANSFER
+            DEPOSIT, WITHDRAW, TRANSFER, RECEIVED, PURCHASE, PAYMENT
         }
 }

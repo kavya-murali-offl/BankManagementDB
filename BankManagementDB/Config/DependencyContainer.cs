@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.IO;
 using BankManagementDB.Controller;
-using BankManagementDB.Controller;
+using BankManagementDB.DatabaseAdapter;
+using BankManagementDB.DataManager;
+using BankManagementDB.DBHandler;
 using BankManagementDB.Interface;
-using BankManagementDB.Repository;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BankManagementDB.Config
@@ -19,6 +17,8 @@ namespace BankManagementDB.Config
             ServiceProvider = 
                 new ServiceCollection()
                 .ConfigureFactories()
+                .ConfigureDBAdapter()
+                .ConfigureHelperServices()
                 .ConfigureCustomerServices()
                 .ConfigureAccountServices()
                 .ConfigureTransactionServices()
@@ -27,41 +27,65 @@ namespace BankManagementDB.Config
         }
 
         public static ServiceProvider ServiceProvider { get; set; }
+        public static IConfiguration Config { get; private set; }
 
-        public static IServiceCollection ConfigureCardServices(this IServiceCollection serviceCollection)
+        public static IServiceCollection ConfigureDBAdapter(this IServiceCollection serviceCollection)
         {
-            serviceCollection.AddScoped<ICardController, CardController>();
-            serviceCollection.AddSingleton<ICardRepository, CardRepository>();  
+            serviceCollection.AddSingleton<IDatabaseAdapter, SQLiteDBAdapter>();
+            serviceCollection.AddSingleton<IDBHandler, DBHandler.DBHandler>();
             return serviceCollection;
         }
 
-        public static IServiceCollection ConfigureFactories(this IServiceCollection serviceCollection)
+        public static IServiceCollection ConfigureDBServices(this IServiceCollection serviceCollection)
+        {
+            Config = new ConfigurationBuilder().Build();
+            var AppSettings = new AppSettings();
+            //Config.Bind("AppSettings", AppSettings);
+            string connectionString = Config.GetConnectionString("SQLiteConnection");
+            return serviceCollection;
+
+        }
+
+        public static IServiceCollection ConfigureHelperServices(this IServiceCollection serviceCollection)
+        {
+            serviceCollection.AddSingleton<IObjectMappingDataManager, ObjectMappingDataManager>();
+            return serviceCollection;
+        }
+
+        public static IServiceCollection ConfigureCardServices(this IServiceCollection serviceCollection)
+        {
+            serviceCollection.AddScoped<IGetCardDataManager, GetCardDataManager>();
+            serviceCollection.AddScoped<IInsertCardDataManager, InsertCardDataManager>();
+            serviceCollection.AddScoped<IUpdateCardDataManager, UpdateCardDataManager>();
+            return serviceCollection;
+        
+        }
+            public static IServiceCollection ConfigureFactories(this IServiceCollection serviceCollection)
         {
             serviceCollection.AddSingleton<IAccountFactory, AccountFactory>();
-            serviceCollection.AddSingleton<ICardFactory, CardFactory>();
             return serviceCollection;
         }
 
         public static IServiceCollection ConfigureCustomerServices(this IServiceCollection serviceCollection)
         {
-            serviceCollection.AddScoped<IValidationServices, AuthController>();
-            serviceCollection.AddScoped<ICustomerController, CustomerController>();
-            serviceCollection.AddSingleton<ICustomerRepository, CustomerRepository>();
+            serviceCollection.AddScoped<IGetCustomerDataManager, GetCustomerDataManager>();
+            serviceCollection.AddScoped<IInsertCustomerDataManager, InsertCustomerDataManager>();
+            serviceCollection.AddScoped<IUpdateCustomerDataManager, UpdateCustomerDataManager>();
+            serviceCollection.AddScoped<IValidatePasswordDataManager, ValidatePasswordDataManager>();
             return serviceCollection;
         }
 
         public static IServiceCollection ConfigureAccountServices(this IServiceCollection serviceCollection)
         {
-            serviceCollection.AddScoped<IAccountController, AccountController>();
-            serviceCollection.AddSingleton<IAccountRepository, AccountRepository>();
+            serviceCollection.AddScoped<IInsertAccountDataManager, InsertAccountDataManager>();
+            serviceCollection.AddScoped<IGetAccountDataManager, GetAccountDataManager>();
+            serviceCollection.AddScoped<IUpdateAccountDataManager, UpdateAccountDataManager>();
             return serviceCollection;
         }
 
         public static IServiceCollection ConfigureTransactionServices(this IServiceCollection serviceCollection)
         {
-            serviceCollection.AddScoped<ITransactionProcessController, TransactionProcessController>();
-            serviceCollection.AddScoped<ITransactionController, TransactionController>();
-            serviceCollection.AddSingleton<ITransactionRepository, TransactionRepository>();
+            serviceCollection.AddScoped<ITransactionDataManager, TransactionDataManager>();
             return serviceCollection;
         }
     }

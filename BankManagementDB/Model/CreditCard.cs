@@ -1,4 +1,5 @@
 ﻿using BankManagementDB.EnumerationType;
+using SQLite;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,30 +8,28 @@ using System.Threading.Tasks;
 
 namespace BankManagementDB.Model
 {
-    public class CreditCard : Card
+    [Table("CreditCard")]
+    public class CreditCard
     {
-        public CreditCard() : base()
+        public CreditCard()
         {
             CreditLimit = 10000;
             APR = 0.060m;
             CreditPoints = 100;
-            Type = CardType.CREDIT;
+            TotalDueAmount= 0;
         }
 
-        public override void Purchase(decimal amount)
-        {
-            Balance += amount;
-        }
+        [PrimaryKey]
+        public Guid ID { get; set; }   
+        
+        public CreditCardType CreditCardType { get; set; }
 
-        public override void Payment(decimal amount)
-        {
-            Balance -= amount;
-        }
+        public int CreditPoints { get; set; }
 
+        public decimal TotalDueAmount { get; set; }
 
+        public decimal APR { get; set; }
 
-        public override string ToString() =>
-           $"\nCard Type: CREDIT\nCard Number: {CardNumber}\nBalance: {Balance}\nExpiry Month: {ExpiryMonth}\nExpiry Year: {ExpiryYear}\n=====================================================\n";
-
+        public decimal CreditLimit { get; set; }
     }
 }

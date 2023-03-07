@@ -1,14 +1,13 @@
-﻿using BankManagementDB.Models;
-using System.Collections.Generic;
-using System;
+﻿using System;
 using System.Linq;
-using BankManagementDB.View;
+using Microsoft.Extensions.DependencyInjection;
+using BankManagementDB.Models;
+using System.Collections.Generic;
 using BankManagementDB.Interface;
 using BankManagementDB.Model;
 using BankManagementDB.EnumerationType;
 using BankManagementDB.Config;
-using Microsoft.Extensions.DependencyInjection;
-using System.Security.Principal;
+using BankManagementDB.Controller;
 
 namespace BankManagementDB.View
 {
@@ -16,70 +15,62 @@ namespace BankManagementDB.View
     {
 
         public DashboardView() {
-            AccountController = DependencyContainer.ServiceProvider.GetRequiredService<IAccountController>();
-            CustomerController = DependencyContainer.ServiceProvider.GetRequiredService<ICustomerController>();
-            TransactionProcessingController = DependencyContainer.ServiceProvider.GetRequiredService<ITransactionProcessController>();
-        }  
+            GetAccountDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IGetAccountDataManager>();
+            InsertAccountDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IInsertAccountDataManager>();
+        }
 
-        public ITransactionProcessController TransactionProcessingController { get; set; }   
-        public IAccountController AccountController { get; set; }
+        public IGetAccountDataManager GetAccountDataManager { get; private set; }
 
-        public ICustomerController CustomerController { get; set; }
+        public IInsertAccountDataManager InsertAccountDataManager { get; private set; }
 
-        public Customer CurrentUserController { get; set; } 
+        public object CurrentUserController { get; private set; }
 
-
-        public void ViewDashboard(Customer currentUser)
+        public void ViewDashboard()
         {
-            AccountController.GetAllAccounts(currentUser.ID);
-            while (true)
+            try
             {
-                for (int i = 0; i < Enum.GetNames(typeof(DashboardCases)).Length; i++)
+                GetAccountDataManager.GetAllAccounts(CurrentUserDataManager.CurrentUser.ID);
+                while (true)
                 {
-                    DashboardCases cases = (DashboardCases)i;
-                    Console.WriteLine($"{i + 1}. {cases.ToString().Replace("_", " ")}");
-                }
+                    for (int i = 0; i < Enum.GetNames(typeof(DashboardCases)).Length; i++)
+                    {
+                        DashboardCases cases = (DashboardCases)i;
+                        Console.WriteLine($"{i + 1}. {cases.ToString().Replace("_", " ")}");
+                    }
 
-                Console.Write("\nEnter your choice: ");
+                    Console.Write("\nEnter your choice: ");
 
-                try
-                {
+              
                     string option = Console.ReadLine().Trim();
                     int entryOption;
 
                     if (!int.TryParse(option, out entryOption))
-                    {
                         Notification.Error("Invalid input! Please enter a valid number.");
-                        continue;
-                    }
-
-                    if (entryOption != 0 && entryOption <= Enum.GetNames(typeof(DashboardCases)).Count())
-                    {
-                        DashboardCases cases = (DashboardCases)entryOption - 1;
-                        if (DashboardOperations(cases, currentUser))
-                            break;
-                    }
                     else
-                        Notification.Error("Invalid input! Please enter a valid number.");
+                    {
+                        if (entryOption != 0 && entryOption <= Enum.GetNames(typeof(DashboardCases)).Count())
+                        {
+                            DashboardCases cases = (DashboardCases)entryOption - 1;
+                            if (DashboardOperations(cases))
+                                break;
+                        }
+                        else
+                            Notification.Error("Invalid input! Please enter a valid number.");
+                    }
                 }
-                catch (Exception error)
-                {
-                    Console.WriteLine(error.Message);
-                }
+            }
+            catch (Exception error)
+            {
+                Console.WriteLine(error.Message);
             }
         }
 
-        private bool DashboardOperations(
-            DashboardCases operation,
-            Customer currentUser
-            )
+        private bool DashboardOperations(DashboardCases operation)
         {
-
-            
             switch (operation)
             {
                 case DashboardCases.PROFILE_SERVICES:
-                    ProfileView profileView = new ProfileView(CustomerController);
+                    ProfileView profileView = new ProfileView();
                     profileView.ViewProfileServices();
                     return false;
 
@@ -91,12 +82,12 @@ namespace BankManagementDB.View
                     ListAllAccounts(); 
                     return false;
 
-                case DashboardCases.GO_TO_ACCOUNT:
+                case DashboardCases.ACCOUNT_SERVICES:
                     GoToAccount();
                     return false;
 
                 case DashboardCases.CARD_SERVICES:
-                    GoToCardServices(currentUser);
+                    GoToCardServices();
                     return false;
 
                 case DashboardCases.SIGN_OUT:
@@ -109,10 +100,10 @@ namespace BankManagementDB.View
             }
         }
 
-        public void GoToCardServices(Customer currentUser)
+        public void GoToCardServices()
         {
             CardView cardsView = new CardView();
-            cardsView.ShowCards(currentUser.ID);
+            cardsView.ShowCards();
         }
 
         public void CreateAccount()
@@ -122,19 +113,18 @@ namespace BankManagementDB.View
             Account account = accountsView.GenerateAccount();
             if (account != null)
             {
-                account.UserID = CustomerController.GetCurrentUser().ID;
+                account.UserID = CurrentUserDataManager.CurrentUser.ID;
                 InsertAccount(account);
             }
         }
 
         public void InsertAccount(Account account)
         {
-            bool inserted = AccountController.InsertAccount(account);
+            bool inserted = InsertAccountDataManager.InsertAccount(account);
             if (inserted)
             {
                 if (account is CurrentAccount)
                     DepositAmount(account);
-                       
             }
 
             if (account != null)
@@ -145,16 +135,17 @@ namespace BankManagementDB.View
 
         public bool DepositAmount(Account account)
         {
+            TransactionView transactionView = new TransactionView();
             while (true)
             {
                 decimal amount = GetAmount();
                 if (amount == 0)
                     return false;
                 else if (amount > account.MinimumBalance)
-                    if (TransactionProcessingController.Deposit(amount, account, ModeOfPayment.CASH))
-                        return true;
-                    else
-                        Notification.Error("Initial deposit was not done. Try again");
+                {
+                    transactionView.Deposit(account, amount, ModeOfPayment.CASH, null);
+                    return true;
+                }
                 else
                     Notification.Error($"Initial deposit amount must be greater than Minimum Balance (Rs. {account.MinimumBalance}). Try again");
             }
@@ -162,26 +153,30 @@ namespace BankManagementDB.View
 
         public decimal GetAmount()
         {
-            while (true)
+            try
             {
-                Console.Write("Enter amount: ");
-                try
-                {
-                    decimal amount = Decimal.Parse(Console.ReadLine().Trim());
+                while (true)
+                {       
+                    Console.Write("Enter amount: ");
+               
+                    decimal amount = decimal.Parse(Console.ReadLine().Trim());
                     if (amount > 0) return amount;
                     else Console.WriteLine("Amount should be greater than zero.");
                 }
-                catch (Exception error)
-                {
-                    Notification.Error("Enter a valid amount. Try Again!");
-                }
+             }
+            catch (Exception error)
+            {
+                Notification.Error("Enter a valid amount. Try Again!");
             }
+            return 0;
         }
 
         public void GoToAccount()
         {
             try
             {
+                IGetCardDataManager GetCardDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IGetCardDataManager>();
+                GetCardDataManager.GetAllCards(CurrentUserDataManager.CurrentUser.ID);
                 while (true)
                 {
                     TransactionView transactionView = new TransactionView();
@@ -189,12 +184,11 @@ namespace BankManagementDB.View
 
                     if (transactionAccount != null)
                         transactionView.GoToAccount(transactionAccount);
-                    else
-                        break;
+                    break;
                 }
             }catch(Exception ex)
             {
-                Console.WriteLine(ex);
+               Notification.Error(ex.ToString());
             }
         }
 
@@ -203,8 +197,7 @@ namespace BankManagementDB.View
             try
             {
                 int accountIndex;
-
-                IList<Account> accountsList = AccountController.GetAccountsList();
+                IList<Account> accountsList = GetAccountDataManager.GetAllAccounts(CurrentUserDataManager.CurrentUser.ID);
 
                 if (accountsList.Count() == 1)
                     accountIndex = 1;
@@ -238,16 +231,30 @@ namespace BankManagementDB.View
 
         public void ListAllAccounts()
         {
-            IList<Account> accountsList = AccountController.GetAccountsList();
+            try
+            {
+                IList<Account> accountsList = GetAccountDataManager.GetAllAccounts(CurrentUserDataManager.CurrentUser.ID);
 
-            foreach(Account account in accountsList) {
-                Console.WriteLine(account);
+                foreach (Account account in accountsList)
+                    Console.WriteLine(account);
+            }
+            catch(Exception ex)
+            {
+                Notification.Error(ex.Message);
             }
         }
 
         private void SaveCustomerSession()
         {
-            CustomerController.UpdateCustomer(CustomerController.GetCurrentUser());
+            try
+            {
+                IUpdateCustomerDataManager updateCustomerDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IUpdateCustomerDataManager>();
+                updateCustomerDataManager.UpdateCustomer(CurrentUserDataManager.CurrentUser);
+            }
+            catch(Exception ex)
+            {
+                Notification.Error(ex.ToString());
+            }
         }
 
         public void ListAccountIDs(IList<Account> accounts)
