@@ -1,6 +1,4 @@
-﻿using BankManagementDB.Data;
-using BankManagementDB.EnumerationType;
-using BankManagementDB.Interface;
+﻿using BankManagementDB.Interface;
 using BankManagementDB.Model;
 using System;
 using System.Collections.Generic;
@@ -10,15 +8,16 @@ using System.Threading.Tasks;
 
 namespace BankManagementDB.DataManager
 {
-    public class InsertCardDataManager : IInsertCardDataManager
+    public class InsertCreditCardDataManager : IInsertCreditCardDataManager
     {
-        public InsertCardDataManager(IDBHandler dBHandler)
+        public InsertCreditCardDataManager(IDBHandler dBHandler)
         {
             DBHandler = dBHandler;
         }
 
         public IDBHandler DBHandler { get; private set; }
 
-        public bool InsertCard(Card card) => DBHandler.InsertCard(card).Result;
+        public bool InsertCreditCard(CreditCard card) => DBHandler.InsertCreditCard(card).Result;
+
     }
 }

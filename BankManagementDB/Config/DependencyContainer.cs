@@ -17,6 +17,7 @@ namespace BankManagementDB.Config
             ServiceProvider = 
                 new ServiceCollection()
                 .ConfigureFactories()
+                .ConfigureDBServices()
                 .ConfigureDBAdapter()
                 .ConfigureHelperServices()
                 .ConfigureCustomerServices()
@@ -39,16 +40,14 @@ namespace BankManagementDB.Config
         public static IServiceCollection ConfigureDBServices(this IServiceCollection serviceCollection)
         {
             Config = new ConfigurationBuilder().Build();
-            var AppSettings = new AppSettings();
-            //Config.Bind("AppSettings", AppSettings);
-            string connectionString = Config.GetConnectionString("SQLiteConnection");
+            //string connectionString = Config..GetSection("SQLiteConnectionString");
+            //System.Console.WriteLine(connectionString);
             return serviceCollection;
 
         }
 
         public static IServiceCollection ConfigureHelperServices(this IServiceCollection serviceCollection)
         {
-            serviceCollection.AddSingleton<IObjectMappingDataManager, ObjectMappingDataManager>();
             return serviceCollection;
         }
 
@@ -56,7 +55,9 @@ namespace BankManagementDB.Config
         {
             serviceCollection.AddScoped<IGetCardDataManager, GetCardDataManager>();
             serviceCollection.AddScoped<IInsertCardDataManager, InsertCardDataManager>();
+            serviceCollection.AddScoped<IInsertCreditCardDataManager, InsertCreditCardDataManager>();
             serviceCollection.AddScoped<IUpdateCardDataManager, UpdateCardDataManager>();
+            serviceCollection.AddScoped<IUpdateCreditCardDataManager, UpdateCreditCardDataManager>();
             return serviceCollection;
         
         }
@@ -68,10 +69,11 @@ namespace BankManagementDB.Config
 
         public static IServiceCollection ConfigureCustomerServices(this IServiceCollection serviceCollection)
         {
+            serviceCollection.AddScoped<IGetCustomerCredentialsDataManager, GetCustomerCredentialsDataManager>();
+            serviceCollection.AddScoped<IInsertCredentialsDataManager, InsertCredentialsDataManager>();
             serviceCollection.AddScoped<IGetCustomerDataManager, GetCustomerDataManager>();
             serviceCollection.AddScoped<IInsertCustomerDataManager, InsertCustomerDataManager>();
             serviceCollection.AddScoped<IUpdateCustomerDataManager, UpdateCustomerDataManager>();
-            serviceCollection.AddScoped<IValidatePasswordDataManager, ValidatePasswordDataManager>();
             return serviceCollection;
         }
 
@@ -85,7 +87,8 @@ namespace BankManagementDB.Config
 
         public static IServiceCollection ConfigureTransactionServices(this IServiceCollection serviceCollection)
         {
-            serviceCollection.AddScoped<ITransactionDataManager, TransactionDataManager>();
+            serviceCollection.AddScoped<IInsertTransactionDataManager, InsertTransactionDataManager>();
+            serviceCollection.AddScoped<IGetTransactionDataManager, GetTransactionDataManager>();
             return serviceCollection;
         }
     }

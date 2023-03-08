@@ -1,8 +1,5 @@
 ﻿using System;
-using BankManagementDB.Config;
 using BankManagementDB.EnumerationType;
-using BankManagementDB.Interface;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace BankManagementDB.View
 {
@@ -10,39 +7,42 @@ namespace BankManagementDB.View
     {
         public void Entry()
         {
-            while (true)
+            try
             {
-                Console.WriteLine();
-                for (int i = 0; i < Enum.GetNames(typeof(EntryCases)).Length; i++)
+                while (true)
                 {
-                    EntryCases cases = (EntryCases)i;
-                    Console.WriteLine($"{i + 1}. {cases.ToString().Replace("_", " ")}");
-                }
-
-                Console.Write("\nEnter your choice: ");
-
-                try
-                {
-                    string option = Console.ReadLine().Trim();
-                    int entryOption = int.Parse(option);
-                    if (entryOption != 0 && entryOption <= Enum.GetValues(typeof(EntryCases)).Length)
+                    Console.WriteLine();
+                    for (int i = 0; i < Enum.GetNames(typeof(EntryCases)).Length; i++)
                     {
-                        EntryCases entry = (EntryCases)entryOption - 1;
-                        if (EntryOperations(entry))
-                            break;
+                        EntryCases cases = (EntryCases)i;
+                        Console.WriteLine($"{i + 1}. {cases.ToString().Replace("_", " ")}");
                     }
+
+                    Console.Write("\nEnter your choice: ");
+
+                    string option = Console.ReadLine().Trim();
+
+                    if (int.TryParse(option, out int entryOption))
+                    {
+                        if (entryOption != 0 && entryOption <= Enum.GetValues(typeof(EntryCases)).Length)
+                        {
+                            EntryCases entry = (EntryCases)entryOption - 1;
+                            if (EntryOperations(entry))
+                                break;
+                        }
+                    }
+                    else
+                        Notification.Error("Please enter a valid number");
                 }
-                catch (Exception err)
-                {
-                    Notification.Error(err.ToString());
-                }
+            }
+            catch (Exception err)
+            {
+                Notification.Error(err.ToString());
             }
         }
         
         public bool EntryOperations(EntryCases option)
         {
-            IAccountFactory accountFactory = DependencyContainer.ServiceProvider.GetRequiredService<IAccountFactory>();
-
             switch (option)
             {
                 case EntryCases.LOGIN:
@@ -55,7 +55,7 @@ namespace BankManagementDB.View
 
                 case EntryCases.SIGNUP:
                     
-                    SignupView signupView = new SignupView(accountFactory);
+                    SignupView signupView = new SignupView();
                     signupView.Signup();
                     return false;
 
@@ -65,6 +65,7 @@ namespace BankManagementDB.View
                     return true;
 
                 default:
+
                     Notification.Error("Enter valid option. Try Again!");
                     return false;
             }

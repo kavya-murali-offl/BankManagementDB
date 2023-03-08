@@ -13,7 +13,5 @@ namespace BankManagementDB.Interface
 
         Account GetAccount(string accountNumber);
 
-        IList<Account> GetAccountsList();
-
     }
 }

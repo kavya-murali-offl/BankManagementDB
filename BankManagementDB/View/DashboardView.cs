@@ -8,6 +8,7 @@ using BankManagementDB.Model;
 using BankManagementDB.EnumerationType;
 using BankManagementDB.Config;
 using BankManagementDB.Controller;
+using BankManagementDB.Data;
 
 namespace BankManagementDB.View
 {
@@ -29,7 +30,7 @@ namespace BankManagementDB.View
         {
             try
             {
-                GetAccountDataManager.GetAllAccounts(CurrentUserDataManager.CurrentUser.ID);
+                GetAccountDataManager.GetAllAccounts(CacheData.CurrentUser.ID);
                 while (true)
                 {
                     for (int i = 0; i < Enum.GetNames(typeof(DashboardCases)).Length; i++)
@@ -92,6 +93,8 @@ namespace BankManagementDB.View
 
                 case DashboardCases.SIGN_OUT:
                     SaveCustomerSession();
+                    CacheData.CurrentUser = null;
+                    Notification.Success("User logged out");
                     return true;
 
                 default:
@@ -113,7 +116,7 @@ namespace BankManagementDB.View
             Account account = accountsView.GenerateAccount();
             if (account != null)
             {
-                account.UserID = CurrentUserDataManager.CurrentUser.ID;
+                account.UserID = CacheData.CurrentUser.ID;
                 InsertAccount(account);
             }
         }
@@ -176,7 +179,7 @@ namespace BankManagementDB.View
             try
             {
                 IGetCardDataManager GetCardDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IGetCardDataManager>();
-                GetCardDataManager.GetAllCards(CurrentUserDataManager.CurrentUser.ID);
+                GetCardDataManager.GetAllCards(CacheData.CurrentUser.ID);
                 while (true)
                 {
                     TransactionView transactionView = new TransactionView();
@@ -197,7 +200,7 @@ namespace BankManagementDB.View
             try
             {
                 int accountIndex;
-                IList<Account> accountsList = GetAccountDataManager.GetAllAccounts(CurrentUserDataManager.CurrentUser.ID);
+                IList<Account> accountsList = GetAccountDataManager.GetAllAccounts(CacheData.CurrentUser.ID);
 
                 if (accountsList.Count() == 1)
                     accountIndex = 1;
@@ -233,7 +236,7 @@ namespace BankManagementDB.View
         {
             try
             {
-                IList<Account> accountsList = GetAccountDataManager.GetAllAccounts(CurrentUserDataManager.CurrentUser.ID);
+                IList<Account> accountsList = GetAccountDataManager.GetAllAccounts(CacheData.CurrentUser.ID);
 
                 foreach (Account account in accountsList)
                     Console.WriteLine(account);
@@ -249,7 +252,7 @@ namespace BankManagementDB.View
             try
             {
                 IUpdateCustomerDataManager updateCustomerDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IUpdateCustomerDataManager>();
-                updateCustomerDataManager.UpdateCustomer(CurrentUserDataManager.CurrentUser);
+                updateCustomerDataManager.UpdateCustomer(CacheData.CurrentUser);
             }
             catch(Exception ex)
             {

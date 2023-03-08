@@ -5,7 +5,7 @@ using System;
 
 namespace BankManagementDB.Models
 {
-    public abstract class Account
+    public class Account
     {
         public Account() {
             ID = Guid.NewGuid();
@@ -41,7 +41,8 @@ namespace BankManagementDB.Models
         {
              Balance -= amount;
         }
-
-        public abstract override string ToString(); 
+        public override string ToString() => $"\nAccount Type: {Type.ToString()}\n Account Number: {AccountNumber} \nAccount Status: {Status} \nBalance: Rs. {Balance}\n" +
+              $"Minimum Balance: {MinimumBalance}\n" +
+              "========================================\n";
     }
 }

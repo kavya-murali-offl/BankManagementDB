@@ -1,5 +1,4 @@
-﻿using BankManagementCipher.Model;
-using BankManagementDB.Model;
+﻿using BankManagementDB.Model;
 using BankManagementDB.Models;
 using System;
 using System.Collections.Generic;
@@ -29,11 +28,11 @@ namespace BankManagementDB.Interface
 
 
         // Account
-        Task<List<AccountDTO>> GetAccounts(Guid userID);
+        Task<List<Account>> GetAccounts(Guid userID);
 
-        Task<bool> InsertAccount(AccountDTO accountDTO);
+        Task<bool> InsertAccount(Account account);
 
-        Task<bool> UpdateAccount(AccountDTO accountDTO);
+        Task<bool> UpdateAccount(Account account);
 
 
         // Card

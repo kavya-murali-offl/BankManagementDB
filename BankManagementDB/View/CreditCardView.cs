@@ -1,8 +1,12 @@
-﻿using BankManagementDB.Controller;
+﻿using BankManagementDB.Config;
+using BankManagementDB.Controller;
+using BankManagementDB.DataManager;
 using BankManagementDB.EnumerationType;
 using BankManagementDB.Interface;
 using BankManagementDB.Model;
 using BankManagementDB.Models;
+using BankManagementDB.Utility;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,19 +17,16 @@ namespace BankManagementDB.View
 {
     public class CreditCardView
     {
-        public CreditCardView(IGetAccountDataManager getAcountDataManager, ITransactionDataManager transactionDataManager, IUpdateCardDataManager updateCardDataManager, IGetCardDataManager getCardDataManager) {
-            UpdateCardDataManager = updateCardDataManager;
+        public event Action<string> CardDueAmountChanged;
+
+        public CreditCardView(IGetCardDataManager getCardDataManager) {
+            UpdateCreditCardDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IUpdateCreditCardDataManager>();
             GetCardDataManager = getCardDataManager;
-            TransactionDataManager = transactionDataManager;
-            GetAccountDataManager = getAcountDataManager;
         }
         public IGetCardDataManager GetCardDataManager { get; private set; }
 
-        public IUpdateCardDataManager UpdateCardDataManager { get; private set; }
+        public IUpdateCreditCardDataManager UpdateCreditCardDataManager { get; private set; }
 
-        public ITransactionDataManager TransactionDataManager { get; private set; }
-
-        public IGetAccountDataManager GetAccountDataManager { get; private set; }
 
         public void CreditCardServices()
         {
@@ -75,10 +76,6 @@ namespace BankManagementDB.View
                     MakePayment();
                     return false;
 
-                case CreditCardCases.VIEW_STATEMENT:
-                    ViewStatement();
-                    return false;
-
                 case CreditCardCases.EXIT:
                     return true;
 
@@ -122,7 +119,7 @@ namespace BankManagementDB.View
                         {
                             if ((amount + card.TotalDueAmount) < card.CreditLimit)
                             {
-                                if (UpdateCardDataManager.UpdateDueAmount(CreditCardCases.PURCHASE, card, amount))
+                                if (UpdateDueAmount(CreditCardCases.PURCHASE, card, amount))
                                 {
                                     Notification.Success("Purchase successful");
                                     bool isTransacted = transactionView.RecordTransaction("Purchase", amount, card.TotalDueAmount, TransactionType.PURCHASE, Guid.Empty, ModeOfPayment.CREDIT_CARD, card.CardNumber);
@@ -159,7 +156,7 @@ namespace BankManagementDB.View
                         if (amount > 0)
                         {
                                 if(transactionView.Withdraw(account, amount, ModeOfPayment.DEBIT_CARD, card.CardNumber))
-                                    if (UpdateCardDataManager.UpdateDueAmount(CreditCardCases.PAYMENT, card, amount))
+                                    if (UpdateDueAmount(CreditCardCases.PAYMENT, card, amount))
                                     {
                                         Notification.Success("Payment successful");
                                         bool isTransacted = transactionView.RecordTransaction("Payment", amount, card.TotalDueAmount, TransactionType.PAYMENT, Guid.Empty, ModeOfPayment.CREDIT_CARD, card.CardNumber);
@@ -174,18 +171,27 @@ namespace BankManagementDB.View
             }
         }
 
-        public void ViewStatement()
+        public bool UpdateDueAmount(CreditCardCases cases, CardBObj card, decimal amount)
         {
-            CardView cardView = new CardView();
-            string cardNumber = cardView.GetCardNumber();
-            bool isAuthenticated = AuthenticateCreditCard(CreditCardCases.VIEW_STATEMENT, cardNumber);
-            if (isAuthenticated)
+            CreditCard creditCard;
+
+            switch (cases)
             {
-                IEnumerable<Transaction> statements = TransactionDataManager.GetAllCreditCardTransactions(cardNumber);
-                foreach(var statement in statements)
-                    Console.WriteLine(statement);
+                case CreditCardCases.PURCHASE:
+                    card.TotalDueAmount += amount;
+                    CardDueAmountChanged?.Invoke($"Purchase of Rs.{amount} is successful");
+                    creditCard = Mapper.Map<CardBObj, CreditCard>(card);
+                    UpdateCreditCardDataManager.UpdateCreditCard(creditCard);
+                    return true;
+                case CreditCardCases.PAYMENT:
+                    card.TotalDueAmount -= amount;
+                    CardDueAmountChanged?.Invoke($"Payment of Rs.{amount} is sucessful");
+                    creditCard = Mapper.Map<CardBObj, CreditCard>(card);
+                    UpdateCreditCardDataManager.UpdateCreditCard(creditCard);
+                    return true;
+                default:
+                    return false;
             }
         }
-
     }
 }

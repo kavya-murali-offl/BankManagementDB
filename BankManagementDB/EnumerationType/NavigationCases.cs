@@ -49,6 +49,7 @@ namespace BankManagementDB.EnumerationType
         VIEW_CARDS,
         ADD_CARD,
         RESET_PIN,
+        VIEW_TRANSACTIONS,
         CREDIT_CARD_SERVICES,
         EXIT
     }
@@ -57,7 +58,6 @@ namespace BankManagementDB.EnumerationType
     {
         PURCHASE,
         PAYMENT,
-        VIEW_STATEMENT,
         EXIT
     }
 

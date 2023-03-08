@@ -5,6 +5,10 @@ using BankManagementDB.Config;
 using BankManagementDB.Interface;
 using BankManagementDB.View;
 using Microsoft.Extensions.DependencyInjection;
+using BankManagementDB.Data;
+using BankManagementDB.Model;
+using System.Linq;
+using BankManagementDB.EnumerationType;
 
 namespace BankManagementDB.Utility
 {
@@ -39,14 +43,25 @@ namespace BankManagementDB.Utility
         public int CountDays()
         {
            
-            ITransactionDataManager transactionController = DependencyContainer.ServiceProvider.GetRequiredService<TransactionDataManager>();   
-            DateTime? lastWithdrawDate = transactionController.GetLastWithdrawDate();
+            DateTime? lastWithdrawDate = GetLastWithdrawDate();
             if (lastWithdrawDate.HasValue)
             {
                int numberOfDays = (int)(DateTime.Now - lastWithdrawDate)?.TotalDays;
                if (numberOfDays > 30) return numberOfDays;
             }
             return 0;
+        }
+
+        public DateTime? GetLastWithdrawDate()
+        {
+            if (CacheData.TransactionList.Count > 0)
+            {
+                Transaction transaction = CacheData.TransactionList.Where(data => data.TransactionType == TransactionType.WITHDRAW).LastOrDefault();
+                if (transaction == null)
+                    transaction = CacheData.TransactionList.Where(data => data.TransactionType == TransactionType.DEPOSIT).LastOrDefault();
+                return transaction.RecordedOn;
+            }
+            return null;
         }
 
     }

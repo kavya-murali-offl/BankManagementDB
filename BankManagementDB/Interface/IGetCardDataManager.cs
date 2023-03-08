@@ -17,13 +17,14 @@ namespace BankManagementDB.Interface
         bool IsCreditCardEnabled();
 
         CardBObj GetCardByType(CardType cardType);
+
         bool IsCardNumber(string cardNumber);
+
         CardBObj GetCard(string cardNumber);
         
         IList<CardBObj> GetCardsList();
 
         public bool IsDebitCardLinked(Guid accountID);
-        bool Authenticate(string cardNumber, string pin);
 
         bool IsCreditCard(string cardNumber);
 

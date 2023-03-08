@@ -1,5 +1,4 @@
-﻿using BankManagementCipher.Model;
-using BankManagementDB.Interface;
+﻿using BankManagementDB.Interface;
 using BankManagementDB.Models;
 using System.Linq;
 
@@ -11,7 +10,6 @@ namespace BankManagementDB.DataManager
         {
             DBHandler = dBHandler;
         }
-
         public IDBHandler DBHandler { get; set; }
         
         public Customer GetCustomer(string phoneNumber) => DBHandler.GetCustomer(phoneNumber).Result.FirstOrDefault();

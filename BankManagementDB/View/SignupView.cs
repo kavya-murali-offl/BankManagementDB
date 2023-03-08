@@ -6,19 +6,21 @@ using BankManagementDB.EnumerationType;
 using BankManagementDB.Interface;
 using BankManagementDB.Config;
 using Microsoft.Extensions.DependencyInjection;
+using BankManagementDB.DataManager;
 
 namespace BankManagementDB.View
 {
     public class SignupView
     {
-        public SignupView(
-            IAccountFactory accountFactory
-            )
+        public SignupView()
         {
-            AccountFactory = accountFactory;
+            AccountFactory = DependencyContainer.ServiceProvider.GetRequiredService<IAccountFactory>();
             InsertAccountDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IInsertAccountDataManager>();
             InsertCustomerDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IInsertCustomerDataManager>();
+            InsertCredentialsDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IInsertCredentialsDataManager>();
+            InsertCardDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IInsertCardDataManager>();
             GetCustomerDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IGetCustomerDataManager>();
+            GetCardDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IGetCardDataManager>();
         }
 
         public IGetCardDataManager GetCardDataManager { get; set; }
@@ -26,6 +28,8 @@ namespace BankManagementDB.View
         public IInsertCardDataManager InsertCardDataManager { get; set; }
 
         public IInsertCustomerDataManager InsertCustomerDataManager { get; set; }
+
+        public IInsertCredentialsDataManager InsertCredentialsDataManager { get; set; }
 
         public IGetCustomerDataManager GetCustomerDataManager { get; set; }
 
@@ -49,22 +53,22 @@ namespace BankManagementDB.View
                     email = GetEmail();
                     if (email != null)
                     {
-                        age = GetInteger("Age: ");
+                        age = GetAge();
                         if (age > 0)
                         {
-                            Console.WriteLine("Enter password: ");
-                            password = helper.GetPassword();
-                            if (password != null)
-                            {
-                                bool isVerified = VerifyPassword(password);
-
-                                if (isVerified)
+                                Console.WriteLine("Enter password: ");
+                                password = helper.GetPassword();
+                                if (password != null)
                                 {
-                                    CreateCustomer(name, password, email, phone, age);
-                                    Customer signedUpCustomer = GetCustomerDataManager.GetCustomer(phone);
-                                    CreateAccountAndDeposit(signedUpCustomer);
+                                    bool isVerified = VerifyPassword(password);
+
+                                    if (isVerified)
+                                    {
+                                        CreateCustomer(name, password, email, phone, age);
+                                        Customer signedUpCustomer = GetCustomerDataManager.GetCustomer(phone);
+                                        CreateAccountAndDeposit(signedUpCustomer);
+                                    }
                                 }
-                            }
                         }
                     }
                 }
@@ -104,16 +108,19 @@ namespace BankManagementDB.View
             return null;
         }
 
-        public int GetInteger(string message)
+        public int GetAge()
         {
             try
             {
                 while (true)
                 {
-                    Console.Write(message);
+                    Console.Write("Age: ");
                     string input = Console.ReadLine().Trim();
                     if (int.TryParse(input, out int number))
-                        return number;
+                        if (number < 19)
+                            Notification.Error("Age should be greater than 18");
+                        else
+                            return number;
                     else
                         Notification.Error("Enter a valid number.");
                 }
@@ -206,7 +213,7 @@ namespace BankManagementDB.View
             return customer == null;
         }
 
-        private bool CreateCustomer(string name, string password, string email, string phone, int age)
+        private void CreateCustomer(string name, string password, string email, string phone, int age)
         {
 
             Customer customer = new Customer()
@@ -220,11 +227,25 @@ namespace BankManagementDB.View
                 CreatedOn = DateTime.Now
             };
 
-            bool customerAdded = InsertCustomerDataManager.InsertCustomer(customer, password);
-            if (customerAdded) Notification.Success("\nSignup successful");
-
-            return customerAdded;
+            if (InsertCredentials(customer, password))
+            {
+                bool customerAdded = InsertCustomerDataManager.InsertCustomer(customer, password);
+                if (customerAdded) Notification.Success("\nSignup successful");
+            }
+            else Notification.Error("Error in signing up");
         }
+        public bool InsertCredentials(Customer customer, string password)
+        {
+            string salt = AuthServices.GenerateSalt(70);
+            string hashedPassword = AuthServices.HashPassword(password, salt);
+
+            CustomerCredentials customerCredentials = new CustomerCredentials();
+            customerCredentials.Password = hashedPassword;
+            customerCredentials.ID = customer.ID;
+            customerCredentials.Salt = salt;
+            return InsertCredentialsDataManager.InsertCredentials(customerCredentials);
+        }
+
 
         private string GetValue(string label)
         {

@@ -7,21 +7,13 @@ using Microsoft.Extensions.DependencyInjection;
 using BankManagementDB.Controller;
 using BankManagementDB.Model;
 using BankManagementDB.DataManager;
+using BankManagementDB.Data;
 
 namespace BankManagementDB.View
 {
     public class LoginView
     {
-        public LoginView() {
-            ValidatePasswordDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IValidatePasswordDataManager>(); 
-            GetCustomerDataManager = DependencyContainer.ServiceProvider.GetService<IGetCustomerDataManager>();
-        }
-
         public Action<string> UserChanged;
-
-        public IGetCustomerDataManager GetCustomerDataManager { get; private set; }
-
-        public IValidatePasswordDataManager ValidatePasswordDataManager { get; private set; }
 
         public void Login()
         {
@@ -43,15 +35,12 @@ namespace BankManagementDB.View
 
                             if (isValidated)
                             {
-                                Customer currentUser = GetCustomerDataManager.GetCustomer(phoneNumber);
+                                Customer currentUser = customer;
                                 
                                 LoginCustomer(currentUser);
 
                                 DashboardView dashboard = new DashboardView();
                                 dashboard.ViewDashboard();
-
-                                LogoutCustomer();
-
                             }
                         }
                     }
@@ -68,20 +57,20 @@ namespace BankManagementDB.View
         public void LoginCustomer(Customer customer)
         {
             customer.LastLoggedOn = DateTime.Now;
-            CurrentUserDataManager.CurrentUser = customer;
+            CacheData.CurrentUser = customer;
             UserChanged?.Invoke("\nWelcome " + customer.Name + "!!!\n");
         }
 
         public void LogoutCustomer()
         {
-            CurrentUserDataManager.CurrentUser = null;
+            CacheData.CurrentUser = null;
             UserChanged.Invoke("User logged out successfully");
-
         }
 
         public Customer GetCustomerByPhone(string phoneNumber)
         {
-             return GetCustomerDataManager.GetCustomer(phoneNumber);
+            IGetCustomerDataManager getCustomerDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IGetCustomerDataManager>();
+             return getCustomerDataManager.GetCustomer(phoneNumber);
         }
 
         public string GetPhoneNumber()
@@ -107,7 +96,9 @@ namespace BankManagementDB.View
             bool isValidated = false;
             try
             {
-                 isValidated = ValidatePasswordDataManager.ValidatePassword(customer.ID, password);
+                IGetCustomerCredentialsDataManager customerCredentialsDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IGetCustomerCredentialsDataManager>();
+                CustomerCredentials customerCredentials = customerCredentialsDataManager.GetCustomerCredentials(customer.ID);
+                isValidated = ValidatePassword(customerCredentials, password);
                  if (!isValidated) Notification.Error("Incorrect Password");
             }
             catch(Exception ex)
@@ -116,6 +107,14 @@ namespace BankManagementDB.View
             }
             return isValidated;
 
+        }
+
+        private bool ValidatePassword(CustomerCredentials customerCredentials, string password)
+        {
+            string hashedInput = AuthServices.HashPassword(password, customerCredentials.Salt);
+            if (customerCredentials != null)
+                return hashedInput.Equals(customerCredentials.Password) ? true : false;
+            return false;
         }
 
     }

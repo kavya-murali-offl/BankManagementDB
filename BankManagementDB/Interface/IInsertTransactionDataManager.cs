@@ -1,4 +1,4 @@
-﻿using BankManagementDB.Models;
+﻿using BankManagementDB.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 
 namespace BankManagementDB.Interface
 {
-    public interface IValidatePasswordDataManager
+    public interface IInsertTransactionDataManager
     {
-        bool ValidatePassword(Guid customerID, string password);
+        bool InsertTransaction(Transaction transaction);
     }
 }

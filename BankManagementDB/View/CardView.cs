@@ -9,6 +9,8 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using BankManagementDB.Utility;
+using BankManagementDB.Data;
+using BankManagementDB.DataManager;
 
 namespace BankManagementDB.View
 { 
@@ -20,7 +22,8 @@ namespace BankManagementDB.View
             GetCardDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IGetCardDataManager>();
             UpdateCardDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IUpdateCardDataManager>();
             InsertCardDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IInsertCardDataManager>();
-            TransactionDataManager = DependencyContainer.ServiceProvider.GetRequiredService<ITransactionDataManager>();
+            InsertCreditCardDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IInsertCreditCardDataManager>();
+            GetTransactionDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IGetTransactionDataManager>();
             GetAccountDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IGetAccountDataManager>();
         }
 
@@ -29,17 +32,18 @@ namespace BankManagementDB.View
        public IUpdateCardDataManager UpdateCardDataManager { get; private set; } 
 
        public IInsertCardDataManager InsertCardDataManager { get; private set; } 
+       public IInsertCreditCardDataManager InsertCreditCardDataManager { get; private set; } 
 
        public IGetAccountDataManager GetAccountDataManager { get; private set; }  
 
-       public ITransactionDataManager TransactionDataManager { get; private set; }  
+       public IGetTransactionDataManager GetTransactionDataManager { get; private set; }  
 
         public void ShowCards()
         {
             try
             {
-                GetCardDataManager.GetAllCards(CurrentUserDataManager.CurrentUser.ID);
-                GetAccountDataManager.GetAllAccounts(CurrentUserDataManager.CurrentUser.ID);
+                GetCardDataManager.GetAllCards(CacheData.CurrentUser.ID);
+                GetAccountDataManager.GetAllAccounts(CacheData.CurrentUser.ID);
                 while (true)
                 {
                     for (int i = 0; i < Enum.GetNames(typeof(CardCases)).Length; i++)
@@ -88,8 +92,12 @@ namespace BankManagementDB.View
                     ResetPin();
                     return false;
 
+                case CardCases.VIEW_TRANSACTIONS:
+                    ViewAllTransactions();
+                    return false;
+
                 case CardCases.CREDIT_CARD_SERVICES:
-                    CreditCardView creditCardView = new CreditCardView(GetAccountDataManager, TransactionDataManager, UpdateCardDataManager, GetCardDataManager);
+                    CreditCardView creditCardView = new CreditCardView(GetCardDataManager);
                     creditCardView.CreditCardServices();
                     return false;
 
@@ -100,6 +108,21 @@ namespace BankManagementDB.View
                     Notification.Error("Enter a valid option.\n");
                     return false;
             }
+        }
+
+        public void ViewAllTransactions()
+        {
+                string cardNumber = GetCardNumber();
+                if (cardNumber != null)
+                {
+                    string pin = GetPin();
+                    if (pin != null)
+                    {
+                        IList<Transaction> transactions = GetTransactionDataManager.GetTransactionsByCardNumber(cardNumber);
+                        foreach (Transaction transaction in transactions) 
+                             Console.WriteLine(transaction);
+                    }
+                }
         }
 
         public void AddCard()
@@ -152,21 +175,29 @@ namespace BankManagementDB.View
                                 Notification.Error("This account already has a debit card linked to it");
 
                             else
-                                card = CreateCard(CardType.DEBIT, account.ID, CurrentUserDataManager.CurrentUser.ID);
+                                card = CreateCard(CardType.DEBIT, account.ID, CacheData.CurrentUser.ID);
                         }
                     }
                 }
                 else if (cardType == CardType.CREDIT)
-                    card = CreateCard(CardType.CREDIT, Guid.Empty, CurrentUserDataManager.CurrentUser.ID);
+                    card = CreateCard(CardType.CREDIT, Guid.Empty, CacheData.CurrentUser.ID);
 
                 if (card != null)
                 {
+                    
                     if (InsertCardDataManager.InsertCard(card))
                     {
+                        if(card.Type == CardType.CREDIT)
+                        {
+                            CreditCard creditCard = new CreditCard();
+                            creditCard.ID = card.ID;
+                            InsertCreditCardDataManager.InsertCreditCard(creditCard);
+                        }
                         Notification.Success("Card created successfully. Save Card Number and Pin for later use.\n");
                         Console.WriteLine(card);
                         Console.WriteLine($" PIN: {card.Pin}");
                         Console.WriteLine();
+                        GetCardDataManager.GetAllCards(CacheData.CurrentUser.ID);
                     }
                     else
                         Notification.Error("Card not created");
@@ -187,7 +218,6 @@ namespace BankManagementDB.View
             card.Pin = RandomGenerator.GeneratePin();
             return card;
         }
-
 
         public void ResetPin()
         {
@@ -256,7 +286,6 @@ namespace BankManagementDB.View
             }
         }
 
-
         public bool ValidateModeOfPayment(Guid accountID, ModeOfPayment modeOfPayment)
         {
 
@@ -271,27 +300,27 @@ namespace BankManagementDB.View
         {
             string pin;
 
-            if (IsCardNumber(cardNumber))
+            if (GetCardDataManager.IsCardNumber(cardNumber))
             {
                 Validation validation= new Validation();    
                 Console.Write("Enter pin: ");
                 pin = Console.ReadLine().Trim();
                 if (!validation.IsValidPin(pin))
                     Notification.Error("Please enter a valid pin");
-                return GetCardDataManager.Authenticate(cardNumber, pin);
+                else
+                    return VerifyPin(cardNumber, pin);
             }
             else
                 Notification.Error("Card number does not exist");
             return false;
         }
 
-        public bool IsCardNumber(string cardNumber)
+        public bool VerifyPin(string cardNumber, string pin)
         {
-            return GetCardDataManager.IsCardNumber(cardNumber);
-        }
-        public void ViewCardDetails(Card card)
-        {
-            Console.WriteLine(card);
+            CardBObj card = GetCardDataManager.GetCard(cardNumber);
+            if (card != null)
+                return card.Pin == pin;
+            return false;
         }
     }
 }

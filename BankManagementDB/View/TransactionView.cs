@@ -15,19 +15,21 @@ namespace BankManagementDB.View
     public class TransactionView
     {
         public TransactionView() {
-            TransactionController = DependencyContainer.ServiceProvider.GetRequiredService<ITransactionDataManager>();
+            InsertTransactionDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IInsertTransactionDataManager>();
+            GetTransactionDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IGetTransactionDataManager>();
             UpdateAccountDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IUpdateAccountDataManager>();
             GetAccountDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IGetAccountDataManager>();
         }
 
-        public ITransactionDataManager TransactionController { get; set; }
+        public IInsertTransactionDataManager InsertTransactionDataManager { get; set; }
+        public IGetTransactionDataManager GetTransactionDataManager { get; set; }
 
         public IUpdateAccountDataManager UpdateAccountDataManager { get; private set; }
         public IGetAccountDataManager GetAccountDataManager { get; private set; }
 
         public void GoToAccount(Account account)
         {
-            TransactionController.FillTable(account.ID);
+            GetTransactionDataManager.GetAllTransactions(account.ID);
             while (true)
             {
                 Console.WriteLine();
@@ -40,12 +42,17 @@ namespace BankManagementDB.View
                 Console.Write("\nEnter your choice: ");
 
                 string option = Console.ReadLine().Trim();
-                int entryOption = int.Parse(option);
-                if (entryOption != 0 && entryOption <= Enum.GetNames(typeof(AccountCases)).Count())
+                if (int.TryParse(option, out int entryOption))
                 {
-                    AccountCases operation = (AccountCases)entryOption - 1;
-                    if (TransactionOperations(operation, account))
-                        break;
+                    if (entryOption != 0 && entryOption <= Enum.GetNames(typeof(AccountCases)).Count())
+                    {
+                        AccountCases operation = (AccountCases)entryOption - 1;
+                        if (TransactionOperations(operation, account))
+                            break;
+                    }
+
+                    else
+                        Notification.Error("Enter a valid input.");
                 }
                 else
                     Notification.Error("Enter a valid input.");
@@ -149,7 +156,7 @@ namespace BankManagementDB.View
         public bool Deposit(Account account, decimal amount, ModeOfPayment modeOfPayment, string cardNumber)
         {
             //AccountDataManager.BalanceChanged += onBalanceChanged;
-            if (UpdateAccountDataManager.UpdateBalance(account, amount, TransactionType.DEPOSIT))
+            if (UpdateBalance(account, amount, TransactionType.DEPOSIT))
             {
                 RecordTransaction("Deposit", amount, account.Balance, TransactionType.DEPOSIT, account.ID, modeOfPayment, cardNumber);
                 Notification.Success($"Deposit of Rs. {amount} is successful");
@@ -178,7 +185,7 @@ namespace BankManagementDB.View
         {
             Transaction transaction =
             new Transaction(description, amount, balance, transactionType, accountID, modeOfPayment, cardNumber);
-            return TransactionController.InsertTransaction(transaction);
+            return InsertTransactionDataManager.InsertTransaction(transaction);
         }
 
         public bool Withdraw(Account account, decimal amount, ModeOfPayment modeOfPayment, string cardNumber)
@@ -191,8 +198,7 @@ namespace BankManagementDB.View
                 {
                     WithdrawHandlers(account);
 
-                    //AccountDataManager.BalanceChanged += onBalanceChanged;
-                    if (UpdateAccountDataManager.UpdateBalance(account, amount, TransactionType.DEPOSIT))
+                    if (UpdateBalance(account, amount, TransactionType.DEPOSIT))
                     {
 
                             Notification.Success("Withdraw successful");
@@ -201,7 +207,6 @@ namespace BankManagementDB.View
                     }
                     else
                         Notification.Error("Withdraw unsuccessful");
-                    //AccountDataManager.BalanceChanged -= onBalanceChanged;
                 }
             }
             catch(Exception ex) { 
@@ -225,7 +230,7 @@ namespace BankManagementDB.View
             {
                 if (currentAccount.Balance < currentAccount.MinimumBalance && currentAccount.Balance > currentAccount.CHARGES)
                 {
-                    UpdateAccountDataManager.UpdateBalance(currentAccount, currentAccount.CHARGES, TransactionType.WITHDRAW);
+                    UpdateBalance(currentAccount, currentAccount.CHARGES, TransactionType.WITHDRAW);
                     Notification.Info("You have been charged for not maintaining minimum balance");
                     RecordTransaction("Minimum Balance Charge",
                         currentAccount.CHARGES, currentAccount.Balance,
@@ -246,7 +251,7 @@ namespace BankManagementDB.View
                 if (interest > 0)
                 {
                     Notification.Info($"Interest deposit of Rs. {interest} has been initiated");
-                    UpdateAccountDataManager.UpdateBalance(account, interest, TransactionType.DEPOSIT);
+                    UpdateBalance(account, interest, TransactionType.DEPOSIT);
                     RecordTransaction("Interest", interest, account.Balance, TransactionType.DEPOSIT, account.ID, ModeOfPayment.INTERNAL, null);
                     return interest;
                 }
@@ -266,9 +271,9 @@ namespace BankManagementDB.View
                 Account transferAccount = GetTransferAccount(account.AccountNumber);
                 if (transferAccount != null)
                 {
-                    if (UpdateAccountDataManager.UpdateBalance(account, amount, TransactionType.WITHDRAW))
+                    if (UpdateBalance(account, amount, TransactionType.WITHDRAW))
                     {
-                        if (UpdateAccountDataManager.UpdateBalance(transferAccount, amount, TransactionType.DEPOSIT))
+                        if (UpdateBalance(transferAccount, amount, TransactionType.DEPOSIT))
                         {
                             Console.WriteLine("Transfer successful");
                             RecordTransaction("Transferred", amount, account.Balance, TransactionType.TRANSFER, account.ID, modeOfPayment, cardNumber);
@@ -277,7 +282,7 @@ namespace BankManagementDB.View
                         else
                         {
                             Notification.Error("Transfer unsuccessful");
-                            UpdateAccountDataManager.UpdateBalance(account, amount, TransactionType.DEPOSIT);
+                            UpdateBalance(account, amount, TransactionType.DEPOSIT);
                         }
                     }
                     else
@@ -290,7 +295,7 @@ namespace BankManagementDB.View
         {
             try
             {
-                IEnumerable<Transaction> statements = TransactionController.GetAllTransactions(accountID).Where(transaction=> transaction.AccountID.Equals(accountID));
+                IEnumerable<Transaction> statements = GetTransactionDataManager.GetAllTransactions(accountID);
                 foreach (Transaction transaction in statements)
                     Console.WriteLine(transaction);
             }
@@ -302,7 +307,7 @@ namespace BankManagementDB.View
 
         public void PrintStatement(Guid accountID)
         {
-            IEnumerable<Transaction> statements = TransactionController.GetAllTransactions(accountID);
+            IEnumerable<Transaction> statements = GetTransactionDataManager.GetAllTransactions(accountID);
             Printer.PrintStatement(statements);
         }
 
@@ -352,6 +357,23 @@ namespace BankManagementDB.View
                return true;
             else
                return cardsView.Authenticate(cardNumber);
+        }
+
+        public bool UpdateBalance(Account account, decimal amount, TransactionType transactionType)
+        {
+
+            switch (transactionType)
+            {
+                case TransactionType.DEPOSIT:
+                    account.Deposit(amount);
+                    return UpdateAccountDataManager.UpdateAccount(account);
+                case TransactionType.WITHDRAW:
+                    account.Withdraw(amount);
+                    return UpdateAccountDataManager.UpdateAccount(account);
+                default:
+                    break;
+            }
+            return false;
         }
 
         public decimal GetAmount()

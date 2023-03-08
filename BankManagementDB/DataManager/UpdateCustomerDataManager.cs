@@ -1,5 +1,4 @@
-﻿using BankManagementCipher.Model;
-using BankManagementDB.Controller;
+﻿using BankManagementDB.Controller;
 using BankManagementDB.DBHandler;
 using BankManagementDB.Interface;
 using BankManagementDB.Models;
@@ -23,8 +22,6 @@ namespace BankManagementDB.DataManager
         public bool UpdateCustomer(Customer customer)
         {
             bool success = DBHandler.UpdateCustomer(customer).Result;
-            if (success)
-                CurrentUserDataManager.CurrentUser = customer;
             return success;
         }
     }

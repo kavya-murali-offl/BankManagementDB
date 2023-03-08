@@ -1,5 +1,4 @@
-﻿using BankManagementDB.EnumerationType;
-using BankManagementDB.Model;
+﻿using BankManagementDB.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,8 +7,8 @@ using System.Threading.Tasks;
 
 namespace BankManagementDB.Interface
 {
-    public interface IUpdateCardDataManager
+    public interface IUpdateCreditCardDataManager
     {
-        bool UpdateCard(Card card);
+        bool UpdateCreditCard(CreditCard card);
     }
 }

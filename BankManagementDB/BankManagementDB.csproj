@@ -179,19 +179,23 @@
     <Compile Include="Config\AppSettings.cs" />
     <Compile Include="Config\DependencyContainer.cs" />
     <Compile Include="Constants\Constants.cs" />
-    <Compile Include="DataManager\CurrentUserDataManager.cs" />
     <Compile Include="DatabaseAdapter\SQLiteDBAdapter.cs" />
     <Compile Include="DataManager\GetAccountDataManager.cs" />
     <Compile Include="DataManager\GetCardDataManager.cs" />
+    <Compile Include="DataManager\GetCustomerCredentialsDataManager.cs" />
     <Compile Include="DataManager\GetCustomerDataManager.cs" />
-    <Compile Include="DataManager\GetCustomerPasswordDataManager.cs" />
+    <Compile Include="DataManager\GetTransactionDataManager.cs" />
     <Compile Include="DataManager\InsertAccountDataManager.cs" />
     <Compile Include="DataManager\InsertCardDataManager.cs" />
+    <Compile Include="DataManager\InsertCredentialsDataManager.cs" />
+    <Compile Include="DataManager\InsertCreditCardDataManager.cs" />
     <Compile Include="DataManager\InsertCustomerDataManager.cs" />
+    <Compile Include="DataManager\InsertTransactionDataManager.cs" />
     <Compile Include="DataManager\UpdateAccountDataManager.cs" />
     <Compile Include="DataManager\UpdateCardDataManager.cs" />
+    <Compile Include="DataManager\UpdateCreditCardDataManager.cs" />
     <Compile Include="DataManager\UpdateCustomerDataManager.cs" />
-    <Compile Include="DataManager\ValidatePasswordDataManager.cs" />
+    <Compile Include="Data\CacheData.cs" />
     <Compile Include="DBHandler\DBHandler.cs" />
     <Compile Include="EnumerationType\CardType.cs" />
     <Compile Include="EnumerationType\CreditCardType.cs" />
@@ -204,26 +208,27 @@
     <Compile Include="Interface\IDatabaseAdapter.cs" />
     <Compile Include="Interface\IDBHandler.cs" />
     <Compile Include="Interface\IGetAccountDataManager.cs" />
+    <Compile Include="Interface\IGetCustomerCredentialsDataManager.cs" />
     <Compile Include="Interface\IGetCustomerDataManager.cs" />
+    <Compile Include="Interface\IGetTransactionDataManager.cs" />
     <Compile Include="Interface\IInsertAccountDataManager.cs" />
     <Compile Include="Interface\IInsertCardDataManager.cs" />
+    <Compile Include="Interface\IInsertCredentialsDataManager.cs" />
+    <Compile Include="Interface\IInsertCreditCardDataManager.cs" />
     <Compile Include="Interface\IInsertCustomerDataManager.cs" />
+    <Compile Include="Interface\IInsertTransactionDataManager.cs" />
     <Compile Include="Interface\ILoginDataManager.cs" />
-    <Compile Include="Interface\IObjectMappingDataManager.cs" />
-    <Compile Include="Interface\ITransactionDataManager.cs" />
     <Compile Include="Interface\IUpdateAccountDataManager.cs" />
     <Compile Include="Interface\IUpdateCardDataManager.cs" />
+    <Compile Include="Interface\IUpdateCreditCardDataManager.cs" />
     <Compile Include="Interface\IUpdateCustomerDataManager.cs" />
     <Compile Include="Interface\IUpdateDataManager.cs" />
-    <Compile Include="Interface\IValidatePasswordDataManager.cs" />
-    <Compile Include="Model\AccountDTO.cs" />
     <Compile Include="Model\Card.cs" />
     <Compile Include="Model\CardBObj.cs" />
     <Compile Include="Model\CreditCard.cs" />
     <Compile Include="Model\CustomerCredentials.cs" />
     <Compile Include="Utility\AuthServices.cs" />
     <Compile Include="DataManager\AccountFactory.cs" />
-    <Compile Include="DataManager\TransactionDataManager.cs" />
     <Compile Include="EnumerationType\AccountStatus.cs" />
     <Compile Include="EnumerationType\AccountType.cs" />
     <Compile Include="EnumerationType\TransactionType.cs" />
@@ -237,7 +242,6 @@
     <Compile Include="Utility\Mapper.cs" />
     <Compile Include="Utility\RandomGenerator.cs" />
     <Compile Include="Utility\Helper.cs" />
-    <Compile Include="DataManager\ObjectMappingDataManager.cs" />
     <Compile Include="View\CreditCardView.cs" />
     <Compile Include="View\Printer.cs" />
     <Compile Include="Utility\Validation.cs" />
@@ -258,9 +262,7 @@
     </None>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Data\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

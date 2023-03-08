@@ -1,11 +1,9 @@
-﻿using BankManagementCipher.Model;
-using BankManagementDB.Interface;
+﻿using BankManagementDB.Interface;
 using BankManagementDB.Model;
 using BankManagementDB.Models;
+using BankManagementDB.View;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace BankManagementDB.DBHandler
@@ -19,6 +17,7 @@ namespace BankManagementDB.DBHandler
         }
 
         public IDatabaseAdapter DatabaseAdapter { get; set; }
+
 
         // Customer
 
@@ -40,7 +39,9 @@ namespace BankManagementDB.DBHandler
 
         public Task<List<Customer>> GetCustomer(string phoneNumber) => DatabaseAdapter.GetAll<Customer>().Where(customer => customer.Phone.Equals(phoneNumber)).ToListAsync();
 
+
         // Customer Credentials
+
         public async Task<List<CustomerCredentials>> GetCredentials(Guid customerID) => await DatabaseAdapter.GetAll<CustomerCredentials>().Where(x => x.ID == customerID).ToListAsync();
 
         public async Task<bool> InsertCredentials(CustomerCredentials customerCredentials)
@@ -60,25 +61,34 @@ namespace BankManagementDB.DBHandler
 
         // Account
 
-        public async Task<List<AccountDTO>> GetAccounts(Guid userID) => await DatabaseAdapter.GetAll<AccountDTO>().Where(x => x.UserID == userID).OrderByDescending(x => x.CreatedOn).ToListAsync();
+        public async Task<List<Account>> GetAccounts(Guid userID) => await DatabaseAdapter.GetAll<Account>().Where(x => x.UserID == userID).OrderByDescending(x => x.CreatedOn).ToListAsync();
 
-        public async Task<bool> InsertAccount(AccountDTO accountDTO)
+        public async Task<bool> InsertAccount(Account account)
         {
-            int rowsModified = await DatabaseAdapter.Insert(accountDTO);
+            try
+            {
+                int rowsModified = await DatabaseAdapter.Insert<Account>(account);
+                if (rowsModified > 0) return true;
+            }
+            catch(Exception ex)
+            {
+                Notification.Error(ex.ToString());
+            }
+           
+            return false;
+        }
+
+        public async Task<bool> UpdateAccount(Account account)
+        {
+            int rowsModified = await DatabaseAdapter.Update(account);
             if (rowsModified > 0) return true;
             return false;
         }
 
-        public async Task<bool> UpdateAccount(AccountDTO accountDTO)
-        {
-            int rowsModified = await DatabaseAdapter.Update(accountDTO);
-            if (rowsModified > 0) return true;
-            return false;
-        }
 
         // Card
 
-        public async Task<IEnumerable<CardBObj>> GetCard(Guid customerID) => await DatabaseAdapter.ExecuteQuery<CardBObj>($"Select * from Card Inner Join CreditCard on Card.ID = CreditCard.ID where CustomerID = '{customerID}'");
+        public async Task<IEnumerable<CardBObj>> GetCard(Guid customerID) => await DatabaseAdapter.Query<CardBObj>($"Select * from Card Inner Join CreditCard on Card.ID = CreditCard.ID where CustomerID = '{customerID}'");
 
         public async Task<List<CardBObj>> GetCard(string cardNumber) => await DatabaseAdapter.GetAll<CardBObj>().Where(x => x.CardNumber.Equals(cardNumber)).ToListAsync();
 
@@ -96,6 +106,7 @@ namespace BankManagementDB.DBHandler
             return false;
         }
 
+
         // Credit Card
 
         public async Task<bool> InsertCreditCard(CreditCard creditCard)
@@ -111,6 +122,7 @@ namespace BankManagementDB.DBHandler
             if (rowsModified > 0) return true;
             return false;
         }
+
 
         // Transaction
 
@@ -132,13 +144,14 @@ namespace BankManagementDB.DBHandler
             return false;
         }
 
+        // Create tables
 
         public async void CreateTables()
         {
             await DatabaseAdapter.CreateTable<Customer>();
             await DatabaseAdapter.CreateTable<CustomerCredentials>();
             await DatabaseAdapter.CreateTable<Card>();
-            await DatabaseAdapter.CreateTable<AccountDTO>();
+            await DatabaseAdapter.CreateTable<Account>();
             await DatabaseAdapter.CreateTable<Transaction>();
             await DatabaseAdapter.CreateTable<CreditCard>();
         }

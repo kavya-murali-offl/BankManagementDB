@@ -36,5 +36,10 @@ namespace BankManagementDB.Model
 
         public CardType Type { get; set; }
 
+        public override string ToString() =>
+         $"\nCard Type: {Type.ToString()}\nCard Number: {CardNumber}\nExpiry Month: {ExpiryMonth}\nExpiry Year: {ExpiryYear}\n=====================================================\n";
+
+       
+
     }
 }

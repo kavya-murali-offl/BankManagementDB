@@ -20,12 +20,12 @@ namespace BankManagementDB.DatabaseAdapter
 
         public async Task CreateTable<T>() where T : new() => await Connection.CreateTableAsync<T>();
 
-        public async Task<int> Insert<T>(T instance) => await Connection.InsertOrReplaceAsync(instance);
+        public async Task<int> Insert<T>(T instance) => await Connection.InsertOrReplaceAsync(instance, typeof(T));
 
-        public async Task<int> Update<T>(T instance) => await Connection.InsertOrReplaceAsync(instance);
+        public async Task<int> Update<T>(T instance) => await Connection.InsertOrReplaceAsync(instance, typeof(T));
 
         public AsyncTableQuery<T> GetAll<T>() where T : new() => Connection.Table<T>();
 
-        public async Task<IEnumerable<T>> ExecuteQuery<T>(string query) where T : new() => await Connection.QueryAsync<T>(query);
+        public async Task<IEnumerable<T>> Query<T>(string query) where T : new() => await Connection.QueryAsync<T>(query);
     }
 }

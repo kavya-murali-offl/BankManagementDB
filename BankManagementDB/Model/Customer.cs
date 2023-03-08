@@ -6,8 +6,6 @@ namespace BankManagementDB.Models
     [Table("Customer")]
     public class Customer : ICloneable
     {
-        public Customer() { }
-
         [PrimaryKey]
         public Guid ID { get; set; }
         
@@ -23,13 +21,9 @@ namespace BankManagementDB.Models
         
         public DateTime CreatedOn { get; set; }
 
-        public override string ToString()
-        {
-            return $"{Name}";
-        }
-        public object Clone()
-        {
-            return this.MemberwiseClone();
-        }
+        public override string ToString() =>
+             $"Name: {Name}\nAge: {Age}\nEmail: {Email}\nPhone: {Phone}\nLast Logged On: {LastLoggedOn}";
+
+        public object Clone() => this.MemberwiseClone();
     }
 }

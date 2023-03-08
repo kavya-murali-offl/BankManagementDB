@@ -1,4 +1,4 @@
-﻿using BankManagementDB.EnumerationType;
+﻿using BankManagementDB.Model;
 using BankManagementDB.Models;
 using System;
 using System.Collections.Generic;
@@ -8,8 +8,8 @@ using System.Threading.Tasks;
 
 namespace BankManagementDB.Interface
 {
-    public interface IUpdateAccountDataManager
+    public interface IInsertCredentialsDataManager
     {
-        bool UpdateAccount(Account updatedAccount);
+        bool InsertCredentials(CustomerCredentials customerCredentials);
     }
 }

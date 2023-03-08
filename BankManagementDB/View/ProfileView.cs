@@ -8,6 +8,7 @@ using BankManagementDB.Config;
 using BankManagementDB.EnumerationType;
 using BankManagementDB.Interface;
 using BankManagementDB.DataManager;
+using BankManagementDB.Data;
 
 namespace BankManagementDB.View
 { 
@@ -76,16 +77,16 @@ namespace BankManagementDB.View
         {
             try
             {
+
                 IGetAccountDataManager GetAccountDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IGetAccountDataManager>();
-                Customer currentUser = CurrentUserDataManager.CurrentUser;
+                Customer currentUser = CacheData.CurrentUser;
                 Notification.Info("\n ================== PROFILE ===================\n");
-                Notification.Info($"Name: {currentUser.Name}");
-                Notification.Info("Age: " + currentUser.Age);
-                Notification.Info("Phone: " + currentUser.Phone);
-                Notification.Info("Email: " + currentUser.Email);
+                Notification.Info(currentUser.ToString());
                 Notification.Info("No. of Accounts: " + (GetAccountDataManager.GetAllAccounts(currentUser.ID).Count()));
                 Notification.Info("\n ==============================================\n");
-            }catch(Exception ex)
+
+            }
+            catch(Exception ex)
             {
                 Notification.Error(ex.ToString());
             }
@@ -93,10 +94,12 @@ namespace BankManagementDB.View
 
         public void EditProfile()
         {
-            Customer currentUser = CurrentUserDataManager.CurrentUser;
-            Customer customer = (Customer)currentUser.Clone();
+            try
+            {
+                Customer currentUser = CacheData.CurrentUser;
+                Customer customer = (Customer)currentUser.Clone();
 
-            IDictionary<string, Action<string>> fields = new Dictionary<string, Action<string>>(){
+                IDictionary<string, Action<string>> fields = new Dictionary<string, Action<string>>(){
                      { "NAME", (value) => customer.Name = value },
                      { "AGE", (value) =>
                                 {
@@ -110,13 +113,12 @@ namespace BankManagementDB.View
                                         Notification.Error("Invalid input! Age should be a number.");
                                 }
                      }
-            };
+                };  
 
-            while (true)
-            {
-                try
+                while (true)
                 {
-                    Console.WriteLine($"Name: {customer.Name}" );
+
+                    Console.WriteLine($"Name: {customer.Name}");
                     Console.WriteLine($"Age: {customer.Age}");
                     Console.WriteLine("Which field you want to edit? Press 0 to go back!");
 
@@ -131,29 +133,35 @@ namespace BankManagementDB.View
                     else if (field == "0")
                         break;
                     else
-                       Notification.Error("Invalid field!");
+                        Notification.Error("Invalid field!");
                 }
-                catch (Exception error)
-                {
-                    Console.WriteLine(error.Message);
-                }
+
+
+                if (customer.Name != currentUser.Name || customer.Age != currentUser.Age)
+                    UpdateProfile(customer);
             }
-            
-            if (customer.Name != currentUser.Name || customer.Age != currentUser.Age)
-                UpdateProfile(customer);
+            catch (Exception error)
+            {
+                Console.WriteLine(error.Message);
+            }
         }
 
             
         public void UpdateProfile(Customer updatedCustomer)
         {
-            IUpdateCustomerDataManager UpdateCustomerDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IUpdateCustomerDataManager>();
-
-            if (UpdateCustomerDataManager.UpdateCustomer(updatedCustomer))
+            try
             {
-                Notification.Success("Profile Updated Successfully");
-                CurrentUserDataManager.CurrentUser = updatedCustomer;
-            }
+                IUpdateCustomerDataManager UpdateCustomerDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IUpdateCustomerDataManager>();
 
+                if (UpdateCustomerDataManager.UpdateCustomer(updatedCustomer))
+                {
+                    Notification.Success("Profile Updated Successfully");
+                    CacheData.CurrentUser = updatedCustomer;
+                }
+
+            }catch(Exception error) { 
+                 Notification.Error(error.ToString());
+            }
         }
 
     }

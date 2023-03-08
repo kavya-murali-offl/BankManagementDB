@@ -1,5 +1,5 @@
-﻿using BankManagementCipher.Model;
-using BankManagementDB.Controller;
+﻿using BankManagementDB.Controller;
+using BankManagementDB.Data;
 using BankManagementDB.DBHandler;
 using BankManagementDB.Interface;
 using BankManagementDB.Models;
@@ -13,20 +13,22 @@ namespace BankManagementDB.DataManager
 {
     public class InsertAccountDataManager : IInsertAccountDataManager
     {
-        public InsertAccountDataManager(IDBHandler dbHandler, IObjectMappingDataManager objectMappingDataManager)
+        public InsertAccountDataManager(IDBHandler dbHandler)
         {
-            ObjectMappingDataManager = objectMappingDataManager;
             DBHandler = dbHandler;
         }
+
         public IDBHandler DBHandler { get; private set; }
-
-        public IObjectMappingDataManager ObjectMappingDataManager { get; private set; }
-
 
         public bool InsertAccount(Account account)
         {
-            return DBHandler.InsertAccount(ObjectMappingDataManager.AccountToDto(account)).Result;
-          
+            bool isSuccess = DBHandler.InsertAccount(account).Result;
+            if (isSuccess)
+            {
+                CacheData.AccountsList ??= new List<Account>();
+                CacheData.AccountsList.Insert(0, account);
+            }
+            return isSuccess;
         }
     }
 }
