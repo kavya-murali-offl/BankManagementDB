@@ -41,6 +41,7 @@ namespace BankManagementDB.Models
         {
              Balance -= amount;
         }
+
         public override string ToString() => $"\nAccount Type: {Type.ToString()}\n Account Number: {AccountNumber} \nAccount Status: {Status} \nBalance: Rs. {Balance}\n" +
               $"Minimum Balance: {MinimumBalance}\n" +
               "========================================\n";

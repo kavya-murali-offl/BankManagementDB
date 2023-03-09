@@ -5,9 +5,7 @@ using BankManagementDB.Models;
 using BankManagementDB.Config;
 using BankManagementDB.Interface;
 using Microsoft.Extensions.DependencyInjection;
-using BankManagementDB.Controller;
-using BankManagementDB.Model;
-using BankManagementDB.DataManager;
+using BankManagementDB.Properties;
 
 namespace BankManagementDB.View
 {
@@ -19,7 +17,8 @@ namespace BankManagementDB.View
             GetAccountDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IGetAccountDataManager>();
         }
 
-        public IGetAccountDataManager GetAccountDataManager { get;private set; }
+        public IGetAccountDataManager GetAccountDataManager { get; private set; }
+
         public IAccountFactory AccountFactory { get;private set; }
 
         public Account GenerateAccount()
@@ -28,32 +27,37 @@ namespace BankManagementDB.View
             {
                 while (true)
                 {
-                    Console.WriteLine("Choose Account Type: ");
+                    Console.WriteLine(Resources.ChooseAccountType);
 
                     for (int i = 0; i < Enum.GetNames(typeof(AccountType)).Length; i++)
                     {
                         AccountType cases = (AccountType)i;
                         Console.WriteLine($"{i + 1}. {cases.ToString().Replace("_", " ")}");
                     }
-                    Console.Write("\nEnter your choice: ");
+
+                    Console.Write(Resources.EnterChoice);
                     string option = Console.ReadLine().Trim();
-                    int entryOption = int.Parse(option);
-                    if (entryOption == 0)
-                        return null;
-                    if (entryOption <= Enum.GetNames(typeof(AccountType)).Count())
+
+                    if (int.TryParse(option, out int entryOption))
                     {
-                        AccountType accountType = (AccountType)entryOption - 1;
-                        Account account = AccountFactory.GetAccountByType(accountType);
-                        if (account != null)
-                            return account;
+
+                        if (entryOption != 0 && entryOption <= Enum.GetNames(typeof(AccountType)).Count())
+                        {
+                            AccountType accountType = (AccountType)entryOption - 1;
+                            Account account = AccountFactory.GetAccountByType(accountType);
+                            if (account != null)
+                                return account;
+                        }
+                        else
+                            Notification.Error(Resources.InvalidOption);
                     }
                     else
-                        Notification.Error("Please enter a valid option");
+                        Notification.Error(Resources.InvalidInteger);
                 }
             }
             catch (Exception error)
             {
-                Notification.Error("Enter a valid option.");
+                Notification.Error(error.ToString());
             }
             return null;
         }
@@ -64,15 +68,15 @@ namespace BankManagementDB.View
             {
                 while (true)
                 {
-                    Console.Write("Enter Account Number: ");
+                    Console.Write(Resources.EnterAccountNumber);
                     string accountNumber = Console.ReadLine().Trim();
-                    if (accountNumber == "0")
+                    if (accountNumber == Resources.BackButton)
                         break;
                     else
                     {
                         Account account = GetAccountDataManager.GetAccount(accountNumber);
                         if (account == null)
-                            Notification.Error("Invalid Account Number");
+                            Notification.Error(Resources.InvalidAccountNumber);
                         else
                             return account;
                     }
@@ -80,7 +84,7 @@ namespace BankManagementDB.View
             }
             catch (Exception error)
             {
-                Notification.Error("Enter a valid option.");
+                Notification.Error(error.ToString());
             }
             return null;
         }

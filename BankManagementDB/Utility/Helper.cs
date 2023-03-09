@@ -34,7 +34,7 @@ namespace BankManagementDB.Utility
             }
             string password = passwordBuilder.ToString();
            
-            if (!string.IsNullOrEmpty(password) && password != "0")
+            if (!string.IsNullOrEmpty(password) && password != Properties.Resources.BackButton)
                 return password;
 
             return null;

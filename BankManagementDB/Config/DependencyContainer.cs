@@ -1,4 +1,6 @@
 ﻿using System.IO;
+using System.Reflection;
+using System.Resources;
 using BankManagementDB.Controller;
 using BankManagementDB.DatabaseAdapter;
 using BankManagementDB.DataManager;

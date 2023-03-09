@@ -5,10 +5,7 @@ namespace BankManagementDB.Utility
 {
     public class Validation
     {
-        public bool ValidatePassword(string password, string rePassword)
-        {
-            return rePassword.Equals(password);
-        }
+        public bool ValidatePassword(string password, string rePassword) => rePassword.Equals(password);
 
         public bool IsValidEmail(string email)
         {
@@ -26,6 +23,7 @@ namespace BankManagementDB.Utility
                 return false;
             }
         }
+
         public bool IsValidPin(string input)
         {
             string pattern = "0000";
@@ -56,10 +54,6 @@ namespace BankManagementDB.Utility
             return matched;
         }
 
-        public static bool IsValidGuid(string str)
-        {
-            Guid guid;
-            return Guid.TryParse(str, out guid);
-        }
+        public static bool IsValidGuid(string str) =>  Guid.TryParse(str, out Guid guid);
     }
 }

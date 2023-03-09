@@ -9,6 +9,7 @@ using BankManagementDB.EnumerationType;
 using BankManagementDB.Interface;
 using BankManagementDB.DataManager;
 using BankManagementDB.Data;
+using BankManagementDB.Properties;
 
 namespace BankManagementDB.View
 { 
@@ -22,18 +23,18 @@ namespace BankManagementDB.View
             {
                 while (true)
                 {
-                    Console.WriteLine("\n");
+                    Console.WriteLine();
                     for (int i = 0; i < Enum.GetNames(typeof(ProfileServiceCases)).Length; i++)
                     {
                         ProfileServiceCases cases = (ProfileServiceCases)i;
                         Console.WriteLine($"{i + 1}. {cases.ToString().Replace("_", " ")}");
                     }
 
-                    Console.Write("\nEnter your choice: ");
+                    Console.Write(Resources.EnterChoice);
 
                     string option = Console.ReadLine().Trim();
                     int entryOption = int.Parse(option);
-                    if (entryOption == 0)
+                    if (option == Resources.BackButton)
                         break;
                     else if (entryOption <= Enum.GetNames(typeof(ProfileServiceCases)).Count())
                     {
@@ -43,7 +44,7 @@ namespace BankManagementDB.View
                             break;
                     }
                     else
-                        Notification.Error("Enter a valid input.");
+                        Notification.Error(Resources.InvalidOption);
                 }
             }
             catch (Exception error)
@@ -68,7 +69,7 @@ namespace BankManagementDB.View
                     return true;
 
                 default:
-                    Notification.Error("Enter a valid option.\n");
+                    Notification.Error(Resources.InvalidOption);
                     return false;
             }
         }
@@ -108,32 +109,31 @@ namespace BankManagementDB.View
                                         if(age > 18)
                                             customer.Age = age;
                                         else
-                                            Notification.Error("Age should be greater than 18.");
+                                            Notification.Error(Resources.AgeGreaterThan18);
                                     else
-                                        Notification.Error("Invalid input! Age should be a number.");
+                                        Notification.Error(Resources.InvalidInteger);
                                 }
                      }
                 };  
 
                 while (true)
                 {
-
-                    Console.WriteLine($"Name: {customer.Name}");
-                    Console.WriteLine($"Age: {customer.Age}");
-                    Console.WriteLine("Which field you want to edit? Press 0 to go back!");
+                    Console.WriteLine(string.Format(Resources.EnterName ,customer.Name));
+                    Console.WriteLine(string.Format(Resources.EnterName, customer.Age));
+                    Console.WriteLine(Resources.AskFieldToEdit);
 
                     string field = Console.ReadLine().Trim().ToUpper();
 
                     if (fields.ContainsKey(field))
                     {
-                        Console.Write("Enter new value: ");
+                        Console.Write(Resources.EnterNewValue);
                         string value = Console.ReadLine();
                         fields[field](value);
                     }
-                    else if (field == "0")
+                    else if (field == Resources.BackButton)
                         break;
                     else
-                        Notification.Error("Invalid field!");
+                        Notification.Error(Resources.InvalidOption);
                 }
 
 
@@ -155,9 +155,11 @@ namespace BankManagementDB.View
 
                 if (UpdateCustomerDataManager.UpdateCustomer(updatedCustomer))
                 {
-                    Notification.Success("Profile Updated Successfully");
+                    Notification.Success(Resources.ProfileUpdateSuccess);
                     CacheData.CurrentUser = updatedCustomer;
                 }
+                else
+                    Notification.Error(Resources.ProfileUpdateFailure);
 
             }catch(Exception error) { 
                  Notification.Error(error.ToString());

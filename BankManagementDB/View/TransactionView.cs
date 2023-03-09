@@ -7,8 +7,9 @@ using BankManagementDB.Utility;
 using BankManagementDB.Config;
 using BankManagementDB.EnumerationType;
 using BankManagementDB.Interface;
+using BankManagementDB.Properties;
 using Microsoft.Extensions.DependencyInjection;
-using System.Security.Principal;
+
 
 namespace BankManagementDB.View
 {
@@ -22,9 +23,11 @@ namespace BankManagementDB.View
         }
 
         public IInsertTransactionDataManager InsertTransactionDataManager { get; set; }
+
         public IGetTransactionDataManager GetTransactionDataManager { get; set; }
 
         public IUpdateAccountDataManager UpdateAccountDataManager { get; private set; }
+
         public IGetAccountDataManager GetAccountDataManager { get; private set; }
 
         public void GoToAccount(Account account)
@@ -36,10 +39,13 @@ namespace BankManagementDB.View
                 for (int i = 0; i < Enum.GetNames(typeof(AccountCases)).Length; i++)
                 {
                     AccountCases cases = (AccountCases)i;
-                    Console.WriteLine($"{i + 1}. {cases.ToString().Replace("_", " ")}");
+                    Console.WriteLine($
+                        
+                        
+                        {i + 1}. {cases.ToString().Replace("_", " ")}");
                 }
 
-                Console.Write("\nEnter your choice: ");
+                Console.Write(Resources.EnterChoice);
 
                 string option = Console.ReadLine().Trim();
                 if (int.TryParse(option, out int entryOption))
@@ -52,10 +58,10 @@ namespace BankManagementDB.View
                     }
 
                     else
-                        Notification.Error("Enter a valid input.");
+                        Notification.Error(Resources.InvalidInteger);
                 }
                 else
-                    Notification.Error("Enter a valid input.");
+                    Notification.Error(Resources.InvalidInput);
             }
         }
        
@@ -77,7 +83,7 @@ namespace BankManagementDB.View
                     return false;
 
                 case AccountCases.CHECK_BALANCE:
-                    Notification.Info($"\nBALANCE: Rs. {account.Balance}\n");
+                    Notification.Info(string.Format(Resources.BalanceDisplay, account.Balance));
                     return false;
 
                 case AccountCases.VIEW_STATEMENT:
@@ -96,7 +102,7 @@ namespace BankManagementDB.View
                     return true;
 
                 default:
-                    Notification.Error("Invalid option. Try again!");
+                    Notification.Error(Resources.InvalidInput);
                     return false;
             }
 
@@ -122,11 +128,12 @@ namespace BankManagementDB.View
                             isAuthenticated = IsAuthenticated(modeOfPayment, cardNumber);
                     }
                    if(!isAuthenticated) 
-                        Notification.Error("Authentication failed. Please try again");
+                        Notification.Error(Resources.CardVerificationFailed);
                 }
                 else
-                    Notification.Error("Selected Mode of payment is not enabled");
+                    Notification.Error(Resources.PaymentModeNotEnabled);
             }
+
             if (isAuthenticated)
             {
                 decimal amount = GetAmount();
@@ -159,11 +166,11 @@ namespace BankManagementDB.View
             if (UpdateBalance(account, amount, TransactionType.DEPOSIT))
             {
                 RecordTransaction("Deposit", amount, account.Balance, TransactionType.DEPOSIT, account.ID, modeOfPayment, cardNumber);
-                Notification.Success($"Deposit of Rs. {amount} is successful");
+                Notification.Success(Resources.DepositSuccess);
                 return true;
             }
             else
-                Notification.Error("Deposit unsuccessful");
+                Notification.Error(Resources.DepositFailure);
             //AccountDataManager.BalanceChanged -= onBalanceChanged;
             return false;
         }
@@ -173,9 +180,10 @@ namespace BankManagementDB.View
         {
             string input;
             ModeOfPayment modeOfPayment = ModeOfPayment.DEFAULT;
-            Console.WriteLine("Choose mode of payment:\n1. CASH\n2. DEBIT CARD\n");
+            Console.WriteLine(Resources.ChoosePaymentMode);
+            Console.WriteLine(Resources.ModeOfPayments);
             input = Console.ReadLine().Trim();
-            if (input == "0") modeOfPayment = ModeOfPayment.DEFAULT;
+            if (input == Resources.BackButton) modeOfPayment = ModeOfPayment.DEFAULT;
             else if (input == "1") modeOfPayment = ModeOfPayment.CASH;
             else if (input == "2") modeOfPayment = ModeOfPayment.DEBIT_CARD;
             return modeOfPayment;
@@ -193,7 +201,7 @@ namespace BankManagementDB.View
             try
             {
                 if (amount > account.Balance)
-                    Notification.Error("Insufficient Balance");
+                    Notification.Error(Resources.InsufficientBalance);
                 else
                 {
                     WithdrawHandlers(account);
@@ -201,12 +209,12 @@ namespace BankManagementDB.View
                     if (UpdateBalance(account, amount, TransactionType.DEPOSIT))
                     {
 
-                            Notification.Success("Withdraw successful");
+                            Notification.Success(Resources.WithdrawSuccess);
                             bool isTransactionRecorded = RecordTransaction("Withdraw", amount, account.Balance, TransactionType.WITHDRAW, account.ID, modeOfPayment, cardNumber);
                             return true;
                     }
                     else
-                        Notification.Error("Withdraw unsuccessful");
+                        Notification.Error(Resources.WithdrawFailure);
                 }
             }
             catch(Exception ex) { 
@@ -231,7 +239,7 @@ namespace BankManagementDB.View
                 if (currentAccount.Balance < currentAccount.MinimumBalance && currentAccount.Balance > currentAccount.CHARGES)
                 {
                     UpdateBalance(currentAccount, currentAccount.CHARGES, TransactionType.WITHDRAW);
-                    Notification.Info("You have been charged for not maintaining minimum balance");
+                    Notification.Info(Resources.MinimumBalanceCharged);
                     RecordTransaction("Minimum Balance Charge",
                         currentAccount.CHARGES, currentAccount.Balance,
                         TransactionType.WITHDRAW, currentAccount.ID, ModeOfPayment.INTERNAL, null);
@@ -250,7 +258,7 @@ namespace BankManagementDB.View
                 decimal interest = account.GetInterest();
                 if (interest > 0)
                 {
-                    Notification.Info($"Interest deposit of Rs. {interest} has been initiated");
+                    Notification.Info(string.Format(Resources.InterestDepositInitiated));
                     UpdateBalance(account, interest, TransactionType.DEPOSIT);
                     RecordTransaction("Interest", interest, account.Balance, TransactionType.DEPOSIT, account.ID, ModeOfPayment.INTERNAL, null);
                     return interest;
@@ -265,7 +273,7 @@ namespace BankManagementDB.View
         public void Transfer(Account account, decimal amount, ModeOfPayment modeOfPayment, string cardNumber)
         {
             
-            if (amount > account.Balance) Notification.Error("Insufficient Balance");
+            if (amount > account.Balance) Notification.Error(Resources.InsufficientBalance);
             else
             {
                 Account transferAccount = GetTransferAccount(account.AccountNumber);
@@ -275,18 +283,18 @@ namespace BankManagementDB.View
                     {
                         if (UpdateBalance(transferAccount, amount, TransactionType.DEPOSIT))
                         {
-                            Console.WriteLine("Transfer successful");
+                            Console.WriteLine(Resources.TransferSuccess);
                             RecordTransaction("Transferred", amount, account.Balance, TransactionType.TRANSFER, account.ID, modeOfPayment, cardNumber);
                             RecordTransaction("Received", amount, account.Balance, TransactionType.RECEIVED, account.ID, modeOfPayment, cardNumber);
                         }
                         else
                         {
-                            Notification.Error("Transfer unsuccessful");
+                            Notification.Error(Resources.TransferFailure);
                             UpdateBalance(account, amount, TransactionType.DEPOSIT);
                         }
                     }
                     else
-                        Notification.Error("Transfer unsuccessful");
+                        Notification.Error(Resources.TransferFailure);
                 }
             }
         }
@@ -317,20 +325,20 @@ namespace BankManagementDB.View
             {
                 while (true)
                 {
-                    Console.Write("Enter Account Number to transfer: ");
+                    Console.Write(Resources.EnterTransferAccountNumber);
                     string transferAccountNumber = Console.ReadLine().Trim();
-                    if (transferAccountNumber == "0")
+                    if (transferAccountNumber == Resources.BackButton)
                         break;
                     else
 
                         if (accountNumber == transferAccountNumber)
-                            Notification.Error("Choose a different account number to transfer.");
+                            Notification.Error(Resources.ChooseDifferentTransferAccount);
                         else
                         {
                             Account transferAccount = GetAccountDataManager.GetAccount(accountNumber);
                             if (transferAccount == null)
                             {
-                                Notification.Error("Enter a valid Account Number");
+                                Notification.Error(Resources.InvalidAccountNumber);
                                 break;
                             }
                             else return transferAccount;
@@ -382,9 +390,9 @@ namespace BankManagementDB.View
             {
                 while (true)
                 {
-                    Console.Write("Enter amount: ");
+                    Console.Write(Resources.EnterAmount);
                     decimal amount = decimal.Parse(Console.ReadLine().Trim());
-                    if (amount < 0) Notification.Error("Amount should be greater than zero.");
+                    if (amount < 0) Notification.Error(Resources.PositiveAmountWarning);
                     else return amount;
                 }
             }

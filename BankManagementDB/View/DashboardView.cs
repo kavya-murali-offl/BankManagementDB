@@ -7,7 +7,7 @@ using BankManagementDB.Interface;
 using BankManagementDB.Model;
 using BankManagementDB.EnumerationType;
 using BankManagementDB.Config;
-using BankManagementDB.Controller;
+using BankManagementDB.Properties;
 using BankManagementDB.Data;
 
 namespace BankManagementDB.View
@@ -39,14 +39,13 @@ namespace BankManagementDB.View
                         Console.WriteLine($"{i + 1}. {cases.ToString().Replace("_", " ")}");
                     }
 
-                    Console.Write("\nEnter your choice: ");
+                    Console.Write(Resources.EnterChoice);
 
               
                     string option = Console.ReadLine().Trim();
-                    int entryOption;
 
-                    if (!int.TryParse(option, out entryOption))
-                        Notification.Error("Invalid input! Please enter a valid number.");
+                    if (!int.TryParse(option, out int entryOption))
+                        Notification.Error(Resources.InvalidInteger);
                     else
                     {
                         if (entryOption != 0 && entryOption <= Enum.GetNames(typeof(DashboardCases)).Count())
@@ -56,7 +55,7 @@ namespace BankManagementDB.View
                                 break;
                         }
                         else
-                            Notification.Error("Invalid input! Please enter a valid number.");
+                            Notification.Error(Resources.InvalidOption);
                     }
                 }
             }
@@ -94,11 +93,11 @@ namespace BankManagementDB.View
                 case DashboardCases.SIGN_OUT:
                     SaveCustomerSession();
                     CacheData.CurrentUser = null;
-                    Notification.Success("User logged out");
+                    Notification.Success(Resources.LogoutSuccess);
                     return true;
 
                 default:
-                    Notification.Error("Enter a valid option.\n");
+                    Notification.Error(Resources.InvalidOption);
                     return false;
             }
         }
@@ -128,12 +127,10 @@ namespace BankManagementDB.View
             {
                 if (account is CurrentAccount)
                     DepositAmount(account);
+                Notification.Success(Resources.AccountInsertSuccess);
             }
-
-            if (account != null)
-                Notification.Success("Account created successfully");
             else
-                Notification.Error("Account not created");
+                Notification.Error(Resources.AccountInsertFailure);
         }
 
         public bool DepositAmount(Account account)
@@ -150,7 +147,7 @@ namespace BankManagementDB.View
                     return true;
                 }
                 else
-                    Notification.Error($"Initial deposit amount must be greater than Minimum Balance (Rs. {account.MinimumBalance}). Try again");
+                    Notification.Warning(string.Format(Resources.InitialDepositAmountWarning, account.MinimumBalance));
             }
         }
 
@@ -160,16 +157,16 @@ namespace BankManagementDB.View
             {
                 while (true)
                 {       
-                    Console.Write("Enter amount: ");
+                    Console.Write(Resources.EnterAmount);
                
                     decimal amount = decimal.Parse(Console.ReadLine().Trim());
                     if (amount > 0) return amount;
-                    else Console.WriteLine("Amount should be greater than zero.");
+                    else Notification.Warning(Resources.PositiveAmountWarning);
                 }
              }
             catch (Exception error)
             {
-                Notification.Error("Enter a valid amount. Try Again!");
+                Notification.Error(error.ToString());
             }
             return 0;
         }
@@ -210,13 +207,13 @@ namespace BankManagementDB.View
                     {
                         ListAccountIDs(accountsList);
 
-                        Console.WriteLine("Choose the account or Press 0 to go back!\n");
+                        Console.WriteLine();
                         string index = Console.ReadLine().Trim();
 
                         if (!int.TryParse(index, out accountIndex))
-                            Notification.Error("Please enter a valid number.");
+                            Notification.Error(Resources.InvalidInteger);
                         else if (accountIndex > accountsList.Count())
-                            Notification.Error("Choose from the listed accounts.");
+                            Notification.Error(Resources.ChooseOnlyFromOptions);
                         else if (accountIndex <= accountsList.Count())
                             break;
                     }
@@ -243,7 +240,7 @@ namespace BankManagementDB.View
             }
             catch(Exception ex)
             {
-                Notification.Error(ex.Message);
+                Notification.Error(ex.ToString());
             }
         }
 

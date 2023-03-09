@@ -1,6 +1,5 @@
 ﻿using BankManagementDB.Config;
-using BankManagementDB.Controller;
-using BankManagementDB.DataManager;
+using BankManagementDB.Properties;
 using BankManagementDB.EnumerationType;
 using BankManagementDB.Interface;
 using BankManagementDB.Model;
@@ -12,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+
 
 namespace BankManagementDB.View
 {
@@ -39,23 +39,24 @@ namespace BankManagementDB.View
                         CreditCardCases cases = (CreditCardCases)i;
                         Console.WriteLine($"{i + 1}. {cases.ToString().Replace("_", " ")}");
                     }
-                    Console.Write("\nEnter your choice: ");
-                    string option = Console.ReadLine().Trim();
-                    int entryOption;
 
-                    if (!int.TryParse(option, out entryOption))
-                        Notification.Error("Invalid input! Please enter a valid number.");
+                    Console.Write(Resources.EnterChoice);
+
+                    string option = Console.ReadLine().Trim();
+
+                    if (!int.TryParse(option, out int entryOption))
+                        Notification.Error(Resources.InvalidInteger);
                     else
-                    if (entryOption != 0 && entryOption <= Enum.GetNames(typeof(CreditCardCases)).Count())
-                    {
-                        CreditCardCases cases = (CreditCardCases)entryOption - 1;
-                        if (CreditCardOperations(cases))
+                        if (entryOption == 0)
                             break;
-                    }
-                    else if (entryOption == 0)
-                        break;
-                    else
-                        Notification.Error("Invalid input! Please enter a valid number.");
+                        else if (entryOption != 0 && entryOption <= Enum.GetNames(typeof(CreditCardCases)).Count())
+                        {
+                            CreditCardCases cases = (CreditCardCases)entryOption - 1;
+                            if (CreditCardOperations(cases))
+                                break;
+                        }
+                        else
+                            Notification.Error(Resources.InvalidOption);
                 }
             }
             catch (Exception err)
@@ -63,6 +64,7 @@ namespace BankManagementDB.View
                 Notification.Error(err.Message);
             }
         }
+
         public bool CreditCardOperations(CreditCardCases operation)
         {
 
@@ -80,7 +82,7 @@ namespace BankManagementDB.View
                     return true;
 
                 default:
-                    Notification.Error("Enter a valid option.\n");
+                    Notification.Error(Resources.InvalidOption);
                     return false;
             }
         }
@@ -94,9 +96,9 @@ namespace BankManagementDB.View
                     if (cardView.Authenticate(cardNumber))
                         return true;
                     else
-                        Notification.Error("Incorrect pin");
+                        Notification.Error(Resources.InvalidPin);
                 else
-                    Notification.Error("Please enter a valid credit card number");
+                    Notification.Error(Resources.InvalidCreditCardNumber);
             }
             return false;
         }
@@ -110,7 +112,6 @@ namespace BankManagementDB.View
             {
                 CardBObj card = GetCardDataManager.GetCard(cardNumber);
                 if (card != null)
-                {
                     if (card.Type == CardType.CREDIT)
                     {
                         TransactionView transactionView = new TransactionView();
@@ -118,20 +119,17 @@ namespace BankManagementDB.View
                         if (amount > 0)
                         {
                             if ((amount + card.TotalDueAmount) < card.CreditLimit)
-                            {
                                 if (UpdateDueAmount(CreditCardCases.PURCHASE, card, amount))
                                 {
-                                    Notification.Success("Purchase successful");
+                                    Notification.Success(Resources.PurchaseSuccess);
                                     bool isTransacted = transactionView.RecordTransaction("Purchase", amount, card.TotalDueAmount, TransactionType.PURCHASE, Guid.Empty, ModeOfPayment.CREDIT_CARD, card.CardNumber);
                                 }
                                 else
-                                    Notification.Error("Purchase failed");
-                            }
+                                    Notification.Error(Resources.PurchaseFailure);
                             else
-                                Notification.Error("Purchase amount is greater than Available credit limit.");
+                                Notification.Error(Resources.CreditLimitReached);
                         }
                     }
-                }
             }
         }
 
@@ -146,27 +144,24 @@ namespace BankManagementDB.View
                 CardBObj card = GetCardDataManager.GetCard(cardNumber);
                 if (card != null)
                 {
-                    TransactionView transactionView = new TransactionView();
                     AccountView accountView = new AccountView();
                     Account account = accountView.GetAccount();
                      
                     if (account != null)
                     {
+                        TransactionView transactionView = new TransactionView();
                         decimal amount = transactionView.GetAmount();
+
                         if (amount > 0)
-                        {
                                 if(transactionView.Withdraw(account, amount, ModeOfPayment.DEBIT_CARD, card.CardNumber))
                                     if (UpdateDueAmount(CreditCardCases.PAYMENT, card, amount))
                                     {
-                                        Notification.Success("Payment successful");
+                                        Notification.Success(Resources.PaymentSuccess);
                                         bool isTransacted = transactionView.RecordTransaction("Payment", amount, card.TotalDueAmount, TransactionType.PAYMENT, Guid.Empty, ModeOfPayment.CREDIT_CARD, card.CardNumber);
                                     }
                                     else
-                                        Notification.Error("Payment failed");
-                        }
+                                        Notification.Error(Resources.PaymentFailure);
                     }
-                    else
-                        Notification.Error("Account not exist");
                 }
             }
         }
@@ -178,18 +173,23 @@ namespace BankManagementDB.View
             switch (cases)
             {
                 case CreditCardCases.PURCHASE:
+
                     card.TotalDueAmount += amount;
                     CardDueAmountChanged?.Invoke($"Purchase of Rs.{amount} is successful");
                     creditCard = Mapper.Map<CardBObj, CreditCard>(card);
                     UpdateCreditCardDataManager.UpdateCreditCard(creditCard);
                     return true;
+
                 case CreditCardCases.PAYMENT:
+
                     card.TotalDueAmount -= amount;
                     CardDueAmountChanged?.Invoke($"Payment of Rs.{amount} is sucessful");
                     creditCard = Mapper.Map<CardBObj, CreditCard>(card);
                     UpdateCreditCardDataManager.UpdateCreditCard(creditCard);
                     return true;
+
                 default:
+
                     return false;
             }
         }

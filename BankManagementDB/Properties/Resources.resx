@@ -1,0 +1,345 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AccountInsertFailure" xml:space="preserve">
+    <value>Failed to create account</value>
+  </data>
+  <data name="AccountInsertSuccess" xml:space="preserve">
+    <value>Account created successfully</value>
+  </data>
+  <data name="AgeGreaterThan18" xml:space="preserve">
+    <value>Age must be greater than 18</value>
+  </data>
+  <data name="AskFieldToEdit" xml:space="preserve">
+    <value>Which field you want to edit?</value>
+  </data>
+  <data name="BackButton" xml:space="preserve">
+    <value>0</value>
+  </data>
+  <data name="BalanceDisplay" xml:space="preserve">
+    <value>BALANCE:     Rs. {0}</value>
+  </data>
+  <data name="CardInsertFailure" xml:space="preserve">
+    <value>Card not created. Please try again.</value>
+  </data>
+  <data name="CardInsertSuccess" xml:space="preserve">
+    <value>Card created successfully. Save Card Number and Pin for later use.</value>
+  </data>
+  <data name="CardNumberNotExist" xml:space="preserve">
+    <value>This card number does not exist. Please enter a valid card number to proceed</value>
+  </data>
+  <data name="CardTypes" xml:space="preserve">
+    <value>1. CREDIT CARD                     2.DEBIT CARD</value>
+  </data>
+  <data name="CardVerificationFailed" xml:space="preserve">
+    <value>Card verification failed</value>
+  </data>
+  <data name="ChooseAccountType" xml:space="preserve">
+    <value>Choose Account Type: </value>
+  </data>
+  <data name="ChooseDifferentTransferAccount" xml:space="preserve">
+    <value>Choose a different account number to transfer</value>
+  </data>
+  <data name="ChooseFromAccountsList" xml:space="preserve">
+    <value>Select account to proceed</value>
+  </data>
+  <data name="ChooseOnlyFromOptions" xml:space="preserve">
+    <value>Choose only from the above listed options</value>
+  </data>
+  <data name="ChoosePaymentMode" xml:space="preserve">
+    <value>Choose mode of payment:</value>
+  </data>
+  <data name="CreditLimitReached" xml:space="preserve">
+    <value>Purchase amount is greater than Available credit limit</value>
+  </data>
+  <data name="DebitCardLinkedError" xml:space="preserve">
+    <value>This account already has a debit card linked to it. Please choose a different account to link.</value>
+  </data>
+  <data name="DepositFailure" xml:space="preserve">
+    <value>Deposit unsuccessful</value>
+  </data>
+  <data name="DepositSuccess" xml:space="preserve">
+    <value>Deposit of Rs.{0} is successful</value>
+  </data>
+  <data name="EmptyFieldError" xml:space="preserve">
+    <value>Field should not be empty</value>
+  </data>
+  <data name="EnterAccountNumber" xml:space="preserve">
+    <value>Account Number: </value>
+  </data>
+  <data name="EnterAge" xml:space="preserve">
+    <value>Age:</value>
+  </data>
+  <data name="EnterAmount" xml:space="preserve">
+    <value>Amount:</value>
+  </data>
+  <data name="EnterCardNumber" xml:space="preserve">
+    <value>Card Number: </value>
+  </data>
+  <data name="EnterChoice" xml:space="preserve">
+    <value>Enter your choice: </value>
+  </data>
+  <data name="EnterEmail" xml:space="preserve">
+    <value>Email: </value>
+  </data>
+  <data name="EnterName" xml:space="preserve">
+    <value>Name:</value>
+  </data>
+  <data name="EnterNewPin" xml:space="preserve">
+    <value>Enter New Pin:</value>
+  </data>
+  <data name="EnterNewValue" xml:space="preserve">
+    <value>Enter value to update: </value>
+  </data>
+  <data name="EnterPassword" xml:space="preserve">
+    <value>Password: </value>
+  </data>
+  <data name="EnterPhoneNumber" xml:space="preserve">
+    <value>Phone Number: </value>
+  </data>
+  <data name="EnterPin" xml:space="preserve">
+    <value>Pin:</value>
+  </data>
+  <data name="EnterRePassword" xml:space="preserve">
+    <value>Re-enter Password:</value>
+  </data>
+  <data name="EnterTransferAccountNumber" xml:space="preserve">
+    <value>Account Number to transfer: </value>
+  </data>
+  <data name="InitialDepositAmountWarning" xml:space="preserve">
+    <value>Initial deposit amount must be greater than Minimum Balance (Rs. {0}). Try again.</value>
+  </data>
+  <data name="InsufficientBalance" xml:space="preserve">
+    <value>Insufficient Balance</value>
+  </data>
+  <data name="InterestDepositInitiated" xml:space="preserve">
+    <value>Interest deposit of Rs. {0} has been initiated</value>
+  </data>
+  <data name="InvalidAccountNumber" xml:space="preserve">
+    <value>This Account Number is invalid</value>
+  </data>
+  <data name="InvalidCreditCardNumber" xml:space="preserve">
+    <value>Please enter a valid credit card number</value>
+  </data>
+  <data name="InvalidEmail" xml:space="preserve">
+    <value>Please enter a valid email address</value>
+  </data>
+  <data name="InvalidInput" xml:space="preserve">
+    <value>Please enter a valid input</value>
+  </data>
+  <data name="InvalidInteger" xml:space="preserve">
+    <value>Please enter a valid number</value>
+  </data>
+  <data name="InvalidOption" xml:space="preserve">
+    <value>Enter valid option. Try Again!</value>
+  </data>
+  <data name="InvalidPhone" xml:space="preserve">
+    <value>Please enter a valid 10-digit phone number</value>
+  </data>
+  <data name="InvalidPhoneNumber" xml:space="preserve">
+    <value>Please enter a valid mobile number</value>
+  </data>
+  <data name="InvalidPin" xml:space="preserve">
+    <value>Please enter a valid 4-digit pin</value>
+  </data>
+  <data name="IsDebitCardRequired" xml:space="preserve">
+    <value>Do you need Debit Card for this account? Press 'y' to accept or 'n' to decline.</value>
+  </data>
+  <data name="LogoutSuccess" xml:space="preserve">
+    <value>User logged out successfully</value>
+  </data>
+  <data name="MinimumBalanceCharged" xml:space="preserve">
+    <value>You have been charged for not maintaining minimum balance</value>
+  </data>
+  <data name="ModeOfPayments" xml:space="preserve">
+    <value>1. CASH                   2. DEBIT CARD</value>
+  </data>
+  <data name="NoCardsLinked" xml:space="preserve">
+    <value>No cards linked to your profile. Add cards to enable service.</value>
+  </data>
+  <data name="PasswordIncorrect" xml:space="preserve">
+    <value>Incorrect Password</value>
+  </data>
+  <data name="PasswordMismatch" xml:space="preserve">
+    <value>Password not matching. Try again</value>
+  </data>
+  <data name="PaymentFailure" xml:space="preserve">
+    <value>Payment failed</value>
+  </data>
+  <data name="PaymentModeNotEnabled" xml:space="preserve">
+    <value>Selected mode of payment is not enabled</value>
+  </data>
+  <data name="PaymentSuccess" xml:space="preserve">
+    <value>Payment successful</value>
+  </data>
+  <data name="PhoneAlreadyRegistered" xml:space="preserve">
+    <value>Phone number is already registered with us</value>
+  </data>
+  <data name="PhoneNotRegistered" xml:space="preserve">
+    <value>This Phone Number is not registered with us. Please try again!</value>
+  </data>
+  <data name="PinDisplay" xml:space="preserve">
+    <value>PIN:   {0}</value>
+  </data>
+  <data name="PositiveAmountWarning" xml:space="preserve">
+    <value>Amount should be greater than 0</value>
+  </data>
+  <data name="PresssBackButton" xml:space="preserve">
+    <value>Press '0' to go back</value>
+  </data>
+  <data name="ProfileUpdateFailure" xml:space="preserve">
+    <value>Profile update failed</value>
+  </data>
+  <data name="ProfileUpdateSuccess" xml:space="preserve">
+    <value>Profile updated successfully</value>
+  </data>
+  <data name="PurchaseFailure" xml:space="preserve">
+    <value>Purchase failed</value>
+  </data>
+  <data name="PurchaseSuccess" xml:space="preserve">
+    <value>Purchase successful</value>
+  </data>
+  <data name="ResetPinFailure" xml:space="preserve">
+    <value>Attempt to reset pin failed. Please try again</value>
+  </data>
+  <data name="ResetPinSuccess" xml:space="preserve">
+    <value>Pin reset successful</value>
+  </data>
+  <data name="SignupFailure" xml:space="preserve">
+    <value>Error in signing up. Please try again.</value>
+  </data>
+  <data name="SignupSuccess" xml:space="preserve">
+    <value>Signup successful</value>
+  </data>
+  <data name="TransferFailure" xml:space="preserve">
+    <value>Transfer unsuccessful</value>
+  </data>
+  <data name="TransferSuccess" xml:space="preserve">
+    <value>Transfer of Rs.{0} is successful</value>
+  </data>
+  <data name="WelcomeUser" xml:space="preserve">
+    <value>Welcome {0}</value>
+  </data>
+  <data name="WithdrawFailure" xml:space="preserve">
+    <value>Withdraw unsuccessful</value>
+  </data>
+  <data name="WithdrawSuccess" xml:space="preserve">
+    <value>Withdraw of Rs.{0} is successful</value>
+  </data>
+</root>

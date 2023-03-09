@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Resources;
 using BankManagementDB.EnumerationType;
 
 namespace BankManagementDB.View
 {
     public class EntryView
-    {
+    { 
+
         public void Entry()
         {
             try
@@ -18,7 +20,7 @@ namespace BankManagementDB.View
                         Console.WriteLine($"{i + 1}. {cases.ToString().Replace("_", " ")}");
                     }
 
-                    Console.Write("\nEnter your choice: ");
+                    Console.Write(Properties.Resources.EnterChoice);
 
                     string option = Console.ReadLine().Trim();
 
@@ -32,7 +34,7 @@ namespace BankManagementDB.View
                         }
                     }
                     else
-                        Notification.Error("Please enter a valid number");
+                        Notification.Error(Properties.Resources.InvalidInput);
                 }
             }
             catch (Exception err)
@@ -66,7 +68,7 @@ namespace BankManagementDB.View
 
                 default:
 
-                    Notification.Error("Enter valid option. Try Again!");
+                    Notification.Error(Properties.Resources.InvalidInput);
                     return false;
             }
         }

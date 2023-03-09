@@ -33,7 +33,7 @@ namespace BankManagementDB.Utility
             }
             catch (Exception e)
             {
-                Console.WriteLine("Exception: " + e.Message);
+                Console.WriteLine(e.Message);
             }
         }
     }

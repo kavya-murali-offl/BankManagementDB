@@ -6,7 +6,7 @@ using BankManagementDB.EnumerationType;
 using BankManagementDB.Interface;
 using BankManagementDB.Config;
 using Microsoft.Extensions.DependencyInjection;
-using BankManagementDB.DataManager;
+using BankManagementDB.Properties;
 
 namespace BankManagementDB.View
 {
@@ -47,7 +47,7 @@ namespace BankManagementDB.View
             phone = GetPhoneNumber();
             if (phone != null)
             {
-                name = GetValue("Name");
+                name = GetValue(Resources.EnterName);
                 if (name != null)
                 {
                     email = GetEmail();
@@ -56,7 +56,7 @@ namespace BankManagementDB.View
                         age = GetAge();
                         if (age > 0)
                         {
-                                Console.WriteLine("Enter password: ");
+                                Console.WriteLine(Resources.EnterPassword);
                                 password = helper.GetPassword();
                                 if (password != null)
                                 {
@@ -83,26 +83,24 @@ namespace BankManagementDB.View
 
             while (true)
             {
-                Console.Write("Enter Mobile Number: ");
+                Console.Write(Resources.EnterPhoneNumber);
                 phoneNumber = Console.ReadLine().Trim();
 
-                if (phoneNumber == "0")
+                if (phoneNumber == Resources.BackButton)
                     break;
 
                 if (!string.IsNullOrEmpty(phoneNumber))
-                {
 
                     if (validation.IsPhoneNumber(phoneNumber))
                         if (CheckUniquePhoneNumber(phoneNumber))
                             return phoneNumber;
                         else
-                            Notification.Error("Phone Number Already Registered");
+                            Notification.Error(Resources.PhoneAlreadyRegistered);
 
                     else
-                        Notification.Error("Enter a valid Phone Number");
-                }
+                        Notification.Error(Resources.InvalidPhone);
                 else
-                    Notification.Error("Phone Number should not be empty");
+                    Notification.Error(Resources.EmptyFieldError);
 
             }
             return null;
@@ -114,20 +112,20 @@ namespace BankManagementDB.View
             {
                 while (true)
                 {
-                    Console.Write("Age: ");
+                    Console.Write(Resources.EnterAge);
                     string input = Console.ReadLine().Trim();
                     if (int.TryParse(input, out int number))
                         if (number < 19)
-                            Notification.Error("Age should be greater than 18");
+                            Notification.Error(Resources.AgeGreaterThan18);
                         else
                             return number;
                     else
-                        Notification.Error("Enter a valid number.");
+                        Notification.Error(Resources.InvalidInteger);
                 }
             }
             catch (Exception error)
             {
-                Notification.Error("Enter a valid number. Try Again!");
+                Notification.Error(error.ToString());
             }
             return 0;
         }
@@ -140,17 +138,18 @@ namespace BankManagementDB.View
                 account.UserID = signedUpCustomer.ID;
                 account.Balance = 0;
 
+                TransactionView transactionView = new TransactionView();
+
                 if (InsertAccountDataManager.InsertAccount(account))
                 {
                     decimal amount = GetAmount(account.MinimumBalance);
                     if (amount > 0)
                     {
-                        TransactionView transactionView = new TransactionView();
                         if (transactionView.Deposit(account, amount, ModeOfPayment.CASH, null))
                         {
-                            Notification.Success("Account created successfully\n");
+                            Notification.Success(Resources.AccountInsertSuccess);
 
-                            Console.WriteLine("Do you need Debit Card for this account? Press y to accept or n to decline");
+                            Console.WriteLine(Resources.IsDebitCardRequired);
                             while (true)
                             {
                                 string input = Console.ReadLine().Trim();
@@ -159,9 +158,12 @@ namespace BankManagementDB.View
                             }
                         }
                         else
-                            Notification.Error("Deposit unsuccessful");
+                            Notification.Error(Resources.DepositFailure);
                     }
                 }
+                else
+                     Notification.Error(Resources.AccountInsertFailure);
+                    
             }
             catch (Exception e)
             {
@@ -176,7 +178,7 @@ namespace BankManagementDB.View
             {
                 amount = transactionsView.GetAmount();
                 if (amount < minimumBalance)
-                    Notification.Error($"Initial Amount should be greater than Minimum Balance Rs. {minimumBalance}");
+                    Notification.Error(string.Format(Resources.InitialDepositAmountWarning, minimumBalance));
                 else
                     break;
             }
@@ -193,16 +195,16 @@ namespace BankManagementDB.View
                         GetCardDataManager.GetAllCards(signedUpCustomer.ID);
                         if (InsertCardDataManager.InsertCard(card))
                         {
-                            Notification.Success("Debit card created successfully. Save Card Number and Pin for later use.\n");
+                            Notification.Success(Resources.CardInsertSuccess);
                             Console.WriteLine(card);
-                            Console.WriteLine($" PIN: {card.Pin}");
+                            Console.WriteLine(string.Format(Resources.PinDisplay, card.Pin));
                             Console.WriteLine();
                         }
                         return true;
                     case "n":
                         return true;
                     default:
-                        Notification.Error("Please enter a valid input");
+                        Notification.Error(Resources.InvalidInput);
                         return false;
                 }
         }
@@ -230,10 +232,11 @@ namespace BankManagementDB.View
             if (InsertCredentials(customer, password))
             {
                 bool customerAdded = InsertCustomerDataManager.InsertCustomer(customer, password);
-                if (customerAdded) Notification.Success("\nSignup successful");
+                if (customerAdded) Notification.Success(Resources.SignupSuccess);
             }
-            else Notification.Error("Error in signing up");
+            else Notification.Error(Resources.SignupFailure);
         }
+
         public bool InsertCredentials(Customer customer, string password)
         {
             string salt = AuthServices.GenerateSalt(70);
@@ -251,10 +254,9 @@ namespace BankManagementDB.View
         {
             while (true)
             {
-                Console.Write(label + ": ");
-                Validation validation = new Validation();
+                Console.Write(label);
                 string value = Console.ReadLine().Trim();
-                if (value == "0") return null;
+                if (value == Resources.BackButton) return null;
                 else if (!string.IsNullOrEmpty(value)) return value;
                 else return null;
             }
@@ -266,16 +268,16 @@ namespace BankManagementDB.View
             Validation validation = new Validation();
             while (true)
             {
-                Console.Write("Enter email: ");
+                Console.Write(Resources.EnterEmail);
                 email = Console.ReadLine().Trim();
-                if (email == "0")
+                if (email == Resources.BackButton)
                     email = null;
                 else if (string.IsNullOrEmpty(email))
-                    Notification.Error("Field should not be empty");
+                    Notification.Error(Resources.EmptyFieldError);
                 else
                 {
                     if (validation.IsValidEmail(email)) break;
-                    else Notification.Error("Please enter a valid email.");
+                    else Notification.Error(Resources.InvalidEmail);
                 }
             }
             return email;
@@ -288,7 +290,7 @@ namespace BankManagementDB.View
             Helper helper = new Helper();
             while (true)
             {
-                Console.WriteLine("Re-enter password: ");
+                Console.WriteLine(Resources.EnterRePassword);
                 string rePassword = helper.GetPassword();
 
                 if (rePassword == null)
@@ -296,9 +298,8 @@ namespace BankManagementDB.View
                 if (validation.ValidatePassword(password, rePassword) && rePassword != null)
                     return true;
                 else
-                    Notification.Error("Password not matching, Enter again");
+                    Notification.Error(Resources.PasswordMismatch);
             }
-
             return false;
         }
     }
