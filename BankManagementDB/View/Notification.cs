@@ -9,6 +9,7 @@ namespace BankManagementDB.View
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine(message);
+            Console.WriteLine();
             Console.ResetColor();
         }
 
@@ -16,6 +17,7 @@ namespace BankManagementDB.View
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine(message);
+            Console.WriteLine();
             Console.ResetColor();
         }
 
@@ -23,13 +25,15 @@ namespace BankManagementDB.View
         {
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine(message);
+            Console.WriteLine();
             Console.ResetColor();
         }
 
         public static void Info(string message)
         {
-            Console.ForegroundColor = ConsoleColor.Blue;
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
             Console.WriteLine(message);
+            Console.WriteLine();
             Console.ResetColor();
         }
     }

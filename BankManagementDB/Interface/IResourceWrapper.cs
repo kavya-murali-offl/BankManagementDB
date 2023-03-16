@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BankManagementDB.EnumerationType
+namespace BankManagementDB.Interface
 {
-    public enum AccountType
+    public interface IResourceWrapper
     {
-        CURRENT=0, SAVINGS=1
+        public string GetString(string key);
     }
 }

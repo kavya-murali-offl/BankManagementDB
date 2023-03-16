@@ -18,12 +18,12 @@ namespace BankManagementDB.DataManager
 
         public IDBHandler DBHandler { get; private set; }
 
-        public IEnumerable<Transaction> GetAllTransactions(Guid accountID)
+        public IEnumerable<Transaction> GetTransactionsByAccountNumber(string accountID)
         {
-            CacheData.TransactionList = DBHandler.GetTransaction(accountID).Result;
-            return CacheData.TransactionList;
+            Store.TransactionsList = DBHandler.GetTransactionByAccountNumber(accountID).Result;
+            return Store.TransactionsList;
         }
 
-        public IList<Transaction> GetTransactionsByCardNumber(string cardNumber) => DBHandler.GetTransaction(cardNumber).Result;
+        public IList<Transaction> GetTransactionsByCardNumber(string cardNumber) => DBHandler.GetTransactionByCardNumber(cardNumber).Result;
     }
 }

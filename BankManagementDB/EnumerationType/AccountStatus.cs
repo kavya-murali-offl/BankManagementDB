@@ -4,6 +4,6 @@ namespace BankManagementDB.EnumerationType
 {
     public enum AccountStatus
     {
-        ACTIVE, INACTIVE, BLOCKED, CLOSED, DORMANT
+        ACTIVE=0, INACTIVE=1, BLOCKED=2, CLOSED=3, DORMANT=4
     }
 }

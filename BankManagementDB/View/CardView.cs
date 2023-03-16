@@ -10,262 +10,215 @@ using System.Linq;
 using System.Collections.Generic;
 using BankManagementDB.Utility;
 using BankManagementDB.Data;
+using BankManagementDB.DataManager;
+using System.Data;
 
 namespace BankManagementDB.View
-{ 
+{
 
     public class CardView
     {
-        public CardView()
-        {
-            GetCardDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IGetCardDataManager>();
-            UpdateCardDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IUpdateCardDataManager>();
-            InsertCardDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IInsertCardDataManager>();
-            InsertCreditCardDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IInsertCreditCardDataManager>();
-            GetTransactionDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IGetTransactionDataManager>();
-            GetAccountDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IGetAccountDataManager>();
-        }
-
-       public IGetCardDataManager GetCardDataManager { get; private set; } 
-
-       public IUpdateCardDataManager UpdateCardDataManager { get; private set; } 
-
-       public IInsertCardDataManager InsertCardDataManager { get; private set; } 
-
-       public IInsertCreditCardDataManager InsertCreditCardDataManager { get; private set; } 
-
-       public IGetAccountDataManager GetAccountDataManager { get; private set; }  
-
-       public IGetTransactionDataManager GetTransactionDataManager { get; private set; }  
-
         public void ShowCards()
         {
             try
             {
-                GetCardDataManager.GetAllCards(CacheData.CurrentUser.ID);
-                GetAccountDataManager.GetAllAccounts(CacheData.CurrentUser.ID);
+                IGetAccountDataManager GetAccountDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IGetAccountDataManager>();
 
-                while (true)
-                {
-                    for (int i = 0; i < Enum.GetNames(typeof(CardCases)).Length; i++)
-                    {
-                        CardCases cases = (CardCases)i;
-                        Console.WriteLine($"{i + 1}. {cases.ToString().Replace("_", " ")}");
-                    }
-                    Console.Write(Resources.EnterChoice);
-                    string option = Console.ReadLine().Trim();
-                    int entryOption;
+                IGetCardDataManager GetCardDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IGetCardDataManager>();
+                GetCardDataManager.GetAllCards(Store.CurrentUser.ID);
+                GetAccountDataManager.GetAllAccounts(Store.CurrentUser.ID);
 
-                    if (!int.TryParse(option, out entryOption))
-                        Notification.Error(Resources.InvalidInteger);
-                    else
-                        if (entryOption != 0 && entryOption <= Enum.GetNames(typeof(CardCases)).Count())
-                        {
-                            CardCases cases = (CardCases)entryOption - 1;
-                            if (CardOperations(cases))
-                                break;
-                        }
-                        else if (entryOption == 0)
-                            break;
-                        else
-                            Notification.Error(Resources.InvalidOption);
-                    }
+                OptionsDelegate<CardCases> options = CardOperations;
+
+                HelperView helperView = new HelperView();
+                helperView.PerformOperation(options);
+
             }
-            catch(Exception err)
+            catch (Exception err)
             {
                 Notification.Error(err.ToString());
             }
         }
 
-        public bool CardOperations(CardCases operation)
-        {
-            switch (operation)
+        public bool CardOperations(CardCases command) =>
+            command switch
             {
-                case CardCases.VIEW_CARDS:
-                    ViewCards();
-                    return false;
+                CardCases.VIEW_CARDS => ViewCards(),
+                CardCases.ADD_CARD => AddCard(),
+                CardCases.RESET_PIN => ResetPin(),
+                CardCases.VIEW_TRANSACTIONS => ViewAllTransactions(),
+                CardCases.CREDIT_CARD_SERVICES => GoToCreditCardServices(),
+                CardCases.EXIT => true,
+                _ => Default()
+            };
 
-                case CardCases.ADD_CARD:
-                    AddCard();
-                    return false;
 
-                case CardCases.RESET_PIN:
-                    ResetPin();
-                    return false;
-
-                case CardCases.VIEW_TRANSACTIONS:
-                    ViewAllTransactions();
-                    return false;
-
-                case CardCases.CREDIT_CARD_SERVICES:
-                    CreditCardView creditCardView = new CreditCardView(GetCardDataManager);
-                    creditCardView.CreditCardServices();
-                    return false;
-
-                case CardCases.EXIT:
-                    return true;
-
-                default:
-                    Notification.Error(Resources.InvalidOption);
-                    return false;
-            }
+        private bool Default()
+        {
+            Notification.Error(DependencyContainer.GetResource("InvalidOption"));
+            return false;
         }
 
-        public void ViewAllTransactions()
+        private bool GoToCreditCardServices()
         {
-                string cardNumber = GetCardNumber();
-                if (cardNumber != null)
+            CreditCardView creditCardView = new CreditCardView();
+            creditCardView.CreditCardServices();
+            return false;
+        }
+
+        private bool ViewAllTransactions()
+        {
+            string cardNumber = GetCardNumber();
+            if (cardNumber != null)
+            {
+                string pin = GetPin();
+                if (pin != null)
                 {
-                    string pin = GetPin();
-                    if (pin != null)
-                    {
-                        IList<Transaction> transactions = GetTransactionDataManager.GetTransactionsByCardNumber(cardNumber);
-                        foreach (Transaction transaction in transactions) 
-                             Console.WriteLine(transaction);
-                    }
+                    IGetTransactionDataManager GetTransactionDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IGetTransactionDataManager>();
+
+                    IList<Transaction> transactions = GetTransactionDataManager.GetTransactionsByCardNumber(cardNumber);
+                    foreach (Transaction transaction in transactions)
+                        Console.WriteLine(transaction);
                 }
+            }
+            return false;
         }
 
-        public void AddCard()
+        private bool AddCard()
         {
-            try
+            Notification.Info(DependencyContainer.GetResource("PressBackButtonInfo"));
+
+            OptionsDelegate <CardType> optionsDelegate = CreateCardBasedOnType;
+
+            HelperView helperView = new HelperView();
+            helperView.PerformOperation(optionsDelegate);
+
+            return false;
+        }
+
+        private bool CreateCardBasedOnType(CardType cardType)
+        {
+            Card card = null;
+
+            if (cardType == CardType.DEBIT)
             {
-                while (true)
+                Console.Write(DependencyContainer.GetResource("EnterAccountNumber"));
+                string accountNumber = Console.ReadLine()?.Trim();
+                if (accountNumber != DependencyContainer.GetResource("BackButton"))
                 {
-                    Console.WriteLine(Resources.CardTypes);
-                    string option = Console.ReadLine().Trim();
-                    if (option == Resources.BackButton)
-                        break;
-                    else if (option == "1")
-                    {
-                        CreateAndInsertCard(CardType.CREDIT);
-                        break;
-                    }
-                    else if (option == "2")
-                    {
-                        CreateAndInsertCard(CardType.DEBIT);
-                        break;
-                    }
+                    Account account = Store.GetAccountByAccountNumber(accountNumber);
+                    if (account == null)
+                        Notification.Error(DependencyContainer.GetResource("InvalidAccountNumber"));
                     else
-                        Notification.Error(Resources.InvalidInput);
-                }
-            }catch(Exception ex)
-            {
-                Notification.Error(ex.ToString());
-            }
-        }
-
-        public void CreateAndInsertCard(CardType cardType)
-        {
-            try
-            {
-                Card card = null;
-
-                if (cardType == CardType.DEBIT)
-                {
-                    Console.Write(Resources.EnterAccountNumber);
-                    string accountNumber = Console.ReadLine().Trim();
-                    if (accountNumber != Resources.BackButton)
                     {
-                        Account account = GetAccountDataManager.GetAccount(accountNumber);
-                        if (account == null)
-                            Notification.Error(Resources.InvalidAccountNumber);
+                        if (Store.IsDebitCardLinked(account.ID))
+                            Notification.Error(DependencyContainer.GetResource("DebitCardLinkedError"));
                         else
-                        {
-                            if (GetCardDataManager.IsDebitCardLinked(account.ID))
-                                Notification.Error(Resources.DebitCardLinkedError);
-
-                            else
-                                card = CreateCard(CardType.DEBIT, account.ID, CacheData.CurrentUser.ID);
-                        }
+                            card = CreateCard(CardType.DEBIT, account.ID, Store.CurrentUser.ID);
                     }
                 }
-                else if (cardType == CardType.CREDIT)
-                    card = CreateCard(CardType.CREDIT, Guid.Empty, CacheData.CurrentUser.ID);
+            }
+            else if (cardType == CardType.CREDIT)
+                card = CreateCard(CardType.CREDIT, null, Store.CurrentUser.ID);
 
+            if(card != null)
                 InsertCard(card);
 
-            } catch (Exception ex)
-            {
-                Notification.Error(ex.ToString());
-            }
+            return false;
         }
 
         public void InsertCard(Card card)
         {
-            if (card != null)
+            IInsertCardDataManager InsertCardDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IInsertCardDataManager>();
+            if (InsertCardDataManager.InsertCard(card))
             {
-
-                if (InsertCardDataManager.InsertCard(card))
+                if (card.Type == CardType.CREDIT)
                 {
-                    if (card.Type == CardType.CREDIT)
-                    {
-                        CreditCard creditCard = new CreditCard();
-                        creditCard.ID = card.ID;
-                        InsertCreditCardDataManager.InsertCreditCard(creditCard);
-                    }
-                    Notification.Success(Resources.CardInsertSuccess);
-                    Console.WriteLine(card);
-                    Console.WriteLine(string.Format(Resources.PinDisplay), card.Pin);
-                    Console.WriteLine();
-                    GetCardDataManager.GetAllCards(CacheData.CurrentUser.ID);
+                    CreditCardView creditCardView = new CreditCardView();
+                    creditCardView.CreateCreditCard(card);
                 }
-                else
-                    Notification.Error(Resources.CardInsertFailure);
+                else if(card.Type == CardType.DEBIT)
+                {
+                    IInsertDebitCardDataManager insertDebitCardDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IInsertDebitCardDataManager>();
+                    insertDebitCardDataManager.InsertDebitCard(
+                        new DebitCardDTO()
+                        {
+                            ID = card.ID,
+                        });
+                }
+
+                Notification.Success(DependencyContainer.GetResource("CardInsertSuccess"));
+                Console.WriteLine(card);
+                Console.WriteLine(string.Format(DependencyContainer.GetResource("PinDisplay"), card.Pin));
+                Console.WriteLine();
+                IGetCardDataManager GetCardDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IGetCardDataManager>();
+
+                GetCardDataManager.GetAllCards(Store.CurrentUser.ID);
             }
+            else
+                Notification.Error(DependencyContainer.GetResource("CardInsertFailure"));
         }
 
-        public Card CreateCard(CardType cardType, Guid accountID, Guid customerID)
+        public Card CreateCard(CardType cardType, string accountID, string customerID)
         {
-            Card card = new Card();
-            card.Type = cardType;
-            card.AccountID = accountID;
-            card.CustomerID = customerID;
-            card.CardNumber = RandomGenerator.GenerateCardNumber();
-            card.CVV = RandomGenerator.GenerateCVV();
-            card.Pin = RandomGenerator.GeneratePin();
+            Card card = new Card
+            {
+                ID = Guid.NewGuid().ToString(),
+                ExpiryMonth = DateTime.Now.Month.ToString(),
+                ExpiryYear = (DateTime.Now.Year + 7).ToString(),
+                CreatedOn = DateTime.Now,
+                Type = cardType,
+                AccountID = accountID,
+                CustomerID = customerID,
+                CardNumber = RandomGenerator.GenerateCardNumber(),
+                CVV = RandomGenerator.GenerateCVV(),
+                Pin = RandomGenerator.GeneratePin()
+            };
             return card;
         }
 
-        private void ResetPin()
+        private bool ResetPin()
         {
-            while(true)
+            while (true)
             {
-              
                 string cardNumber = GetCardNumber();
                 if (cardNumber != null)
                 {
                     string pin = GetPin();
                     if (pin != null)
                     {
-                        CardBObj cardBObj = GetCardDataManager.GetCard(cardNumber);
-                        if (cardBObj != null)
+                        Card card = Store.GetCard(cardNumber);
+                        if (card != null)
                         {
-                            cardBObj.Pin = pin;
-                            Card card = Mapper.Map<CardBObj, Card>(cardBObj);
+                            card.Pin = pin;
+                            IUpdateCardDataManager UpdateCardDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IUpdateCardDataManager>();
+
                             if (UpdateCardDataManager.UpdateCard(card))
-                                Notification.Success(Resources.ResetPinSuccess);
+                                Notification.Success(DependencyContainer.GetResource("ResetPinSuccess"));
                             else
-                                Notification.Error(Resources.ResetPinFailure);
+                                Notification.Error(DependencyContainer.GetResource("ResetPinFailure"));
                         }
-                        
-                        break;
+                        else break;
                     }
+                    else break;
                 }
+                else break;
             }
+            return false;
         }
 
-        public string GetCardNumber() {
+        public string GetCardNumber()
+        {
             while (true)
             {
-                Console.Write(Resources.EnterCardNumber);
-                string cardNumber = Console.ReadLine().Trim();
-                if (cardNumber == Resources.BackButton)
+                Console.Write(DependencyContainer.GetResource("EnterCardNumber"));
+                string cardNumber = Console.ReadLine()?.Trim();
+                if (cardNumber == DependencyContainer.GetResource("BackButton"))
                     return null;
                 else
                 {
-                    if(GetCardDataManager.IsCardNumber(cardNumber)) return cardNumber;
-                    else Notification.Error(Resources.CardNumberNotExist);
+                    if (Store.IsCardNumber(cardNumber)) return cardNumber;
+                    else Notification.Error(DependencyContainer.GetResource("CardNumberNotExist"));
                 }
             }
         }
@@ -275,58 +228,56 @@ namespace BankManagementDB.View
             Validation validation = new Validation();
             while (true)
             {
-                Console.Write(Resources.EnterNewPin);
-                string pin = Console.ReadLine().Trim();
-                if (pin == Resources.BackButton)
+                Console.Write(DependencyContainer.GetResource("EnterNewPin"));
+                string pin = Console.ReadLine()?.Trim();
+                if (pin == DependencyContainer.GetResource("BackButton"))
                     return null;
                 else if (validation.IsValidPin(pin))
                     return pin;
                 else
-                    Notification.Error(Resources.InvalidPin);
+                    Notification.Error(DependencyContainer.GetResource("InvalidPin"));
             }
         }
 
-        private void ViewCards()
+        private bool ViewCards()
         {
-            IList<CardBObj> cards = GetCardDataManager.GetCardsList();
-            if (cards.Count() == 0) Notification.Info(Resources.NoCardsLinked);
-            foreach(CardBObj card in cards) {
+            IEnumerable<Card> cards = Store.GetCardsList();
+            if (cards.Count() == 0) Notification.Info(DependencyContainer.GetResource("NoCardsLinked"));
+            foreach (Card card in cards)
                 Console.WriteLine(card);
-            }
+            return false;
         }
 
-        public bool ValidateModeOfPayment(Guid accountID, ModeOfPayment modeOfPayment)
+        public bool ValidateModeOfPayment(string accountID, ModeOfPayment modeOfPayment)
         {
 
             if (modeOfPayment == ModeOfPayment.CREDIT_CARD)
-                return GetCardDataManager.IsCreditCardEnabled();
+                return Store.IsCreditCardEnabled();
             else if (modeOfPayment == ModeOfPayment.DEBIT_CARD)
-                return GetCardDataManager.IsDebitCardEnabled(accountID);
+                return Store.IsDebitCardEnabled(accountID);
             else return true;
+        
         }
 
         public bool Authenticate(string cardNumber)
         {
-            string pin;
-
-            if (GetCardDataManager.IsCardNumber(cardNumber))
+            if (Store.IsCardNumber(cardNumber))
             {
-                Validation validation= new Validation();    
-                Console.Write(Resources.EnterPin);
-                pin = Console.ReadLine().Trim();
-                if (!validation.IsValidPin(pin))
-                    Notification.Error(Resources.InvalidPin);
-                else
+                Validation validation = new Validation();
+                Console.Write(DependencyContainer.GetResource("EnterPin"));
+                string pin = Console.ReadLine()?.Trim();
+                if (validation.IsValidPin(pin))
                     return VerifyPin(cardNumber, pin);
             }
             else
-                Notification.Error(Resources.CardNumberNotExist);
+                Notification.Error(DependencyContainer.GetResource("CardNumberNotExist"));
+
             return false;
         }
 
         private bool VerifyPin(string cardNumber, string pin)
         {
-            CardBObj card = GetCardDataManager.GetCard(cardNumber);
+            Card card = Store.GetCard(cardNumber);
             if (card != null)
                 return card.Pin == pin;
             return false;

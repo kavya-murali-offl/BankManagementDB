@@ -8,9 +8,12 @@ using System.Threading.Tasks;
 
 namespace BankManagementDB.Model
 {
-    public class CreditCard : Card
+    [Table("CreditCard")]
+    public class CreditCardDTO
     {
-     
+        [PrimaryKey]
+        public string ID { get; set; }
+
         public CreditCardType CreditCardType { get; set; }
 
         public int CreditPoints { get; set; }
@@ -20,8 +23,5 @@ namespace BankManagementDB.Model
         public decimal APR { get; set; }
 
         public decimal CreditLimit { get; set; }
-
-
     }
-
 }

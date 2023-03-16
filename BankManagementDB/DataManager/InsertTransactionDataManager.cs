@@ -23,8 +23,8 @@ namespace BankManagementDB.DataManager
             bool success = DBHandler.InsertTransaction(transaction).Result;
             if (success)
             {
-                CacheData.TransactionList ??= new List<Transaction>();
-                CacheData.TransactionList.Insert(0, transaction);
+                Store.TransactionsList ??= new List<Transaction>();
+                Store.TransactionsList.Prepend(transaction);
             }
             return success;
         }

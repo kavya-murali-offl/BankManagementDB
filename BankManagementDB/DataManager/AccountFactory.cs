@@ -13,12 +13,16 @@ namespace BankManagementDB.Controller
             {
                 case AccountType.CURRENT:
                     {
-                        CurrentAccount currentAccount = new CurrentAccount();
+                        CurrentAccount currentAccount  = new CurrentAccount();
+                        currentAccount.InterestRate = Constants.AccountConstants.CURRENT_INTEREST_RATE;
+
                         return currentAccount;
                     }
                 case AccountType.SAVINGS:
                     {
                         SavingsAccount savingsAccount = new SavingsAccount();
+                        savingsAccount.InterestRate = Constants.AccountConstants.SAVINGS_INTEREST_RATE;
+
                         return savingsAccount;
                     }
                 default:

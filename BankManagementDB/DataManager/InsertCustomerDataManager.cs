@@ -13,11 +13,6 @@ namespace BankManagementDB.DataManager
 
         public IDBHandler DBHandler { get; set; }
 
-        public bool InsertCustomer(Customer customer, string password)
-        {
-           
-
-                return DBHandler.InsertCustomer(customer).Result;
-        }
+        public bool InsertCustomer(Customer customer, string password) => DBHandler.InsertCustomer(customer).Result;
     }
 }

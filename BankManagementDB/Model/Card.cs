@@ -7,16 +7,8 @@ namespace BankManagementDB.Model
     [Table("Card")]
     public class Card
     {
-        public Card()
-        {
-            ID = Guid.NewGuid();
-            ExpiryMonth = DateTime.Now.Month.ToString();
-            ExpiryYear = (DateTime.Now.Year + 7).ToString();
-            CreatedOn = DateTime.Now;
-        }
-
         [PrimaryKey]
-        public virtual Guid ID { get; set; }
+        public string ID { get; set; }
 
         public DateTime CreatedOn { get; set; }
 
@@ -24,9 +16,9 @@ namespace BankManagementDB.Model
 
         public string CardNumber { get; set; }
 
-        public Guid AccountID { get; set; }
+        public string AccountID { get; set; }
 
-        public virtual Guid CustomerID { get; set; }
+        public string CustomerID { get; set; }
 
         public string CVV { get; set; }
 
@@ -37,9 +29,6 @@ namespace BankManagementDB.Model
         public CardType Type { get; set; }
 
         public override string ToString() =>
-         $"\nCard Type: {Type.ToString()}\nCard Number: {CardNumber}\nExpiry Month: {ExpiryMonth}\nExpiry Year: {ExpiryYear}\n=====================================================\n";
-
-       
-
+         $"\nCard Type: {Type.ToString()}\nCard Number: {CardNumber}\nExpiry Month: {ExpiryMonth}\nExpiry Year: {ExpiryYear}\n";
     }
 }

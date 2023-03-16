@@ -11,7 +11,7 @@ namespace BankManagementDB.Interface
     {
         IList<Transaction> GetTransactionsByCardNumber(string cardNumber);
 
-        IEnumerable<Transaction> GetAllTransactions(Guid accountID);
+        IEnumerable<Transaction> GetTransactionsByAccountNumber(string accountID);
 
     }
 }

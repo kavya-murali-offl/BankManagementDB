@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Resources;
+using BankManagementDB.Config;
 using BankManagementDB.EnumerationType;
 
 namespace BankManagementDB.View
@@ -11,66 +11,53 @@ namespace BankManagementDB.View
         {
             try
             {
-                while (true)
-                {
-                    Console.WriteLine();
-                    for (int i = 0; i < Enum.GetNames(typeof(EntryCases)).Length; i++)
-                    {
-                        EntryCases cases = (EntryCases)i;
-                        Console.WriteLine($"{i + 1}. {cases.ToString().Replace("_", " ")}");
-                    }
+                OptionsDelegate<EntryCases> options = EntryOperations;
 
-                    Console.Write(Properties.Resources.EnterChoice);
+                HelperView helperView = new HelperView();
+                helperView.PerformOperation(options);
 
-                    string option = Console.ReadLine().Trim();
-
-                    if (int.TryParse(option, out int entryOption))
-                    {
-                        if (entryOption != 0 && entryOption <= Enum.GetValues(typeof(EntryCases)).Length)
-                        {
-                            EntryCases entry = (EntryCases)entryOption - 1;
-                            if (EntryOperations(entry))
-                                break;
-                        }
-                    }
-                    else
-                        Notification.Error(Properties.Resources.InvalidInput);
-                }
-            }
-            catch (Exception err)
+            }catch(Exception ex)
             {
-                Notification.Error(err.ToString());
+                Notification.Error(ex.ToString());
             }
+            
         }
-        
-        public bool EntryOperations(EntryCases option)
+
+        public bool EntryOperations(EntryCases command) =>
+        command switch
         {
-            switch (option)
-            {
-                case EntryCases.LOGIN:
+            EntryCases.LOGIN => Login(),
+            EntryCases.SIGNUP => Signup(),
+            EntryCases.EXIT => Exit(),
+            _ => Default()
+        };
 
-                    LoginView loginView = new LoginView();
-                    loginView.UserChanged += onUserChanged;
-                    loginView.Login();
-                    loginView.UserChanged -= onUserChanged;
-                    return false;
+        public bool Login()
+        {
+            LoginView loginView = new LoginView();
+            loginView.UserChanged += onUserChanged;
+            loginView.Login();
+            loginView.UserChanged -= onUserChanged;
+            return false;
+        }
 
-                case EntryCases.SIGNUP:
-                    
-                    SignupView signupView = new SignupView();
-                    signupView.Signup();
-                    return false;
+        public bool Signup()
+        {
+            SignupView signupView = new SignupView();
+            signupView.Signup();
+            return false;
+        }
 
-                case EntryCases.EXIT:
+        public bool Exit()
+        {
+            Environment.Exit(0);
+            return true;
+        }
 
-                    Environment.Exit(0);    
-                    return true;
-
-                default:
-
-                    Notification.Error(Properties.Resources.InvalidInput);
-                    return false;
-            }
+        public bool Default()
+        {
+            Notification.Error(DependencyContainer.GetResource("InvalidInput"));
+            return false;
         }
 
         public void onUserChanged(string message)

@@ -18,13 +18,12 @@ namespace BankManagementDB.DataManager
         }
         public IDBHandler DBHandler { get; private set; }
 
-        public IList<Account> GetAllAccounts(Guid customerId)
+        public IList<Account> GetAllAccounts(string customerId)
         {
             IList<Account> accounts = DBHandler.GetAccounts(customerId).Result;
-            CacheData.AccountsList = accounts;
+            Store.AccountsList = accounts;
             return accounts;
         }
 
-        public Account GetAccount(string accountNumber) => GetAllAccounts(CacheData.CurrentUser.ID).Where(acc => acc.AccountNumber == accountNumber).FirstOrDefault();
     }
 }

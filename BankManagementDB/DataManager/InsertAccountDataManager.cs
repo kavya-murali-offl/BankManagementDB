@@ -1,6 +1,6 @@
 ﻿using BankManagementDB.Controller;
 using BankManagementDB.Data;
-using BankManagementDB.DBHandler;
+using BankManagementDB.DatabaseHandler;
 using BankManagementDB.Interface;
 using BankManagementDB.Models;
 using System;
@@ -25,8 +25,8 @@ namespace BankManagementDB.DataManager
             bool isSuccess = DBHandler.InsertAccount(account).Result;
             if (isSuccess)
             {
-                CacheData.AccountsList ??= new List<Account>();
-                CacheData.AccountsList.Insert(0, account);
+                Store.AccountsList ??= new List<Account>();
+                Store.AccountsList.Prepend(account);
             }
             return isSuccess;
         }

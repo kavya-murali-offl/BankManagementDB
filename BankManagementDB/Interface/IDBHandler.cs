@@ -8,9 +8,10 @@ namespace BankManagementDB.Interface
 {
     public interface IDBHandler
     {
-        // Customer
-        Task<List<Customer>> GetCustomer(Guid id);
 
+        Task<bool> RunInTransaction(IList<Action> actions);
+
+        // Customer
         Task<bool> InsertCustomer(Customer customer);
 
         Task<bool> UpdateCustomer(Customer customer);
@@ -20,7 +21,7 @@ namespace BankManagementDB.Interface
         
         // Customer Credentials
 
-        Task<List<CustomerCredentials>> GetCredentials(Guid customerID);
+        Task<List<CustomerCredentials>> GetCredentials(string customerID);
 
         Task<bool> InsertCredentials(CustomerCredentials customerCredentials);
 
@@ -28,34 +29,41 @@ namespace BankManagementDB.Interface
 
 
         // Account
-        Task<List<Account>> GetAccounts(Guid userID);
+        Task<List<Account>> GetAccounts(string userID);
 
         Task<bool> InsertAccount(Account account);
 
         Task<bool> UpdateAccount(Account account);
 
 
+        // Debit Card
+        Task<IEnumerable<DebitCard>> GetDebitCardByCustomerID(string customerID);
+
+        Task<bool> InsertDebitCard(DebitCardDTO card);
+
+        Task<bool> UpdateDebitCard(DebitCardDTO card);
+
+
+
+        // Credit Card
+        Task<IEnumerable<CreditCard>> GetCreditCardByCustomerID(string customerID);
+
+
+        Task<bool> InsertCreditCard(CreditCardDTO creditCard);
+
+        Task<bool> UpdateCreditCard(CreditCardDTO creditCard);
+
         // Card
-        Task<IEnumerable<CardBObj>> GetCard(Guid customerID);
-
-        Task<List<CardBObj>> GetCard(string cardNumber);
-
         Task<bool> InsertCard(Card card);
 
         Task<bool> UpdateCard(Card card);
 
-        // Credit Card
-
-        Task<bool> InsertCreditCard(CreditCard creditCard);
-
-        Task<bool> UpdateCreditCard(CreditCard creditCard);
-
 
         // Transaction
 
-        Task<IList<Transaction>> GetTransaction(Guid accountID);
+        Task<IList<Transaction>> GetTransactionByAccountNumber(string accountNumber);
 
-        Task<IList<Transaction>> GetTransaction(string cardNumber);
+        Task<IList<Transaction>> GetTransactionByCardNumber(string cardNumber);
 
         Task<bool> InsertTransaction(Transaction transaction);
 

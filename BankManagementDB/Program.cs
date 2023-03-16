@@ -1,16 +1,20 @@
-﻿using BankManagementDB.View;
+﻿using BankManagementDB.DatabaseAdapter;
+using BankManagementDB.Model;
+using BankManagementDB.View;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Threading;
-
 namespace BankManagementDB
 {
     public class Program
     {
         static void Main(string[] args)
         {
-           
+
             Environment.SetEnvironmentVariable("DATABASE_PATH", Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "BankDB.db3"));
             Environment.SetEnvironmentVariable("DATABASE_PASSWORD", "pass");
             Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo("en-US");
@@ -19,7 +23,6 @@ namespace BankManagementDB
             entryView.Entry();
 
             Console.ReadKey();
-
         }
     }
 }

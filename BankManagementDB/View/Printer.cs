@@ -14,7 +14,7 @@ namespace BankManagementDB.Utility
             {
                 StreamWriter sw = new StreamWriter("C:\\Users\\kavya-pt6688\\source\\repos\\BankManagementDB\\Statement.txt");
 
-                sw.WriteLine("AccountID: " + transactions.ElementAt(0).AccountID);
+                sw.WriteLine("Account: " + transactions.ElementAt(0).FromAccountNumber);
                 sw.WriteLine("No. of Transactions: " + transactions.Count());
                 sw.WriteLine("S.No.\t\tTransaction ID\t\t\t\t\tTransaction Time\t\t\t\t\tTransaction Type\t\t\tAmount\t\t\t\tBalance");
 

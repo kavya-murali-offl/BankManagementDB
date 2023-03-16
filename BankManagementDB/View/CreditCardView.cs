@@ -11,7 +11,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using BankManagementDB.Data;
+using BankManagementDB.DataManager;
+using System.Data.Entity.Core.Mapping;
 
 namespace BankManagementDB.View
 {
@@ -19,45 +21,23 @@ namespace BankManagementDB.View
     {
         public event Action<string> CardDueAmountChanged;
 
-        public CreditCardView(IGetCardDataManager getCardDataManager) {
+        public CreditCardView() {
             UpdateCreditCardDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IUpdateCreditCardDataManager>();
-            GetCardDataManager = getCardDataManager;
+            GetCardDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IGetCardDataManager>();
         }
         public IGetCardDataManager GetCardDataManager { get; private set; }
 
         public IUpdateCreditCardDataManager UpdateCreditCardDataManager { get; private set; }
 
-
         public void CreditCardServices()
         {
             try
             {
-                while (true)
-                {
-                    for (int i = 0; i < Enum.GetNames(typeof(CreditCardCases)).Length; i++)
-                    {
-                        CreditCardCases cases = (CreditCardCases)i;
-                        Console.WriteLine($"{i + 1}. {cases.ToString().Replace("_", " ")}");
-                    }
+                OptionsDelegate<CreditCardCases> options = CreditCardOperations;
 
-                    Console.Write(Resources.EnterChoice);
+                HelperView helperView = new HelperView();
+                helperView.PerformOperation(options);
 
-                    string option = Console.ReadLine().Trim();
-
-                    if (!int.TryParse(option, out int entryOption))
-                        Notification.Error(Resources.InvalidInteger);
-                    else
-                        if (entryOption == 0)
-                            break;
-                        else if (entryOption != 0 && entryOption <= Enum.GetNames(typeof(CreditCardCases)).Count())
-                        {
-                            CreditCardCases cases = (CreditCardCases)entryOption - 1;
-                            if (CreditCardOperations(cases))
-                                break;
-                        }
-                        else
-                            Notification.Error(Resources.InvalidOption);
-                }
             }
             catch (Exception err)
             {
@@ -65,26 +45,34 @@ namespace BankManagementDB.View
             }
         }
 
-        public bool CreditCardOperations(CreditCardCases operation)
-        {
-
-            switch (operation)
+        public bool CreditCardOperations(CreditCardCases command) =>
+            command switch
             {
-                case CreditCardCases.PURCHASE:
-                    MakePurchase();
-                    return false;
+                CreditCardCases.PURCHASE => MakePurchase(),
+                CreditCardCases.PAYMENT => MakePayment(),
+                CreditCardCases.EXIT => true,
+                _ => Default()
 
-                case CreditCardCases.PAYMENT:
-                    MakePayment();
-                    return false;
+            };
+        private bool Default()
+        {
+            Notification.Error(DependencyContainer.GetResource("InvalidOption"));
+            return false;
+        }
 
-                case CreditCardCases.EXIT:
-                    return true;
+        public bool CreateCreditCard(Card card)
+        {
+            CreditCardDTO creditCard = new CreditCardDTO()
+            {
+                CreditLimit = 10000,
+                APR = 0.060m,
+                CreditPoints = 100,
+                TotalDueAmount = 0,
+                ID = card.ID
+            };
 
-                default:
-                    Notification.Error(Resources.InvalidOption);
-                    return false;
-            }
+            IInsertCreditCardDataManager insertCreditCardDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IInsertCreditCardDataManager>();
+            return insertCreditCardDataManager.InsertCreditCard(creditCard);
         }
 
         public bool AuthenticateCreditCard(CreditCardCases cases, string cardNumber)
@@ -92,48 +80,55 @@ namespace BankManagementDB.View
             CardView cardView = new CardView();
             if (cardNumber != null)
             {
-                if (GetCardDataManager.IsCreditCard(cardNumber))
+                if (Store.IsCreditCard(cardNumber))
                     if (cardView.Authenticate(cardNumber))
                         return true;
                     else
-                        Notification.Error(Resources.InvalidPin);
+                        Notification.Error(DependencyContainer.GetResource("InvalidPin"));
                 else
-                    Notification.Error(Resources.InvalidCreditCardNumber);
+                    Notification.Error(DependencyContainer.GetResource("InvalidCreditCardNumber"));
             }
             return false;
         }
 
-        public void MakePurchase()
+        private bool MakePurchase()
         {
             CardView cardView = new CardView();
             string cardNumber = cardView.GetCardNumber();
             bool isAuthenticated =  AuthenticateCreditCard(CreditCardCases.PURCHASE, cardNumber);
             if(isAuthenticated)
             {
-                CardBObj card = GetCardDataManager.GetCard(cardNumber);
-                if (card != null)
-                    if (card.Type == CardType.CREDIT)
+                CreditCard creditCard = Store.GetCard(cardNumber) as CreditCard;
+                if (creditCard != null)
+                {
+                    HelperView helperView = new HelperView();
+                    decimal amount = helperView.GetAmount();
+                    if (amount > 0)
                     {
-                        TransactionView transactionView = new TransactionView();
-                        decimal amount = transactionView.GetAmount();
-                        if (amount > 0)
+                        if ((amount + creditCard.TotalDueAmount) < creditCard.CreditLimit)
                         {
-                            if ((amount + card.TotalDueAmount) < card.CreditLimit)
-                                if (UpdateDueAmount(CreditCardCases.PURCHASE, card, amount))
-                                {
-                                    Notification.Success(Resources.PurchaseSuccess);
-                                    bool isTransacted = transactionView.RecordTransaction("Purchase", amount, card.TotalDueAmount, TransactionType.PURCHASE, Guid.Empty, ModeOfPayment.CREDIT_CARD, card.CardNumber);
-                                }
-                                else
-                                    Notification.Error(Resources.PurchaseFailure);
+                            Console.Write(DependencyContainer.GetResource("EnterAccountNumber"));
+                            string recipient = Console.ReadLine();
+                            if (UpdateDueAmount(CreditCardCases.PURCHASE, creditCard, amount))
+                            {
+                                Notification.Success(DependencyContainer.GetResource("PurchaseSuccess"));
+                                TransactionView transactionView = new TransactionView();
+                                creditCard.TotalDueAmount += amount;
+                                bool isTransacted = transactionView.RecordTransaction("Purchase", amount, creditCard.TotalDueAmount, TransactionType.PURCHASE, null, ModeOfPayment.CREDIT_CARD, creditCard.CardNumber, recipient);
+                            }
                             else
-                                Notification.Error(Resources.CreditLimitReached);
+                                Notification.Error(DependencyContainer.GetResource("PurchaseFailure"));
                         }
+                        else
+                            Notification.Error(DependencyContainer.GetResource("CreditLimitReached"));
                     }
+                }
             }
+            return false;
+
         }
 
-        public void MakePayment()
+        private bool MakePayment()
         {
             CardView cardView = new CardView();
             string cardNumber = cardView.GetCardNumber();
@@ -141,55 +136,55 @@ namespace BankManagementDB.View
             bool isAuthenticated = AuthenticateCreditCard(CreditCardCases.PAYMENT, cardNumber);
             if(isAuthenticated)
             {
-                CardBObj card = GetCardDataManager.GetCard(cardNumber);
-                if (card != null)
+                CreditCard creditCard = Store.GetCard(cardNumber) as CreditCard;
+                if (creditCard != null)
                 {
                     AccountView accountView = new AccountView();
                     Account account = accountView.GetAccount();
                      
                     if (account != null)
                     {
+                        HelperView helperView = new HelperView();
                         TransactionView transactionView = new TransactionView();
-                        decimal amount = transactionView.GetAmount();
-
+                        decimal amount = helperView.GetAmount();
+                        AccountView.SelectedAccount = account;
                         if (amount > 0)
-                                if(transactionView.Withdraw(account, amount, ModeOfPayment.DEBIT_CARD, card.CardNumber))
-                                    if (UpdateDueAmount(CreditCardCases.PAYMENT, card, amount))
-                                    {
-                                        Notification.Success(Resources.PaymentSuccess);
-                                        bool isTransacted = transactionView.RecordTransaction("Payment", amount, card.TotalDueAmount, TransactionType.PAYMENT, Guid.Empty, ModeOfPayment.CREDIT_CARD, card.CardNumber);
-                                    }
-                                    else
-                                        Notification.Error(Resources.PaymentFailure);
+                            if(accountView.Withdraw(amount, ModeOfPayment.DEBIT_CARD, creditCard.CardNumber))
+                                if (UpdateDueAmount(CreditCardCases.PAYMENT, creditCard, amount))
+                                {
+                                    Notification.Success(DependencyContainer.GetResource("PaymentSuccess"));
+                                    creditCard.TotalDueAmount -= amount;
+                                    bool isTransacted = transactionView.RecordTransaction("Payment", amount, creditCard.TotalDueAmount, TransactionType.PAYMENT, account.AccountNumber, ModeOfPayment.CREDIT_CARD, creditCard.CardNumber, null);
+                                }
+                                else
+                                    Notification.Error(DependencyContainer.GetResource("PaymentFailure"));
                     }
                 }
             }
+            return false;
+
         }
 
-        public bool UpdateDueAmount(CreditCardCases cases, CardBObj card, decimal amount)
+        public bool UpdateDueAmount(CreditCardCases cases, CreditCard creditCard, decimal amount)
         {
-            CreditCard creditCard;
-
+            CreditCardDTO creditCardDTO = Mapper.Map<CreditCard, CreditCardDTO>(creditCard);
             switch (cases)
             {
                 case CreditCardCases.PURCHASE:
 
-                    card.TotalDueAmount += amount;
+                    creditCardDTO.TotalDueAmount += amount;
                     CardDueAmountChanged?.Invoke($"Purchase of Rs.{amount} is successful");
-                    creditCard = Mapper.Map<CardBObj, CreditCard>(card);
-                    UpdateCreditCardDataManager.UpdateCreditCard(creditCard);
+                    UpdateCreditCardDataManager.UpdateCreditCard(creditCardDTO);
                     return true;
 
                 case CreditCardCases.PAYMENT:
 
-                    card.TotalDueAmount -= amount;
+                    creditCardDTO.TotalDueAmount -= amount;
                     CardDueAmountChanged?.Invoke($"Payment of Rs.{amount} is sucessful");
-                    creditCard = Mapper.Map<CardBObj, CreditCard>(card);
-                    UpdateCreditCardDataManager.UpdateCreditCard(creditCard);
+                    UpdateCreditCardDataManager.UpdateCreditCard(creditCardDTO);
                     return true;
 
                 default:
-
                     return false;
             }
         }

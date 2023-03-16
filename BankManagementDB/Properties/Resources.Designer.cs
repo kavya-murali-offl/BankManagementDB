@@ -160,6 +160,15 @@ namespace BankManagementDB.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Choose account from the above list.
+        /// </summary>
+        public static string ChooseAccount {
+            get {
+                return ResourceManager.GetString("ChooseAccount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Choose Account Type: .
         /// </summary>
         public static string ChooseAccountType {
@@ -237,6 +246,15 @@ namespace BankManagementDB.Properties {
         public static string DepositSuccess {
             get {
                 return ResourceManager.GetString("DepositSuccess", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to \nAccount Number: {0}\nType: {1}\nMinimum Balance: {2}\nInterest Rate: {3}\nStatus: {4}\n======================================\n.
+        /// </summary>
+        public static string DisplayAccount {
+            get {
+                return ResourceManager.GetString("DisplayAccount", resourceCulture);
             }
         }
         
@@ -529,11 +547,38 @@ namespace BankManagementDB.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No function passed in delegate.
+        /// </summary>
+        public static string NullDelegateException {
+            get {
+                return ResourceManager.GetString("NullDelegateException", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to \b \b.
+        /// </summary>
+        public static string PasswordBackspace {
+            get {
+                return ResourceManager.GetString("PasswordBackspace", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Incorrect Password.
         /// </summary>
         public static string PasswordIncorrect {
             get {
                 return ResourceManager.GetString("PasswordIncorrect", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to *.
+        /// </summary>
+        public static string PasswordMask {
+            get {
+                return ResourceManager.GetString("PasswordMask", resourceCulture);
             }
         }
         
@@ -612,9 +657,9 @@ namespace BankManagementDB.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Press &apos;0&apos; to go back.
         /// </summary>
-        public static string PresssBackButton {
+        public static string PressBackButtonInfo {
             get {
-                return ResourceManager.GetString("PresssBackButton", resourceCulture);
+                return ResourceManager.GetString("PressBackButtonInfo", resourceCulture);
             }
         }
         
@@ -687,6 +732,15 @@ namespace BankManagementDB.Properties {
         public static string SignupSuccess {
             get {
                 return ResourceManager.GetString("SignupSuccess", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to .
+        /// </summary>
+        public static string String1 {
+            get {
+                return ResourceManager.GetString("String1", resourceCulture);
             }
         }
         

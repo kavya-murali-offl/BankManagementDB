@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 
 namespace BankManagementDB.Interface
 {
-    public interface IGetCustomerCredentialsDataManager
+    public interface IInsertDebitCardDataManager
     {
-        CustomerCredentials GetCustomerCredentials(string id);
+        bool InsertDebitCard(DebitCardDTO card);
     }
 }

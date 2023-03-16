@@ -1,5 +1,4 @@
-﻿using BankManagementDB.Model;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace BankManagementDB.Interface
 {
-    public interface IUpdateCreditCardDataManager
+    public interface ITransferAmountDataManager
     {
-        bool UpdateCreditCard(CreditCardDTO card);
+        public bool PerformTransaction(IList<Action> actions);
     }
 }

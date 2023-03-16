@@ -1,20 +1,15 @@
 ﻿using BankManagementDB.EnumerationType;
 using BankManagementDB.Utility;
 using BankManagementDB.View;
+using SQLite;
 using System;
 
 namespace BankManagementDB.Models
 {
     public class Account
     {
-        public Account() {
-            ID = Guid.NewGuid();
-            AccountNumber = RandomGenerator.GenerateAccountNumber();
-            Balance = 0;
-            Status = AccountStatus.ACTIVE;
-        }
-        
-        public Guid ID { get; set; }
+        [PrimaryKey]
+        public string ID { get; set; }
 
         public string AccountNumber { get; set; }
 
@@ -26,7 +21,7 @@ namespace BankManagementDB.Models
         
         public AccountType Type { get; set; }
         
-        public Guid UserID { get; set; }
+        public string UserID { get; set; }
         
         public DateTime CreatedOn { get; set; }
         
@@ -42,8 +37,9 @@ namespace BankManagementDB.Models
              Balance -= amount;
         }
 
-        public override string ToString() => $"\nAccount Type: {Type.ToString()}\n Account Number: {AccountNumber} \nAccount Status: {Status} \nBalance: Rs. {Balance}\n" +
-              $"Minimum Balance: {MinimumBalance}\n" +
+        public override string ToString() =>
+           $"\nAccount Type: {Type}\n Account Number: {AccountNumber} \nAccount Status: {Status} \nBalance: Rs. {Balance}\n" +
+               $"Interest Rate:  {InterestRate}\n" +
               "========================================\n";
     }
 }

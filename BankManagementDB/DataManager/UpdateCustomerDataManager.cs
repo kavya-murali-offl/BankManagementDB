@@ -1,5 +1,5 @@
 ﻿using BankManagementDB.Controller;
-using BankManagementDB.DBHandler;
+using BankManagementDB.DatabaseHandler;
 using BankManagementDB.Interface;
 using BankManagementDB.Models;
 using System;

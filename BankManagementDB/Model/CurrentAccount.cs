@@ -2,6 +2,7 @@
 using BankManagementDB.EnumerationType;
 using BankManagementDB.Models;
 using BankManagementDB.Constants;
+using BankManagementDB.Utility;
 
 namespace BankManagementDB.Model
 {
@@ -9,7 +10,11 @@ namespace BankManagementDB.Model
     {
         public readonly decimal CHARGES = 50;
         
-        public CurrentAccount(): base() {
+        public CurrentAccount(){
+            ID = Guid.NewGuid().ToString();
+            AccountNumber = RandomGenerator.GenerateAccountNumber();
+            Balance = 0;
+            Status = AccountStatus.ACTIVE;
             InterestRate = Constants.AccountConstants.CURRENT_INTEREST_RATE;
             Type = AccountType.CURRENT;
             CreatedOn = DateTime.Now;

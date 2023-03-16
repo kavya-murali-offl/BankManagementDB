@@ -6,6 +6,6 @@ namespace BankManagementDB.EnumerationType
     [DefaultValue(null)]
     public enum CardType
     {
-        DEBIT, CREDIT
+        DEBIT=0, CREDIT=1
     }
 }

@@ -7,14 +7,10 @@ using System.Threading.Tasks;
 
 namespace BankManagementDB.Model
 {
-    [Table("CustomerCredentials")]
-    public class CustomerCredentials
+    [Table("DebitCard")]
+    public class DebitCardDTO
     {
         [PrimaryKey]
-        public string ID { get; set; }
-
-        public string Password { get; set; }
-
-        public string Salt { get; set; }
+        public string ID { get; set; }  
     }
 }

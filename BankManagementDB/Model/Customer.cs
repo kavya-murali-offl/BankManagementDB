@@ -7,7 +7,7 @@ namespace BankManagementDB.Models
     public class Customer : ICloneable
     {
         [PrimaryKey]
-        public Guid ID { get; set; }
+        public string ID { get; set; }
         
         public int Age { get; set; }
         

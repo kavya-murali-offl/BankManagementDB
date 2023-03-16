@@ -7,13 +7,6 @@ namespace BankManagementDB.Model
 {
     public class SavingsAccount : Account
     {
-        public SavingsAccount() : base()
-        {
-            InterestRate = Constants.AccountConstants.SAVINGS_INTEREST_RATE;
-            Type = AccountType.SAVINGS;
-            CreatedOn = DateTime.Now;
-            MinimumBalance = 0;
-        }
 
         public decimal GetInterest()
         {

@@ -12,192 +12,138 @@ using BankManagementDB.Data;
 
 namespace BankManagementDB.View
 {
+
     public class DashboardView
     {
-
-        public DashboardView() {
-            GetAccountDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IGetAccountDataManager>();
-            InsertAccountDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IInsertAccountDataManager>();
-        }
-
-        public IGetAccountDataManager GetAccountDataManager { get; private set; }
-
-        public IInsertAccountDataManager InsertAccountDataManager { get; private set; }
-
-        public object CurrentUserController { get; private set; }
 
         public void ViewDashboard()
         {
             try
             {
-                GetAccountDataManager.GetAllAccounts(CacheData.CurrentUser.ID);
-                while (true)
-                {
-                    for (int i = 0; i < Enum.GetNames(typeof(DashboardCases)).Length; i++)
-                    {
-                        DashboardCases cases = (DashboardCases)i;
-                        Console.WriteLine($"{i + 1}. {cases.ToString().Replace("_", " ")}");
-                    }
+                IGetAccountDataManager GetAccountDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IGetAccountDataManager>();
+                GetAccountDataManager.GetAllAccounts(Store.CurrentUser.ID);
+                OptionsDelegate<DashboardCases> options = DashboardOperations;
 
-                    Console.Write(Resources.EnterChoice);
+                HelperView helperView = new HelperView();
+                helperView.PerformOperation(options);
 
-              
-                    string option = Console.ReadLine().Trim();
-
-                    if (!int.TryParse(option, out int entryOption))
-                        Notification.Error(Resources.InvalidInteger);
-                    else
-                    {
-                        if (entryOption != 0 && entryOption <= Enum.GetNames(typeof(DashboardCases)).Count())
-                        {
-                            DashboardCases cases = (DashboardCases)entryOption - 1;
-                            if (DashboardOperations(cases))
-                                break;
-                        }
-                        else
-                            Notification.Error(Resources.InvalidOption);
-                    }
-                }
             }
             catch (Exception error)
             {
-                Console.WriteLine(error.Message);
+                Notification.Error(error.ToString());
             }
         }
 
-        private bool DashboardOperations(DashboardCases operation)
+        public bool DashboardOperations(DashboardCases command) =>
+        command switch
         {
-            switch (operation)
-            {
-                case DashboardCases.PROFILE_SERVICES:
-                    ProfileView profileView = new ProfileView();
-                    profileView.ViewProfileServices();
-                    return false;
+            DashboardCases.PROFILE_SERVICES => GoToProfileServices(),
+            DashboardCases.CREATE_ACCOUNT => CreateAccount(),
+            DashboardCases.LIST_ACCOUNTS => ListAllAccounts(),
+            DashboardCases.ACCOUNT_SERVICES => GoToAccount(),
+            DashboardCases.CARD_SERVICES => GoToCardServices(),
+            DashboardCases.SIGN_OUT => Signout(),
+            _ => Default()
+        };
 
-                case DashboardCases.CREATE_ACCOUNT:
-                    CreateAccount();
-                    return false;
 
-                case DashboardCases.LIST_ACCOUNTS:
-                    ListAllAccounts(); 
-                    return false;
-
-                case DashboardCases.ACCOUNT_SERVICES:
-                    GoToAccount();
-                    return false;
-
-                case DashboardCases.CARD_SERVICES:
-                    GoToCardServices();
-                    return false;
-
-                case DashboardCases.SIGN_OUT:
-                    SaveCustomerSession();
-                    CacheData.CurrentUser = null;
-                    Notification.Success(Resources.LogoutSuccess);
-                    return true;
-
-                default:
-                    Notification.Error(Resources.InvalidOption);
-                    return false;
-            }
+        private bool Default()
+        {
+            Notification.Error(DependencyContainer.GetResource("InvalidOption"));
+            return false;
         }
 
-        public void GoToCardServices()
+        public bool GoToProfileServices()
+        {
+            ProfileView profileView = new ProfileView();
+            profileView.ViewProfileServices();
+            return false;
+        }
+
+        public bool Signout()
+        {
+            SaveCustomerSession();
+            Store.CurrentUser = null;
+            Notification.Success(DependencyContainer.GetResource("LogoutSuccess"));
+            return true;
+        }
+
+        public bool GoToCardServices()
         {
             CardView cardsView = new CardView();
             cardsView.ShowCards();
+            return false;
         }
 
-        public void CreateAccount()
+        public bool CreateAccount()
         {
 
             AccountView accountsView = new AccountView();
             Account account = accountsView.GenerateAccount();
             if (account != null)
             {
-                account.UserID = CacheData.CurrentUser.ID;
+                account.UserID = Store.CurrentUser.ID;
                 InsertAccount(account);
             }
+
+            return false;
         }
 
-        public void InsertAccount(Account account)
+        private void InsertAccount(Account account)
         {
+            IInsertAccountDataManager InsertAccountDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IInsertAccountDataManager>();
             bool inserted = InsertAccountDataManager.InsertAccount(account);
             if (inserted)
             {
                 if (account is CurrentAccount)
-                    DepositAmount(account);
-                Notification.Success(Resources.AccountInsertSuccess);
+                {
+                    AccountView accountView = new AccountView();
+                    AccountView.SelectedAccount = account;
+                    while (true)
+                    {
+                        HelperView helperView = new HelperView();
+                        decimal amount = helperView.GetAmount();
+                        if (amount == 0)
+                            break;
+                        else if (amount > account.MinimumBalance)
+                        {
+                            accountView.Deposit(amount, ModeOfPayment.CASH, null);
+                            break;
+                        }
+                        else
+                            Notification.Warning(string.Format(DependencyContainer.GetResource("InitialDepositAmountWarning"), account.MinimumBalance));
+                    }
+                }
+                Notification.Success(DependencyContainer.GetResource("AccountInsertSuccess"));
             }
             else
-                Notification.Error(Resources.AccountInsertFailure);
+                Notification.Error(DependencyContainer.GetResource("AccountInsertFailure"));
         }
 
-        public bool DepositAmount(Account account)
+       
+
+        private bool GoToAccount()
         {
-            TransactionView transactionView = new TransactionView();
+            IGetCardDataManager GetCardDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IGetCardDataManager>();
+            GetCardDataManager.GetAllCards(Store.CurrentUser.ID);
             while (true)
             {
-                decimal amount = GetAmount();
-                if (amount == 0)
-                    return false;
-                else if (amount > account.MinimumBalance)
-                {
-                    transactionView.Deposit(account, amount, ModeOfPayment.CASH, null);
-                    return true;
-                }
-                else
-                    Notification.Warning(string.Format(Resources.InitialDepositAmountWarning, account.MinimumBalance));
-            }
-        }
+                AccountView accountView = new AccountView();
+                Account transactionAccount = ChooseAccountForTransaction();
 
-        public decimal GetAmount()
-        {
-            try
-            {
-                while (true)
-                {       
-                    Console.Write(Resources.EnterAmount);
-               
-                    decimal amount = decimal.Parse(Console.ReadLine().Trim());
-                    if (amount > 0) return amount;
-                    else Notification.Warning(Resources.PositiveAmountWarning);
-                }
-             }
-            catch (Exception error)
-            {
-                Notification.Error(error.ToString());
-            }
-            return 0;
-        }
+                if (transactionAccount != null)
+                    accountView.GoToAccount(transactionAccount);
 
-        public void GoToAccount()
-        {
-            try
-            {
-                IGetCardDataManager GetCardDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IGetCardDataManager>();
-                GetCardDataManager.GetAllCards(CacheData.CurrentUser.ID);
-                while (true)
-                {
-                    TransactionView transactionView = new TransactionView();
-                    Account transactionAccount = ChooseAccountForTransaction();
-
-                    if (transactionAccount != null)
-                        transactionView.GoToAccount(transactionAccount);
-                    break;
-                }
-            }catch(Exception ex)
-            {
-               Notification.Error(ex.ToString());
+                break;
             }
+            return false;
+
         }
 
         public Account ChooseAccountForTransaction()
         {
-            try
-            {
                 int accountIndex;
-                IList<Account> accountsList = GetAccountDataManager.GetAllAccounts(CacheData.CurrentUser.ID);
+                IEnumerable<Account> accountsList = Store.AccountsList;
 
                 if (accountsList.Count() == 1)
                     accountIndex = 1;
@@ -206,61 +152,43 @@ namespace BankManagementDB.View
                     while (true)
                     {
                         ListAccountIDs(accountsList);
-
+                        Notification.Info(DependencyContainer.GetResource("ChooseAccount"));
+                        Notification.Info(DependencyContainer.GetResource("PressBackButtonInfo"));
+                        string index = Console.ReadLine()?.Trim();
                         Console.WriteLine();
-                        string index = Console.ReadLine().Trim();
-
                         if (!int.TryParse(index, out accountIndex))
-                            Notification.Error(Resources.InvalidInteger);
+                            Notification.Error(DependencyContainer.GetResource("InvalidInteger"));
                         else if (accountIndex > accountsList.Count())
-                            Notification.Error(Resources.ChooseOnlyFromOptions);
+                            Notification.Error(DependencyContainer.GetResource("ChooseOnlyFromOptions"));
                         else if (accountIndex <= accountsList.Count())
                             break;
                     }
                 }
 
-                if(accountIndex > 0) 
-                    return accountsList[accountIndex - 1];
+                if (accountIndex > 0)
+                    return accountsList.First();
 
-            }
-            catch(Exception e) {
-                Console.WriteLine(e);
-            }
             return null;
         }
 
-        public void ListAllAccounts()
+        private bool ListAllAccounts()
         {
-            try
-            {
-                IList<Account> accountsList = GetAccountDataManager.GetAllAccounts(CacheData.CurrentUser.ID);
-
-                foreach (Account account in accountsList)
+                foreach (Account account in Store.AccountsList)
                     Console.WriteLine(account);
-            }
-            catch(Exception ex)
-            {
-                Notification.Error(ex.ToString());
-            }
+
+            return false;
         }
 
         private void SaveCustomerSession()
         {
-            try
-            {
                 IUpdateCustomerDataManager updateCustomerDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IUpdateCustomerDataManager>();
-                updateCustomerDataManager.UpdateCustomer(CacheData.CurrentUser);
-            }
-            catch(Exception ex)
-            {
-                Notification.Error(ex.ToString());
-            }
+                updateCustomerDataManager.UpdateCustomer(Store.CurrentUser);
         }
 
-        public void ListAccountIDs(IList<Account> accounts)
+        public void ListAccountIDs(IEnumerable<Account> accounts)
         {
-            for(int i = 0; i < accounts.Count(); i++)
-                Notification.Info(i+1 + ". " + accounts[i].AccountNumber);
+            for (int i = 0; i < accounts.Count(); i++)
+                Notification.Info(i + 1 + ". " + accounts.ElementAt(i).AccountNumber);
         }
     }
 }

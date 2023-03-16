@@ -9,6 +9,6 @@ namespace BankManagementDB.Interface
 {
     public interface IInsertCreditCardDataManager
     {
-        bool InsertCreditCard(CreditCard card);
+        bool InsertCreditCard(CreditCardDTO card);
     }
 }

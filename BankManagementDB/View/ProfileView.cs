@@ -21,31 +21,10 @@ namespace BankManagementDB.View
             
             try
             {
-                while (true)
-                {
-                    Console.WriteLine();
-                    for (int i = 0; i < Enum.GetNames(typeof(ProfileServiceCases)).Length; i++)
-                    {
-                        ProfileServiceCases cases = (ProfileServiceCases)i;
-                        Console.WriteLine($"{i + 1}. {cases.ToString().Replace("_", " ")}");
-                    }
+                OptionsDelegate<ProfileServiceCases> options = ProfileOperations;
 
-                    Console.Write(Resources.EnterChoice);
-
-                    string option = Console.ReadLine().Trim();
-                    int entryOption = int.Parse(option);
-                    if (option == Resources.BackButton)
-                        break;
-                    else if (entryOption <= Enum.GetNames(typeof(ProfileServiceCases)).Count())
-                    {
-                        ProfileServiceCases cases = (ProfileServiceCases)entryOption - 1;
-
-                        if (ProfileOperations(cases))
-                            break;
-                    }
-                    else
-                        Notification.Error(Resources.InvalidOption);
-                }
+                HelperView helperView = new HelperView();
+                helperView.PerformOperation(options);
             }
             catch (Exception error)
             {
@@ -53,51 +32,35 @@ namespace BankManagementDB.View
             }
         }
 
-        public bool ProfileOperations(ProfileServiceCases cases)
-        {
-            switch (cases)
+        public bool ProfileOperations(ProfileServiceCases command) =>
+            command switch
             {
-                case ProfileServiceCases.VIEW_PROFILE:
-                    ViewProfileDetails();
-                    return false;
+                ProfileServiceCases.VIEW_PROFILE => ViewProfile(),
+                ProfileServiceCases.EDIT_PROFILE => EditProfile(),
+                ProfileServiceCases.EXIT => true,
+                _ => Default(),
+            };
 
-                case ProfileServiceCases.EDIT_PROFILE:
-                    EditProfile();
-                    return false;
-
-                case ProfileServiceCases.EXIT:
-                    return true;
-
-                default:
-                    Notification.Error(Resources.InvalidOption);
-                    return false;
-            }
+        private bool Default()
+        {
+            Notification.Error(DependencyContainer.GetResource("InvalidOption"));
+            return false;
         }
 
-        public void ViewProfileDetails()
+        private bool ViewProfile()
         {
-            try
-            {
-
-                IGetAccountDataManager GetAccountDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IGetAccountDataManager>();
-                Customer currentUser = CacheData.CurrentUser;
-                Notification.Info("\n ================== PROFILE ===================\n");
-                Notification.Info(currentUser.ToString());
-                Notification.Info("No. of Accounts: " + (GetAccountDataManager.GetAllAccounts(currentUser.ID).Count()));
-                Notification.Info("\n ==============================================\n");
-
-            }
-            catch(Exception ex)
-            {
-                Notification.Error(ex.ToString());
-            }
+            IGetAccountDataManager GetAccountDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IGetAccountDataManager>();
+            Customer currentUser = Store.CurrentUser;
+            Notification.Info("\n ================== PROFILE ===================\n");
+            Notification.Info(currentUser.ToString());
+            Notification.Info("No. of Accounts: " + (GetAccountDataManager.GetAllAccounts(currentUser.ID).Count()));
+            Notification.Info("\n ==============================================\n");
+            return false;
         }
 
-        public void EditProfile()
+        private bool EditProfile()
         {
-            try
-            {
-                Customer currentUser = CacheData.CurrentUser;
+                Customer currentUser = Store.CurrentUser;
                 Customer customer = (Customer)currentUser.Clone();
 
                 IDictionary<string, Action<string>> fields = new Dictionary<string, Action<string>>(){
@@ -109,61 +72,54 @@ namespace BankManagementDB.View
                                         if(age > 18)
                                             customer.Age = age;
                                         else
-                                            Notification.Error(Resources.AgeGreaterThan18);
+                                            Notification.Error(DependencyContainer.GetResource("AgeGreaterThan18"));
                                     else
-                                        Notification.Error(Resources.InvalidInteger);
+                                        Notification.Error(DependencyContainer.GetResource("InvalidInteger"));
                                 }
                      }
                 };  
 
                 while (true)
                 {
-                    Console.WriteLine(string.Format(Resources.EnterName ,customer.Name));
-                    Console.WriteLine(string.Format(Resources.EnterName, customer.Age));
-                    Console.WriteLine(Resources.AskFieldToEdit);
+                    Console.WriteLine(DependencyContainer.GetResource("EnterName") + customer.Name);
+                    Console.WriteLine(DependencyContainer.GetResource("EnterAge") +  customer.Age);
+                    Notification.Info(DependencyContainer.GetResource("AskFieldToEdit"));
+                    Notification.Info(DependencyContainer.GetResource("PressBackButtonInfo"));
 
-                    string field = Console.ReadLine().Trim().ToUpper();
+                    string field = Console.ReadLine()?.Trim().ToUpper();
 
                     if (fields.ContainsKey(field))
                     {
-                        Console.Write(Resources.EnterNewValue);
+                        Console.Write(DependencyContainer.GetResource("EnterNewValue"));
                         string value = Console.ReadLine();
                         fields[field](value);
                     }
-                    else if (field == Resources.BackButton)
+                    else if (field == DependencyContainer.GetResource("BackButton"))
                         break;
                     else
-                        Notification.Error(Resources.InvalidOption);
+                        Notification.Error(DependencyContainer.GetResource("InvalidOption"));
                 }
 
 
                 if (customer.Name != currentUser.Name || customer.Age != currentUser.Age)
                     UpdateProfile(customer);
-            }
-            catch (Exception error)
-            {
-                Console.WriteLine(error.Message);
-            }
+            return false;
+
         }
 
-            
+
         public void UpdateProfile(Customer updatedCustomer)
         {
-            try
-            {
                 IUpdateCustomerDataManager UpdateCustomerDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IUpdateCustomerDataManager>();
 
                 if (UpdateCustomerDataManager.UpdateCustomer(updatedCustomer))
                 {
-                    Notification.Success(Resources.ProfileUpdateSuccess);
-                    CacheData.CurrentUser = updatedCustomer;
+                    Notification.Success(DependencyContainer.GetResource("ProfileUpdateSuccess"));
+                    Store.CurrentUser = updatedCustomer;
                 }
                 else
-                    Notification.Error(Resources.ProfileUpdateFailure);
-
-            }catch(Exception error) { 
-                 Notification.Error(error.ToString());
-            }
+                    Notification.Error(DependencyContainer.GetResource("ProfileUpdateFailure"));
+           
         }
 
     }

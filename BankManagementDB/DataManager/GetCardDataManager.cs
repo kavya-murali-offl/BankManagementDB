@@ -19,30 +19,17 @@ namespace BankManagementDB.DataManager
 
         public IDBHandler DBHandler { get; private set; }
 
-        public void GetAllCards(Guid customerID)
+        public void GetAllCards(string customerID)
         {
-            var cardsList = DBHandler.GetCard(customerID).Result;
-            IList<CardBObj> cards = new List<CardBObj>();
-            foreach (var card in cardsList)
-                cards.Add(card);
-            CacheData.CardsList = cards;
+            IEnumerable <Card> cards = new List<Card>();
+            var creditCardsList = DBHandler.GetCreditCardByCustomerID(customerID).Result;
+            var debitCardsList = DBHandler.GetDebitCardByCustomerID(customerID).Result;
+            cards = cards.Concat(creditCardsList);
+            cards = cards.Concat(debitCardsList);
+            Store.CardsList = cards;
+
+
         }
-
-        public bool IsDebitCardEnabled(Guid accountID) => CacheData.CardsList.Where(c => c.Type.Equals(CardType.DEBIT) && c.AccountID.Equals(accountID)).Any();
-
-        public bool IsCreditCardEnabled() => CacheData.CardsList.Where(c => c.Type.Equals(CardType.CREDIT)).Any();
-
-        public CardBObj GetCardByType(CardType cardType) => CacheData.CardsList.Where<CardBObj>(card => card.Type == cardType).FirstOrDefault();
-
-        public bool IsCardNumber(string cardNumber) => CacheData.CardsList.Where<CardBObj>(card => card.CardNumber == cardNumber).Any();
-
-        public CardBObj GetCard(string cardNumber) => CacheData.CardsList.Where<CardBObj>(card => card.CardNumber == cardNumber).FirstOrDefault();
-
-        public IList<CardBObj> GetCardsList() => CacheData.CardsList ??= new List<CardBObj>();
-
-        public bool IsCreditCard(string cardNumber) => CacheData.CardsList.Where(c => c.Type == CardType.CREDIT && c.CardNumber == cardNumber).Any();
-
-        public bool IsDebitCardLinked(Guid accountID) => CacheData.CardsList.Where(card => card.AccountID == accountID).Any();
 
     }
 }

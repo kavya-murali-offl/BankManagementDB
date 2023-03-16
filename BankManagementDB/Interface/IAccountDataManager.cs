@@ -10,8 +10,6 @@ namespace BankManagementDB.Interface
 {
     public interface IAccountDataManager
     {
-        //event Action<string> BalanceChanged;
-
         bool InsertAccount(Account account);
 
         bool UpdateAccount(Account account);

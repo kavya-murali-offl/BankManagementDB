@@ -8,6 +8,6 @@ namespace BankManagementDB.EnumerationType
 {
     public enum ModeOfPayment
     {
-        DEFAULT, CASH, CREDIT_CARD, DEBIT_CARD, INTERNAL
+        DEFAULT=0, CASH=1, CREDIT_CARD=2, DEBIT_CARD=3, INTERNAL=4
     }
 }

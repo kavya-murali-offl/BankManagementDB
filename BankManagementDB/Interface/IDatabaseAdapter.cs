@@ -14,11 +14,14 @@ namespace BankManagementDB.Interface
 
         AsyncTableQuery<T> GetAll<T>() where T : new();
 
-        Task<int> Insert<T>(T obj);
+        Task<bool> Insert<T>(T obj);
 
-        Task<int> Update<T>(T obj);
+        Task<bool> Update<T>(T obj);
 
         Task<IEnumerable<T>> Query<T>(string query) where T : new();
+
+        Task<bool> RunInTransaction(IList<Action> actions);
+
 
     }
 }
