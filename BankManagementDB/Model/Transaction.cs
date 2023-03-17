@@ -1,5 +1,7 @@
 ﻿using System;
+using BankManagementDB.Config;
 using BankManagementDB.EnumerationType;
+using BankManagementDB.Utility;
 using SQLite;
 
 namespace BankManagementDB.Model
@@ -29,12 +31,7 @@ namespace BankManagementDB.Model
         public string CardNumber { get; set; }
 
         public override string ToString() =>
-                $@"
-                Transaction Type: {TransactionType} 
-                Transaction Time: {RecordedOn} 
-                Description: {Description}
-                Amount: {Amount}
-                Mode of Payment: {ModeOfPayment}
-                Balance: {Balance}";
+            Formatter.FormatString(DependencyContainer.GetResource("DisplayTransaction"), TransactionType, RecordedOn, Description, Amount, Balance, ModeOfPayment)
+              
     }
 }

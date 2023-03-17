@@ -15,7 +15,7 @@ namespace BankManagementDB.DataManager
         {
             DBHandler = dBHandler;
         }
-        public IDBHandler DBHandler { get; private set; }
+        private IDBHandler DBHandler { get; set; }
 
 
         public bool UpdateAccount(Account updatedAccount) => DBHandler.UpdateAccount(updatedAccount).Result;

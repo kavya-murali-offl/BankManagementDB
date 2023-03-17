@@ -17,7 +17,7 @@ namespace BankManagementDB.DataManager
             DBHandler = dBHandler;
         }
 
-        public IDBHandler DBHandler { get; set; }
+        private IDBHandler DBHandler { get; set; }
 
         public bool UpdateCustomer(Customer customer)
         {

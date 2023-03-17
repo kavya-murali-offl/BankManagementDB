@@ -19,7 +19,8 @@ namespace BankManagementDB
             return Convert.ToBase64String(saltBytes);
         }
 
-        public static string HashPassword(string password, string salt)        {
+        public static string HashPassword(string password, string salt) 
+        {
             var saltBytes = Convert.FromBase64String(salt);
 
             using (var rfc2898DeriveBytes = new Rfc2898DeriveBytes(password, saltBytes, 10101))

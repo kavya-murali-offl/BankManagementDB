@@ -18,7 +18,7 @@ namespace BankManagementDB.DataManager
             DBHandler = dbHandler;
         }
 
-        public IDBHandler DBHandler { get; private set; }
+        private IDBHandler DBHandler { get; set; }
 
         public bool InsertAccount(Account account)
         {

@@ -1,4 +1,6 @@
-﻿using BankManagementDB.EnumerationType;
+﻿using BankManagementDB.Config;
+using BankManagementDB.EnumerationType;
+using BankManagementDB.Utility;
 using SQLite;
 using System;
 using System.Collections.Generic;
@@ -21,6 +23,8 @@ namespace BankManagementDB.Model
 
         public decimal CreditLimit { get; set; }
 
+        public override string ToString() =>
+            Formatter.FormatString(DependencyContainer.GetResource("DisplayCreditCard"), CreditCardType, TotalDueAmount, CreditLimit, CreditPoints);
 
     }
 

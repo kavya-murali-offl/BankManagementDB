@@ -18,10 +18,9 @@ namespace BankManagementDB.Interface
 
         Task<bool> Update<T>(T obj);
 
-        Task<IEnumerable<T>> Query<T>(string query) where T : new();
+        Task<IEnumerable<T>> Query<T>(string query, params object[] args) where T : new();
 
         Task<bool> RunInTransaction(IList<Action> actions);
-
 
     }
 }

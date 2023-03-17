@@ -7,6 +7,7 @@ using SQLite;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace BankManagementDB.DatabaseAdapter
@@ -34,7 +35,7 @@ namespace BankManagementDB.DatabaseAdapter
 
         public AsyncTableQuery<T> GetAll<T>() where T : new() => Connection.Table<T>();
 
-        public async Task<IEnumerable<T>> Query<T>(string query) where T : new() => await Connection.QueryAsync<T>(query);
+        public async Task<IEnumerable<T>> Query<T>(string query, params object[] args) where T : new() => await Connection.QueryAsync<T>(query, args);
 
         public async Task<bool> RunInTransaction(IList<Action> actions)
         {
@@ -42,7 +43,7 @@ namespace BankManagementDB.DatabaseAdapter
             {
                 foreach (Action action in actions)
                     action();
-            }).ConfigureAwait(false);
+            });
             return true;
         }
     }

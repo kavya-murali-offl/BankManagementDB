@@ -10,6 +10,7 @@ using BankManagementDB.Interface;
 using BankManagementDB.DataManager;
 using BankManagementDB.Data;
 using BankManagementDB.Properties;
+using BankManagementDB.Utility;
 
 namespace BankManagementDB.View
 { 
@@ -18,27 +19,22 @@ namespace BankManagementDB.View
     {
         public void ViewProfileServices()
         {
-            
-            try
-            {
-                OptionsDelegate<ProfileServiceCases> options = ProfileOperations;
+            OptionsDelegate<ProfileServiceCases> options = ProfileOperations;
 
-                HelperView helperView = new HelperView();
-                helperView.PerformOperation(options);
-            }
-            catch (Exception error)
-            {
-                Notification.Error(error.Message);
-            }
+            HelperView helperView = new HelperView();
+            helperView.PerformOperation(options);
         }
+
 
         public bool ProfileOperations(ProfileServiceCases command) =>
             command switch
             {
+
                 ProfileServiceCases.VIEW_PROFILE => ViewProfile(),
                 ProfileServiceCases.EDIT_PROFILE => EditProfile(),
                 ProfileServiceCases.EXIT => true,
                 _ => Default(),
+
             };
 
         private bool Default()
@@ -49,12 +45,13 @@ namespace BankManagementDB.View
 
         private bool ViewProfile()
         {
-            IGetAccountDataManager GetAccountDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IGetAccountDataManager>();
             Customer currentUser = Store.CurrentUser;
-            Notification.Info("\n ================== PROFILE ===================\n");
-            Notification.Info(currentUser.ToString());
-            Notification.Info("No. of Accounts: " + (GetAccountDataManager.GetAllAccounts(currentUser.ID).Count()));
-            Notification.Info("\n ==============================================\n");
+            Notification.Info(
+                Formatter.FormatString(
+                    DependencyContainer.GetResource("DisplayProfile"),
+                    currentUser.ToString(),
+                    Store.AccountsList.Count())
+                );
             return false;
         }
 
@@ -67,8 +64,7 @@ namespace BankManagementDB.View
                      { "NAME", (value) => customer.Name = value },
                      { "AGE", (value) =>
                                 {
-                                    int age;
-                                    if (int.TryParse(value, out age))
+                                    if (int.TryParse(value, out int age))
                                         if(age > 18)
                                             customer.Age = age;
                                         else
@@ -101,7 +97,7 @@ namespace BankManagementDB.View
                 }
 
 
-                if (customer.Name != currentUser.Name || customer.Age != currentUser.Age)
+                if (!customer.Name.Equals(currentUser.Name) || !customer.Age.Equals(currentUser.Age))
                     UpdateProfile(customer);
             return false;
 

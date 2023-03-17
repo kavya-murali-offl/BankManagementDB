@@ -13,7 +13,7 @@ using System.Collections;
 using System.Collections.Generic;
 using BankManagementDB.DataManager;
 using System.Security.Principal;
-using BankManagementDB.UseCase;
+using BankManagementDB.Controller;
 
 namespace BankManagementDB.View
 {
@@ -32,6 +32,24 @@ namespace BankManagementDB.View
         public TransactionView TransactionView { get; private set; }
 
         public IUpdateAccountDataManager UpdateAccountDataManager { get; private set; }
+
+        public Account CreateAccount(AccountType accountType)
+        {
+
+            IAccountFactory AccountFactory = DependencyContainer.ServiceProvider.GetRequiredService<IAccountFactory>();
+
+            Account account = AccountFactory.GetAccountByType(accountType);
+            account.ID = Guid.NewGuid().ToString();
+            account.AccountNumber = RandomGenerator.GenerateAccountNumber();
+            account.Balance = 0;
+            account.Status = AccountStatus.ACTIVE;
+            account.InterestRate = Constants.AccountConstants.CURRENT_INTEREST_RATE;
+            account.Type = AccountType.CURRENT;
+            account.CreatedOn = DateTime.Now;
+            account.MinimumBalance = 500;
+
+            return account;
+        }
 
         public bool InitiateTransaction(TransactionType transactionType)
         {
@@ -112,7 +130,7 @@ namespace BankManagementDB.View
 
                 if (UpdateBalance(SelectedAccount, amount, TransactionType.WITHDRAW))
                 {
-                    Notification.Success(string.Format(DependencyContainer.GetResource("WithdrawSuccess"), amount));
+                    Notification.Success(Formatter.FormatString(DependencyContainer.GetResource("WithdrawSuccess"), amount));
                     bool isTransactionRecorded = TransactionView.RecordTransaction("Withdraw", amount, SelectedAccount.Balance, TransactionType.WITHDRAW, SelectedAccount.AccountNumber, modeOfPayment, cardNumber, null);
                     return true;
                 }
@@ -149,13 +167,14 @@ namespace BankManagementDB.View
             decimal interest = account.GetInterest();
             if (interest > 0)
             {
-                Notification.Info(string.Format(DependencyContainer.GetResource("InterestDepositInitiated")));
+                Notification.Info(Formatter.FormatString(DependencyContainer.GetResource("InterestDepositInitiated")));
                 UpdateBalance(account, interest, TransactionType.DEPOSIT);
                 TransactionView.RecordTransaction("Interest", interest, account.Balance, TransactionType.DEPOSIT, null, ModeOfPayment.INTERNAL,null, account.AccountNumber);
                 return interest;
             }
             return 0;
         }
+
 
         public void Transfer(decimal amount, ModeOfPayment modeOfPayment, string cardNumber)
         {
@@ -179,7 +198,7 @@ namespace BankManagementDB.View
                     {
                         if (UpdateBalance(transferAccount, amount, TransactionType.DEPOSIT))
                         {
-                            Notification.Success(string.Format(DependencyContainer.GetResource("TransferSuccess"), amount));
+                            Notification.Success(Formatter.FormatString(DependencyContainer.GetResource("TransferSuccess"), amount));
                             TransactionView.RecordTransaction("Transferred", amount, SelectedAccount.Balance, TransactionType.TRANSFER, SelectedAccount.AccountNumber, modeOfPayment, cardNumber, null);
                             TransactionView.RecordTransaction("Received", amount, SelectedAccount.Balance, TransactionType.RECEIVED, null, modeOfPayment, cardNumber, SelectedAccount.AccountNumber);
                         }
@@ -216,7 +235,7 @@ namespace BankManagementDB.View
             if (UpdateBalance(SelectedAccount, amount, TransactionType.DEPOSIT))
             {
                 TransactionView.RecordTransaction("Deposit", amount, SelectedAccount.Balance, TransactionType.DEPOSIT, null, modeOfPayment, cardNumber, SelectedAccount.AccountNumber);
-                Notification.Success(string.Format(DependencyContainer.GetResource("DepositSuccess"), amount));
+                Notification.Success(Formatter.FormatString(DependencyContainer.GetResource("DepositSuccess"), amount));
                 return true;
             }
             else
@@ -300,7 +319,7 @@ namespace BankManagementDB.View
 
         private bool CheckBalance()
         {
-            Notification.Info(string.Format(DependencyContainer.GetResource("BalanceDisplay"), SelectedAccount.Balance));
+            Notification.Info(Formatter.FormatString(DependencyContainer.GetResource("BalanceDisplay"), SelectedAccount.Balance));
             return false;
         }
 

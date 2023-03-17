@@ -250,11 +250,74 @@ namespace BankManagementDB.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to \nAccount Number: {0}\nType: {1}\nMinimum Balance: {2}\nInterest Rate: {3}\nStatus: {4}\n======================================\n.
+        ///   Looks up a localized string similar to \nAccount Number: {0}\nType: {1}\nStatus: {2}.
         /// </summary>
         public static string DisplayAccount {
             get {
                 return ResourceManager.GetString("DisplayAccount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to \nCard Type: {Type.ToString()}\nCard Number: {CardNumber}\nExpiry Month: {ExpiryMonth}\nExpiry Year: {ExpiryYear}\n.
+        /// </summary>
+        public static string DisplayCard {
+            get {
+                return ResourceManager.GetString("DisplayCard", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CreditCardType: {0}\nTotalDueAmount: {1}\nCredit Limit: {2}\nCredit Points: {3}\n.
+        /// </summary>
+        public static string DisplayCreditCard {
+            get {
+                return ResourceManager.GetString("DisplayCreditCard", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to \nMinimum Balance: {0}\n======================================\n.
+        /// </summary>
+        public static string DisplayCurrentAccount {
+            get {
+                return ResourceManager.GetString("DisplayCurrentAccount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Name: {Name}\nAge: {Age}\nEmail: {Email}\nPhone: {Phone}\nLast Logged On: {LastLoggedOn}.
+        /// </summary>
+        public static string DisplayCustomer {
+            get {
+                return ResourceManager.GetString("DisplayCustomer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to \n ================== PROFILE ===================\n{0}\nNo. of Accounts: {1}\n\n ==============================================\n.
+        /// </summary>
+        public static string DisplayProfile {
+            get {
+                return ResourceManager.GetString("DisplayProfile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to InterestRate: {0}\n======================================\n.
+        /// </summary>
+        public static string DisplaySavingsAccount {
+            get {
+                return ResourceManager.GetString("DisplaySavingsAccount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Transaction Type: {0}\nTransaction Time: {1}\nDescription: {2}\nMode of Payment: {3}\nAmount: {4}\nBalance: {5}\n============================\n.
+        /// </summary>
+        public static string DisplayTransaction {
+            get {
+                return ResourceManager.GetString("DisplayTransaction", resourceCulture);
             }
         }
         
@@ -471,6 +534,15 @@ namespace BankManagementDB.Properties {
         public static string InvalidOption {
             get {
                 return ResourceManager.GetString("InvalidOption", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Please enter a valid password. Password must be of length &gt; 8.
+        /// </summary>
+        public static string InvalidPassword {
+            get {
+                return ResourceManager.GetString("InvalidPassword", resourceCulture);
             }
         }
         

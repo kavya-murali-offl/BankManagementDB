@@ -1,12 +1,7 @@
-﻿using BankManagementDB.Controller;
-using BankManagementDB.Data;
+﻿using BankManagementDB.Data;
 using BankManagementDB.Interface;
 using BankManagementDB.Models;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BankManagementDB.DataManager
 {
@@ -16,7 +11,7 @@ namespace BankManagementDB.DataManager
         {
             DBHandler = dBHandler;
         }
-        public IDBHandler DBHandler { get; private set; }
+        private IDBHandler DBHandler { get; set; }
 
         public IList<Account> GetAllAccounts(string customerId)
         {

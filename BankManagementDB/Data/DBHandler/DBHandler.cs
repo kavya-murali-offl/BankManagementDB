@@ -16,10 +16,10 @@ namespace BankManagementDB.DatabaseHandler
             CreateTables();
         }
 
+        private IDatabaseAdapter DatabaseAdapter { get; set; }
+
         public async Task<bool> RunInTransaction(IList<Action> actions) => await DatabaseAdapter.RunInTransaction(actions);
 
-
-        public IDatabaseAdapter DatabaseAdapter { get; set; }
 
         // Customer
 
@@ -47,24 +47,30 @@ namespace BankManagementDB.DatabaseHandler
 
         //Card
 
-        public async Task<IEnumerable<CreditCard>> GetCreditCardByCustomerID(string customerID) => await
-                DatabaseAdapter.Query<CreditCard>($"Select * from Card Inner Join CreditCard on Card.ID = CreditCard.ID where CustomerID = '{customerID}'");
-        
-        public async Task<IEnumerable<DebitCard>> GetDebitCardByCustomerID(string customerID) => await DatabaseAdapter.Query<DebitCard>($"Select * from Card  Inner Join DebitCard on Card.ID = DebitCard.ID where CustomerID = '{customerID}'");
-
-        // Card
-
         public async Task<bool> InsertCard(Card card) => await DatabaseAdapter.Insert<Card>(card);
 
-        public async Task<bool> UpdateCard(Card card)  => await DatabaseAdapter.Update<Card>(card); // Credit Card
+        public async Task<bool> UpdateCard(Card card)  => await DatabaseAdapter.Update<Card>(card); 
+
+        
+        // Credit Card
 
         public async Task<bool> InsertCreditCard(CreditCardDTO creditCard) => await DatabaseAdapter.Insert(creditCard);
 
         public async Task<bool> UpdateCreditCard(CreditCardDTO creditCard) => await DatabaseAdapter.Update(creditCard);
 
+        public async Task<IEnumerable<CreditCard>> GetCreditCardByCustomerID(string customerID) =>
+             await DatabaseAdapter.Query<CreditCard>($"Select * from Card Inner Join CreditCard on Card.ID = CreditCard.ID where CustomerID = ?", customerID);
+
+
+        // Debit Card
+
         public async Task<bool> InsertDebitCard(DebitCardDTO creditCard) => await DatabaseAdapter.Insert(creditCard);
 
         public async Task<bool> UpdateDebitCard(DebitCardDTO creditCard) => await DatabaseAdapter.Update(creditCard);
+
+        public async Task<IEnumerable<DebitCard>> GetDebitCardByCustomerID(string customerID) =>
+           await DatabaseAdapter.Query<DebitCard>($"Select * from Card  Inner Join DebitCard on Card.ID = DebitCard.ID where CustomerID = ?", customerID);
+
 
         // Transaction
 

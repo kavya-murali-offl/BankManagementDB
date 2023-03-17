@@ -17,8 +17,6 @@ namespace BankManagementDB.Utility
     {
         public static T StringToEnum<T>(string data) => (T)Enum.Parse(typeof(T), data);
 
-        
-
         public int CountDays()
         {
            

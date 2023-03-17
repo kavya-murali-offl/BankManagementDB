@@ -20,9 +20,8 @@ namespace BankManagementDB.Config
         {
             ServiceProvider = 
                 new ServiceCollection()
-                .AddLocalization()
-                .ConfigureFactories()
                 .ConfigureDBServices()
+                .AddLocalization()
                 .ConfigureDBAdapter()
                 .ConfigureCustomerServices()
                 .ConfigureAccountServices()
@@ -39,23 +38,24 @@ namespace BankManagementDB.Config
 
         public static string GetResource(string key) => ResourceSet.GetString(key);
 
-        public static IServiceCollection ConfigureDBAdapter(this IServiceCollection serviceCollection)
+        private static IServiceCollection ConfigureDBAdapter(this IServiceCollection serviceCollection)
         {
             serviceCollection.AddSingleton<IDatabaseAdapter, SQLiteDatabaseAdapter>();
             serviceCollection.AddSingleton<IDBHandler, DBHandler>();
             return serviceCollection;
         }
 
-        public static IServiceCollection ConfigureDBServices(this IServiceCollection serviceCollection)
+        private static IServiceCollection ConfigureDBServices(this IServiceCollection serviceCollection)
         {
             Config = new ConfigurationBuilder()
-                .SetBasePath(Environment.CurrentDirectory)
+                .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json")
+                .AddEnvironmentVariables()
                 .Build();
             return serviceCollection;
         }
 
-        public static IServiceCollection AddLocalization(this IServiceCollection serviceCollection)
+        private static IServiceCollection AddLocalization(this IServiceCollection serviceCollection)
         {
             ResourceManager manager = new ResourceManager(typeof(Properties.Resources));
             var culture = CultureInfo.CurrentCulture;
@@ -68,7 +68,7 @@ namespace BankManagementDB.Config
             return serviceCollection;
         }
 
-        public static IServiceCollection ConfigureCardServices(this IServiceCollection serviceCollection)
+        private static IServiceCollection ConfigureCardServices(this IServiceCollection serviceCollection)
         {
             serviceCollection.AddScoped<IGetCardDataManager, GetCardDataManager>();
             serviceCollection.AddScoped<IInsertCardDataManager, InsertCardDataManager>();
@@ -77,15 +77,9 @@ namespace BankManagementDB.Config
             serviceCollection.AddScoped<IUpdateCardDataManager, UpdateCardDataManager>();
             serviceCollection.AddScoped<IUpdateCreditCardDataManager, UpdateCreditCardDataManager>();
             return serviceCollection;
-        
-        }
-            public static IServiceCollection ConfigureFactories(this IServiceCollection serviceCollection)
-         {
-            serviceCollection.AddSingleton<IAccountFactory, AccountFactory>();
-            return serviceCollection;
         }
 
-        public static IServiceCollection ConfigureCustomerServices(this IServiceCollection serviceCollection)
+        private static IServiceCollection ConfigureCustomerServices(this IServiceCollection serviceCollection)
         {
             serviceCollection.AddScoped<IGetCustomerCredentialsDataManager, GetCustomerCredentialsDataManager>();
             serviceCollection.AddScoped<IInsertCredentialsDataManager, InsertCredentialsDataManager>();
@@ -95,16 +89,16 @@ namespace BankManagementDB.Config
             return serviceCollection;
         }
 
-        public static IServiceCollection ConfigureAccountServices(this IServiceCollection serviceCollection)
+        private static IServiceCollection ConfigureAccountServices(this IServiceCollection serviceCollection)
         {
             serviceCollection.AddScoped<IInsertAccountDataManager, InsertAccountDataManager>();
             serviceCollection.AddScoped<IGetAccountDataManager, GetAccountDataManager>();
             serviceCollection.AddScoped<IUpdateAccountDataManager, UpdateAccountDataManager>();
-            serviceCollection.AddScoped<ITransferAmountDataManager, TranferAmountDataManager>();
+            serviceCollection.AddSingleton<IAccountFactory, AccountFactory>();
             return serviceCollection;
         }
-
-        public static IServiceCollection ConfigureTransactionServices(this IServiceCollection serviceCollection)
+    
+        private static IServiceCollection ConfigureTransactionServices(this IServiceCollection serviceCollection)
         {
             serviceCollection.AddScoped<IInsertTransactionDataManager, InsertTransactionDataManager>();
             serviceCollection.AddScoped<IGetTransactionDataManager, GetTransactionDataManager>();

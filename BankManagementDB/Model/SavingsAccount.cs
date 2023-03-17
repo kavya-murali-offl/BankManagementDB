@@ -1,4 +1,5 @@
 ﻿using System;
+using BankManagementDB.Config;
 using BankManagementDB.EnumerationType;
 using BankManagementDB.Models;
 using BankManagementDB.Utility;
@@ -16,10 +17,7 @@ namespace BankManagementDB.Model
             return interest;
         }
 
-        public override string ToString() =>
-             $"\nAccount Type: Savings\n Account Number: {AccountNumber} \nAccount Status: {Status} \nBalance: Rs. {Balance}\n" +
-                 $"Interest Rate:  {InterestRate}\n" +
-                "========================================\n";
+        public override string ToString() => base.ToString() + Formatter.FormatString(DependencyContainer.GetResource("DisplaySavingsAccount"), InterestRate);
 
     }
 }

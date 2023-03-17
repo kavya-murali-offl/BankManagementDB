@@ -8,16 +8,16 @@ using System.Threading.Tasks;
 
 namespace BankManagementDB.DataManager
 {
-    public class InsertDebitCardDataManager : IInsertDebitCardDataManager
+    public class InsertCreditCardDataManager : IInsertCreditCardDataManager
     {
-        public InsertDebitCardDataManager(IDBHandler dBHandler)
+        public InsertCreditCardDataManager(IDBHandler dBHandler)
         {
             DBHandler = dBHandler;
         }
 
-        public IDBHandler DBHandler { get; private set; }
+        private IDBHandler DBHandler { get; set; }
 
-        public bool InsertDebitCard(DebitCardDTO card) => DBHandler.InsertDebitCard(card).Result;
+        public bool InsertCreditCard(CreditCardDTO card) => DBHandler.InsertCreditCard(card).Result;
 
     }
 }

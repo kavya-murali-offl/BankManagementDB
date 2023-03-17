@@ -18,7 +18,7 @@ namespace BankManagementDB.View
             try
             {
                 HelperView helper = new HelperView();
-                Notification.Info(DependencyContainer.GetResource("PressBackButtonInfo"));
+                Notification.Info(Formatter.FormatString(DependencyContainer.GetResource("PressBackButtonInfo")));
                 string phoneNumber = GetPhoneNumber();
                 if(phoneNumber != null)
                 {
@@ -46,7 +46,6 @@ namespace BankManagementDB.View
                     else
                         Notification.Error(DependencyContainer.GetResource("PhoneNotRegistered"));
                 }
-               
             }
             catch(Exception ex) {
                 Notification.Error(ex.ToString());
@@ -57,13 +56,13 @@ namespace BankManagementDB.View
         {
             customer.LastLoggedOn = DateTime.Now;
             Store.CurrentUser = customer;
-            Notification.Success("\n" + string.Format(DependencyContainer.GetResource("WelcomeUser"), customer.Name));
+            Notification.Success("\n" + Formatter.FormatString(DependencyContainer.GetResource("WelcomeUser"), customer.Name));
         }
 
         public void LogoutCustomer()
         {
             Store.CurrentUser = null;
-            UserChanged.Invoke(DependencyContainer.GetResource("LogoutSuccess"));
+            UserChanged?.Invoke(DependencyContainer.GetResource("LogoutSuccess"));
         }
 
         public Customer GetCustomerByPhone(string phoneNumber)
@@ -78,7 +77,7 @@ namespace BankManagementDB.View
             {
                 Console.Write(DependencyContainer.GetResource("EnterPhoneNumber"));
                 string phoneNumber = Console.ReadLine()?.Trim();
-                Validation validation = new Validation();
+                Validator validation = new Validator();
 
                 if (phoneNumber == DependencyContainer.GetResource("BackButton"))
                     break;

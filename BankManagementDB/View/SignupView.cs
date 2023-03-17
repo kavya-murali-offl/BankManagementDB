@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using BankManagementDB.Properties;
 using BankManagementDB.DataManager;
 using BankManagementDB.Controller;
+using System.Reflection.Emit;
 
 namespace BankManagementDB.View;
 
@@ -33,8 +34,7 @@ public class SignupView
                     age = GetAge();
                     if (age > 0)
                     {
-                         Console.Write(DependencyContainer.GetResource("EnterPassword"));
-                         password = helper.GetPassword();
+                         password = GetPassword(DependencyContainer.GetResource("EnterPassword"));
                          if (password != null)
                          {
                              bool isVerified = VerifyPassword(password);
@@ -56,7 +56,7 @@ public class SignupView
 
     public string GetPhoneNumber()
     {
-        Validation validation = new Validation();
+        Validator validation = new Validator();
         string phoneNumber;
 
         while (true)
@@ -112,26 +112,24 @@ public class SignupView
     {
         try
         {
-            IAccountFactory AccountFactory  = DependencyContainer.ServiceProvider.GetRequiredService<IAccountFactory>();
-            Account account = AccountFactory.GetAccountByType(AccountType.CURRENT);
-
-            account.UserID = signedUpCustomer.ID;
-            account.Balance = 0;
 
             AccountView accountView = new AccountView();
+            Account account = accountView.CreateAccount(AccountType.CURRENT);
 
             IInsertAccountDataManager InsertAccountDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IInsertAccountDataManager>();
+
             if (InsertAccountDataManager.InsertAccount(account))
             {
+                Notification.Success(DependencyContainer.GetResource("AccountInsertSuccess"));
+
+                Notification.Info(DependencyContainer.GetResource("MakeInitialDeposit"));
                 AccountView.SelectedAccount = account;
                 decimal amount = GetAmount(account.MinimumBalance);
                 if (amount > 0)
                 {
                     if (accountView.Deposit(amount, ModeOfPayment.CASH, null))
                     {
-                        Notification.Success(DependencyContainer.GetResource("AccountInsertSuccess"));
-
-                        Console.WriteLine(DependencyContainer.GetResource("IsDebitCardRequired"));
+                        Notification.Info(DependencyContainer.GetResource("IsDebitCardRequired"));
                         while (true)
                         {
                             string input = Console.ReadLine()?.Trim();
@@ -161,7 +159,7 @@ public class SignupView
         {
             amount = helperView.GetAmount();
             if (amount < minimumBalance)
-                Notification.Error(string.Format(DependencyContainer.GetResource("InitialDepositAmountWarning"), minimumBalance));
+                Notification.Error(Formatter.FormatString(DependencyContainer.GetResource("InitialDepositAmountWarning"), minimumBalance));
             else
                 break;
         }
@@ -183,7 +181,7 @@ public class SignupView
                 {
                     Notification.Success(DependencyContainer.GetResource("CardInsertSuccess"));
                     Console.WriteLine(card);
-                    Console.WriteLine(string.Format(DependencyContainer.GetResource("PinDisplay"), card.Pin));
+                    Console.WriteLine(Formatter.FormatString(DependencyContainer.GetResource("PinDisplay"), card.Pin));
                     Console.WriteLine();
                 }
                 return true;
@@ -238,6 +236,17 @@ public class SignupView
         return InsertCredentialsDataManager.InsertCredentials(customerCredentials);
     }
 
+    private string GetPassword(string label)
+    {
+        while (true)
+        {
+            Console.Write(label);
+            string value = Console.ReadLine()?.Trim();
+            if (!string.IsNullOrEmpty(value) && Validator.IsValidPassword(value)) return value;
+            else if (value == DependencyContainer.GetResource("BackButton")) return null;
+            else Notification.Error(DependencyContainer.GetResource("InvalidPasswordI"));
+        }
+    }
 
     private string GetValue(string label)
     {
@@ -254,7 +263,7 @@ public class SignupView
     private string GetEmail()
     {
         string email;
-        Validation validation = new Validation();
+        Validator validation = new Validator();
         while (true)
         {
             Console.Write(DependencyContainer.GetResource("EnterEmail"));
@@ -275,16 +284,13 @@ public class SignupView
 
     private bool VerifyPassword(string password)
     {
-        Validation validation = new Validation();
-        HelperView helper = new HelperView();
         while (true)
         {
-            Console.Write(DependencyContainer.GetResource("EnterRePassword"));
-            string rePassword = helper.GetPassword();
+            string rePassword = GetPassword(DependencyContainer.GetResource("EnterRePassword"));
 
             if (rePassword == null)
                 break;
-            if (validation.ValidatePassword(password, rePassword) && rePassword != null)
+            if (password.Equals(rePassword) && rePassword != null)
                 return true;
             else
                 Notification.Error(DependencyContainer.GetResource("PasswordMismatch"));

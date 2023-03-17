@@ -149,7 +149,7 @@ namespace BankManagementDB.View
 
                 Notification.Success(DependencyContainer.GetResource("CardInsertSuccess"));
                 Console.WriteLine(card);
-                Console.WriteLine(string.Format(DependencyContainer.GetResource("PinDisplay"), card.Pin));
+                Console.WriteLine(Formatter.FormatString(DependencyContainer.GetResource("PinDisplay"), card.Pin));
                 Console.WriteLine();
                 IGetCardDataManager GetCardDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IGetCardDataManager>();
 
@@ -225,7 +225,7 @@ namespace BankManagementDB.View
 
         private string GetPin()
         {
-            Validation validation = new Validation();
+            Validator validation = new Validator();
             while (true)
             {
                 Console.Write(DependencyContainer.GetResource("EnterNewPin"));
@@ -263,7 +263,7 @@ namespace BankManagementDB.View
         {
             if (Store.IsCardNumber(cardNumber))
             {
-                Validation validation = new Validation();
+                Validator validation = new Validator();
                 Console.Write(DependencyContainer.GetResource("EnterPin"));
                 string pin = Console.ReadLine()?.Trim();
                 if (validation.IsValidPin(pin))

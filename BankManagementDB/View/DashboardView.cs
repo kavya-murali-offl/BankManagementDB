@@ -9,6 +9,7 @@ using BankManagementDB.EnumerationType;
 using BankManagementDB.Config;
 using BankManagementDB.Properties;
 using BankManagementDB.Data;
+using BankManagementDB.Utility;
 
 namespace BankManagementDB.View
 {
@@ -111,7 +112,7 @@ namespace BankManagementDB.View
                             break;
                         }
                         else
-                            Notification.Warning(string.Format(DependencyContainer.GetResource("InitialDepositAmountWarning"), account.MinimumBalance));
+                            Notification.Warning(Formatter.FormatString(DependencyContainer.GetResource("InitialDepositAmountWarning"), account.MinimumBalance));
                     }
                 }
                 Notification.Success(DependencyContainer.GetResource("AccountInsertSuccess"));

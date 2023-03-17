@@ -17,7 +17,7 @@ namespace BankManagementDB.DataManager
             DBHandler = dBHandler;
         }
 
-        public IDBHandler DBHandler { get; private set; }
+        private IDBHandler DBHandler { get;  set; }
 
         public void GetAllCards(string customerID)
         {
@@ -27,8 +27,6 @@ namespace BankManagementDB.DataManager
             cards = cards.Concat(creditCardsList);
             cards = cards.Concat(debitCardsList);
             Store.CardsList = cards;
-
-
         }
 
     }

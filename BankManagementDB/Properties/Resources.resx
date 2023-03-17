@@ -181,7 +181,28 @@
     <value>Deposit of Rs.{0} is successful</value>
   </data>
   <data name="DisplayAccount" xml:space="preserve">
-    <value>\nAccount Number: {0}\nType: {1}\nMinimum Balance: {2}\nInterest Rate: {3}\nStatus: {4}\n======================================\n</value>
+    <value>\nAccount Number: {0}\nType: {1}\nStatus: {2}</value>
+  </data>
+  <data name="DisplayCard" xml:space="preserve">
+    <value>\nCard Type: {Type.ToString()}\nCard Number: {CardNumber}\nExpiry Month: {ExpiryMonth}\nExpiry Year: {ExpiryYear}\n</value>
+  </data>
+  <data name="DisplayCreditCard" xml:space="preserve">
+    <value>CreditCardType: {0}\nTotalDueAmount: {1}\nCredit Limit: {2}\nCredit Points: {3}\n</value>
+  </data>
+  <data name="DisplayCurrentAccount" xml:space="preserve">
+    <value>\nMinimum Balance: {0}\n======================================\n</value>
+  </data>
+  <data name="DisplayCustomer" xml:space="preserve">
+    <value>Name: {Name}\nAge: {Age}\nEmail: {Email}\nPhone: {Phone}\nLast Logged On: {LastLoggedOn}</value>
+  </data>
+  <data name="DisplayProfile" xml:space="preserve">
+    <value>\n ================== PROFILE ===================\n{0}\nNo. of Accounts: {1}\n\n ==============================================\n</value>
+  </data>
+  <data name="DisplaySavingsAccount" xml:space="preserve">
+    <value>InterestRate: {0}\n======================================\n</value>
+  </data>
+  <data name="DisplayTransaction" xml:space="preserve">
+    <value>Transaction Type: {0}\nTransaction Time: {1}\nDescription: {2}\nMode of Payment: {3}\nAmount: {4}\nBalance: {5}\n============================\n</value>
   </data>
   <data name="EmptyFieldError" xml:space="preserve">
     <value>Field should not be empty</value>
@@ -254,6 +275,9 @@
   </data>
   <data name="InvalidOption" xml:space="preserve">
     <value>Enter valid option. Try Again!</value>
+  </data>
+  <data name="InvalidPassword" xml:space="preserve">
+    <value>Please enter a valid password. Password must be of length &gt; 8</value>
   </data>
   <data name="InvalidPhone" xml:space="preserve">
     <value>Please enter a valid 10-digit phone number</value>

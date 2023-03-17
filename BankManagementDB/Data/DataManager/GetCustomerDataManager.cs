@@ -10,7 +10,7 @@ namespace BankManagementDB.DataManager
         {
             DBHandler = dBHandler;
         }
-        public IDBHandler DBHandler { get; set; }
+        private IDBHandler DBHandler { get; set; }
         
         public Customer GetCustomer(string phoneNumber) => DBHandler.GetCustomer(phoneNumber).Result.FirstOrDefault();
     }

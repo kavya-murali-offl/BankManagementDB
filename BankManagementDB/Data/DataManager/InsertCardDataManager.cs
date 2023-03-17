@@ -17,7 +17,7 @@ namespace BankManagementDB.DataManager
             DBHandler = dBHandler;
         }
 
-        public IDBHandler DBHandler { get; private set; }
+        private IDBHandler DBHandler { get; set; }
 
         public bool InsertCard(Card card) => DBHandler.InsertCard(card).Result;
     }

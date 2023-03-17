@@ -16,7 +16,7 @@ namespace BankManagementDB.DataManager
             DBHandler = dbHandler;
         }
 
-        public IDBHandler DBHandler { get; set; }
+        private IDBHandler DBHandler { get; set; }
 
         public bool InsertCredentials(CustomerCredentials customerCredentials) => DBHandler.InsertCredentials(customerCredentials).Result;
 

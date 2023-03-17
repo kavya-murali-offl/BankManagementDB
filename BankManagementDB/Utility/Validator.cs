@@ -3,9 +3,17 @@ using System.Text.RegularExpressions;
 
 namespace BankManagementDB.Utility
 {
-    public class Validation
+    public class Validator
     {
-        public bool ValidatePassword(string password, string rePassword) => rePassword.Equals(password);
+        public static bool IsValidPassword(string password) {
+
+            if (string.IsNullOrWhiteSpace(password) || string.IsNullOrEmpty(password)) return false;
+            if(password.Length < 8) return false;
+            return Regex.IsMatch(password,
+                    @"^[A-Za-z0-9][-a-z0-9._]",
+                    RegexOptions.None, TimeSpan.FromMilliseconds(250));
+        }
+
 
         public bool IsValidEmail(string email)
         {
@@ -55,5 +63,7 @@ namespace BankManagementDB.Utility
         }
 
         public static bool IsValidGuid(string str) =>  Guid.TryParse(str, out Guid guid);
+
+        public static bool IsValidAge(int age) => age > 18;
     }
 }

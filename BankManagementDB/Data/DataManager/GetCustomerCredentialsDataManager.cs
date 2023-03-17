@@ -15,7 +15,7 @@ namespace BankManagementDB.DataManager
         {
             DBHandler = dBHandler;
         }
-        public IDBHandler DBHandler { get; set; }
+        private IDBHandler DBHandler { get; set; }
 
         public CustomerCredentials GetCustomerCredentials(string id) => DBHandler.GetCredentials(id).Result.FirstOrDefault();
 

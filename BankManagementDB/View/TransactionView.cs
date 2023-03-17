@@ -55,7 +55,6 @@ namespace BankManagementDB.View
         {
             IEnumerable<Transaction> statements = Store.TransactionsList;
             Printer.PrintStatement(statements);
-
             return false;
         }
 
