@@ -1,13 +1,10 @@
 ﻿using BankManagementDB.Config;
 using BankManagementDB.Interface;
-using BankManagementDB.Model;
-using BankManagementDB.Utility;
 using Microsoft.Extensions.Configuration;
 using SQLite;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace BankManagementDB.DatabaseAdapter
@@ -23,7 +20,7 @@ namespace BankManagementDB.DatabaseAdapter
         private SQLiteAsyncConnection Connection { get; set; }
 
         private SQLiteConnectionString GetConnectionString(){
-            string databasePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), DependencyContainer.Config.GetConnectionString("SQLiteConnectionString"));
+            string databasePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), DependencyContainer.Config.GetConnectionString("SQLiteConnectionString"));
             return new SQLiteConnectionString(databasePath, true, key: Environment.GetEnvironmentVariable("DATABASE_PASSWORD"));
         }
 

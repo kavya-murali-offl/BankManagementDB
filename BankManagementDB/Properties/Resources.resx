@@ -184,7 +184,7 @@
     <value>\nAccount Number: {0}\nType: {1}\nStatus: {2}</value>
   </data>
   <data name="DisplayCard" xml:space="preserve">
-    <value>\nCard Type: {Type.ToString()}\nCard Number: {CardNumber}\nExpiry Month: {ExpiryMonth}\nExpiry Year: {ExpiryYear}\n</value>
+    <value>\nCard Type: {0}\nCard Number: {1}\nExpiry Month: {2}\nExpiry Year: {3}\n</value>
   </data>
   <data name="DisplayCreditCard" xml:space="preserve">
     <value>CreditCardType: {0}\nTotalDueAmount: {1}\nCredit Limit: {2}\nCredit Points: {3}\n</value>
@@ -193,7 +193,7 @@
     <value>\nMinimum Balance: {0}\n======================================\n</value>
   </data>
   <data name="DisplayCustomer" xml:space="preserve">
-    <value>Name: {Name}\nAge: {Age}\nEmail: {Email}\nPhone: {Phone}\nLast Logged On: {LastLoggedOn}</value>
+    <value>Name: {0}\nAge: {1}\nEmail: {2}\nPhone: {3}\nLast Logged On: {4}</value>
   </data>
   <data name="DisplayProfile" xml:space="preserve">
     <value>\n ================== PROFILE ===================\n{0}\nNo. of Accounts: {1}\n\n ==============================================\n</value>

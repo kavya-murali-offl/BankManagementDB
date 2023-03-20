@@ -1,7 +1,9 @@
 ﻿using BankManagementDB.Data;
 using BankManagementDB.Interface;
+using BankManagementDB.Model;
 using BankManagementDB.Models;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace BankManagementDB.DataManager
 {
@@ -13,11 +15,13 @@ namespace BankManagementDB.DataManager
         }
         private IDBHandler DBHandler { get; set; }
 
-        public IList<Account> GetAllAccounts(string customerId)
+        public void GetAllAccounts(string customerId)
         {
-            IList<Account> accounts = DBHandler.GetAccounts(customerId).Result;
-            Store.AccountsList = accounts;
-            return accounts;
+            IList<SavingsAccount> savingsAccounts = DBHandler.GetSavingsAccounts(customerId).Result;
+            IList<CurrentAccount> currentAccounts = DBHandler.GetCurrentAccounts(customerId).Result;
+            Store.AccountsList = new List<Account>();
+            Store.AccountsList = Store.AccountsList.Concat(currentAccounts);
+            Store.AccountsList = Store.AccountsList.Concat(savingsAccounts);
         }
 
     }

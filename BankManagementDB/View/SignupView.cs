@@ -15,6 +15,9 @@ namespace BankManagementDB.View;
 
 public class SignupView
 {
+    public SignupView() { 
+        
+    }
 
     public void Signup()
     {
@@ -244,7 +247,7 @@ public class SignupView
             string value = Console.ReadLine()?.Trim();
             if (!string.IsNullOrEmpty(value) && Validator.IsValidPassword(value)) return value;
             else if (value == DependencyContainer.GetResource("BackButton")) return null;
-            else Notification.Error(DependencyContainer.GetResource("InvalidPasswordI"));
+            else Notification.Error(DependencyContainer.GetResource("InvalidPassword"));
         }
     }
 

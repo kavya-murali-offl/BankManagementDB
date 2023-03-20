@@ -259,7 +259,7 @@ namespace BankManagementDB.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to \nCard Type: {Type.ToString()}\nCard Number: {CardNumber}\nExpiry Month: {ExpiryMonth}\nExpiry Year: {ExpiryYear}\n.
+        ///   Looks up a localized string similar to \nCard Type: {0}\nCard Number: {1}\nExpiry Month: {2}\nExpiry Year: {3}\n.
         /// </summary>
         public static string DisplayCard {
             get {
@@ -286,7 +286,7 @@ namespace BankManagementDB.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Name: {Name}\nAge: {Age}\nEmail: {Email}\nPhone: {Phone}\nLast Logged On: {LastLoggedOn}.
+        ///   Looks up a localized string similar to Name: {0}\nAge: {1}\nEmail: {2}\nPhone: {3}\nLast Logged On: {4}.
         /// </summary>
         public static string DisplayCustomer {
             get {

@@ -9,8 +9,6 @@ namespace BankManagementDB.Interface
 {
     public interface IGetAccountDataManager
     {
-        IList<Account> GetAllAccounts(string id);
-
-
+        void GetAllAccounts(string id);
     }
 }

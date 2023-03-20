@@ -10,7 +10,7 @@ namespace BankManagementDB.Utility
             if (string.IsNullOrWhiteSpace(password) || string.IsNullOrEmpty(password)) return false;
             if(password.Length < 8) return false;
             return Regex.IsMatch(password,
-                    @"^[A-Za-z0-9][-a-z0-9._]",
+                    @"^[A-Za-z][-a-z0-9._]",
                     RegexOptions.None, TimeSpan.FromMilliseconds(250));
         }
 

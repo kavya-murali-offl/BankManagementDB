@@ -1,4 +1,5 @@
-﻿using BankManagementDB.Model;
+﻿using BankManagementDB.Entities;
+using BankManagementDB.Model;
 using BankManagementDB.Models;
 using System;
 using System.Collections.Generic;
@@ -29,11 +30,17 @@ namespace BankManagementDB.Interface
 
 
         // Account
-        Task<List<Account>> GetAccounts(string userID);
+        Task<IList<CurrentAccount>> GetCurrentAccounts(string userID);
+
+        Task<IList<SavingsAccount>> GetSavingsAccounts(string userID);
 
         Task<bool> InsertAccount(Account account);
 
         Task<bool> UpdateAccount(Account account);
+
+        Task<bool> InsertCurrentAccount(CurrentAccountDTO account);
+
+        Task<bool> InsertSavingsAccount(SavingsAccountDTO account);
 
 
         // Debit Card

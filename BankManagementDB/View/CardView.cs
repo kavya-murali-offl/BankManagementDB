@@ -3,7 +3,6 @@ using BankManagementDB.Config;
 using BankManagementDB.EnumerationType;
 using BankManagementDB.Interface;
 using BankManagementDB.Model;
-using BankManagementDB.Properties;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Linq;
@@ -11,7 +10,6 @@ using System.Collections.Generic;
 using BankManagementDB.Utility;
 using BankManagementDB.Data;
 using BankManagementDB.DataManager;
-using System.Data;
 
 namespace BankManagementDB.View
 {
@@ -124,7 +122,7 @@ namespace BankManagementDB.View
             if(card != null)
                 InsertCard(card);
 
-            return false;
+            return true;
         }
 
         public void InsertCard(Card card)
@@ -159,9 +157,8 @@ namespace BankManagementDB.View
                 Notification.Error(DependencyContainer.GetResource("CardInsertFailure"));
         }
 
-        public Card CreateCard(CardType cardType, string accountID, string customerID)
-        {
-            Card card = new Card
+        public Card CreateCard(CardType cardType, string accountID, string customerID) =>
+            new Card
             {
                 ID = Guid.NewGuid().ToString(),
                 ExpiryMonth = DateTime.Now.Month.ToString(),
@@ -174,8 +171,7 @@ namespace BankManagementDB.View
                 CVV = RandomGenerator.GenerateCVV(),
                 Pin = RandomGenerator.GeneratePin()
             };
-            return card;
-        }
+
 
         private bool ResetPin()
         {

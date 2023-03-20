@@ -1,4 +1,6 @@
 ﻿using BankManagementDB.Data;
+using BankManagementDB.Entities;
+using BankManagementDB.EnumerationType;
 using BankManagementDB.Interface;
 using BankManagementDB.Model;
 using BankManagementDB.Models;
@@ -33,23 +35,36 @@ namespace BankManagementDB.DatabaseHandler
 
         public async Task<List<CustomerCredentials>> GetCredentials(string customerID) => await DatabaseAdapter.GetAll<CustomerCredentials>().Where(x => x.ID == customerID).ToListAsync();
 
-        public async Task<bool> InsertCredentials(CustomerCredentials customerCredentials) => await DatabaseAdapter.Insert<CustomerCredentials>(customerCredentials);
+        public async Task<bool> InsertCredentials(CustomerCredentials customerCredentials) => await DatabaseAdapter.Insert(customerCredentials);
 
-        public async Task<bool> UpdateCredentials(CustomerCredentials customerCredentials) => await DatabaseAdapter.Update<CustomerCredentials>(customerCredentials);
+        public async Task<bool> UpdateCredentials(CustomerCredentials customerCredentials) => await DatabaseAdapter.Update(customerCredentials);
 
         // Account
 
-        public async Task<List<Account>> GetAccounts(string userID) => await DatabaseAdapter.GetAll<Account>().Where(x => x.UserID == userID).OrderByDescending(x => x.CreatedOn).ToListAsync();
+        public async Task<IList<CurrentAccount>> GetCurrentAccounts(string userID) =>
+            await DatabaseAdapter.GetAll<CurrentAccount>().Where(x => x.UserID.Equals(userID)).OrderByDescending(x => x.CreatedOn).ToListAsync();
+       
+        public async Task<IList<SavingsAccount>> GetSavingsAccounts(string userID) => await DatabaseAdapter.GetAll<SavingsAccount>().Where(x => x.UserID == 
+        userID).OrderByDescending(x => x.CreatedOn).ToListAsync();
 
-        public async Task<bool> InsertAccount(Account account) => await DatabaseAdapter.Insert<Account>(account);
+        public async Task<bool> InsertAccount(Account account) => await DatabaseAdapter.Insert(account);
 
         public async Task<bool> UpdateAccount(Account account) => await DatabaseAdapter.Update(account);
 
+        public async Task<bool> InsertCurrentAccount(CurrentAccountDTO account) => await DatabaseAdapter.Insert(account);
+
+        public async Task<bool> UpdateSavingsAccount(SavingsAccountDTO account) => await DatabaseAdapter.Update(account);
+
+        public async Task<bool> InsertSavingsAccount(SavingsAccountDTO account) => await DatabaseAdapter.Insert(account);
+
+        public async Task<bool> UpdateCurrentAccount(CurrentAccountDTO account) => await DatabaseAdapter.Update(account);
+
+
         //Card
 
-        public async Task<bool> InsertCard(Card card) => await DatabaseAdapter.Insert<Card>(card);
+        public async Task<bool> InsertCard(Card card) => await DatabaseAdapter.Insert(card);
 
-        public async Task<bool> UpdateCard(Card card)  => await DatabaseAdapter.Update<Card>(card); 
+        public async Task<bool> UpdateCard(Card card)  => await DatabaseAdapter.Update(card); 
 
         
         // Credit Card
@@ -80,7 +95,7 @@ namespace BankManagementDB.DatabaseHandler
 
         public async Task<bool> InsertTransaction(Transaction transaction) => await DatabaseAdapter.Insert(transaction);
 
-        public async Task<bool> UpdateTransaction(Transaction transaction) => await DatabaseAdapter.Update<Transaction>(transaction);
+        public async Task<bool> UpdateTransaction(Transaction transaction) => await DatabaseAdapter.Update(transaction);
 
         // Create tables
 
@@ -90,6 +105,8 @@ namespace BankManagementDB.DatabaseHandler
             await DatabaseAdapter.CreateTable<CustomerCredentials>();
             await DatabaseAdapter.CreateTable<Card>();
             await DatabaseAdapter.CreateTable<Account>();
+            await DatabaseAdapter.CreateTable<CurrentAccountDTO>();
+            await DatabaseAdapter.CreateTable<SavingsAccountDTO>();
             await DatabaseAdapter.CreateTable<Transaction>();
             await DatabaseAdapter.CreateTable<CreditCardDTO>();
             await DatabaseAdapter.CreateTable<DebitCardDTO>();

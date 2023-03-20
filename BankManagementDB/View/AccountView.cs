@@ -19,7 +19,7 @@ namespace BankManagementDB.View
 {
     public class AccountView
     {
-        private Account _generatedAccount = null;
+        private Account GeneratedAccount { get; set; }
 
         public static Account SelectedAccount { get;  set; }
        
@@ -175,19 +175,8 @@ namespace BankManagementDB.View
             return 0;
         }
 
-
         public void Transfer(decimal amount, ModeOfPayment modeOfPayment, string cardNumber)
         {
-            //Account transferAccount = GetTransferAccount(SelectedAccount.AccountNumber);
-            //if (amount > SelectedAccount.Balance) Notification.Error(DependencyContainer.GetResource("InsufficientBalance);
-            //else
-            //{
-            //    if (transferAccount != null)
-            //    {
-            //        TransferAmountUseCase transferAmountUseCase = new TransferAmountUseCase();
-            //        transferAmountUseCase.TransferAmount(SelectedAccount, transferAccount, amount);
-            //    }
-            //}
             if (amount > SelectedAccount.Balance) Notification.Error(DependencyContainer.GetResource("InsufficientBalance"));
             else
             {
@@ -213,6 +202,7 @@ namespace BankManagementDB.View
                 }
             }
         }
+
         public bool ViewAccountDetails()
         {
             Console.WriteLine(SelectedAccount);
@@ -228,7 +218,6 @@ namespace BankManagementDB.View
             else
                 return cardsView.Authenticate(cardNumber);
         }
-
 
         public bool Deposit(decimal amount, ModeOfPayment modeOfPayment, string cardNumber)
         {
@@ -337,19 +326,19 @@ namespace BankManagementDB.View
             HelperView helperView = new HelperView();
             helperView.PerformOperation(options);
 
-            return _generatedAccount;
+            return GeneratedAccount;
         }
 
         public bool GetAccountByType(AccountType accountType)
         {
             IAccountFactory AccountFactory = DependencyContainer.ServiceProvider.GetRequiredService<IAccountFactory>();
-            _generatedAccount = AccountFactory.GetAccountByType(accountType);
-            _generatedAccount.ID = Guid.NewGuid().ToString();
-            _generatedAccount.AccountNumber = RandomGenerator.GenerateAccountNumber();
-            _generatedAccount.Balance = 0;
-            _generatedAccount.Status = AccountStatus.ACTIVE;
-            _generatedAccount.CreatedOn = DateTime.Now;
-            _generatedAccount.MinimumBalance = 0;
+            GeneratedAccount = AccountFactory.GetAccountByType(accountType);
+            GeneratedAccount.ID = Guid.NewGuid().ToString();
+            GeneratedAccount.AccountNumber = RandomGenerator.GenerateAccountNumber();
+            GeneratedAccount.Balance = 0;
+            GeneratedAccount.Status = AccountStatus.ACTIVE;
+            GeneratedAccount.CreatedOn = DateTime.Now;
+            GeneratedAccount.MinimumBalance = 0;
             return true;
         }
 
@@ -372,12 +361,5 @@ namespace BankManagementDB.View
             }
             return null;
         }
-    }
-
-    public class TransferEventArgs : EventArgs
-    {
-        public decimal amount { get; set; }
-
-        public TransactionType transactionType { get; set; }
     }
 }

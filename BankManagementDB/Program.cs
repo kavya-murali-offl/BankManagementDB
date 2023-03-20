@@ -1,5 +1,6 @@
 ﻿using BankManagementDB.DatabaseAdapter;
 using BankManagementDB.Model;
+using BankManagementDB.Utility;
 using BankManagementDB.View;
 using System;
 using System.Collections;
@@ -16,7 +17,7 @@ namespace BankManagementDB
         {
 
             Environment.SetEnvironmentVariable("DATABASE_PASSWORD", "pass");
-
+           
             EntryView entryView = new EntryView();
             entryView.Entry();
 
