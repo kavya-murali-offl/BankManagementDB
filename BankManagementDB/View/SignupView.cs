@@ -15,13 +15,8 @@ namespace BankManagementDB.View;
 
 public class SignupView
 {
-    public SignupView() { 
-        
-    }
-
     public void Signup()
     {
-        HelperView helper = new HelperView();
         string email, password, phone, name;
         int age;
         Notification.Info(DependencyContainer.GetResource("PressBackButtonInfo"));
@@ -35,21 +30,21 @@ public class SignupView
                 if (email != null)
                 {
                     age = GetAge();
-                    if (age > 0)
+                    if (Validator.IsValidAge(age))
                     {
-                         password = GetPassword(DependencyContainer.GetResource("EnterPassword"));
-                         if (password != null)
-                         {
-                             bool isVerified = VerifyPassword(password);
-                             if (isVerified)
-                             {
-                                 CreateCustomer(name, password, email, phone, age);
-                                 IGetCustomerDataManager GetCustomerDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IGetCustomerDataManager>();
+                        password = GetPassword(DependencyContainer.GetResource("EnterPassword"));
+                        if (password != null)
+                        {
+                            bool isVerified = VerifyPassword(password);
+                            if (isVerified)
+                            {
+                                CreateCustomer(name, password, email, phone, age);
+                                IGetCustomerDataManager GetCustomerDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IGetCustomerDataManager>();
 
-                                 Customer signedUpCustomer = GetCustomerDataManager.GetCustomer(phone);
-                                 CreateAccountAndDeposit(signedUpCustomer);
-                             }
-                         }
+                                Customer signedUpCustomer = GetCustomerDataManager.GetCustomer(phone);
+                                CreateAccountAndDeposit(signedUpCustomer);
+                            }
+                        }
                     }
                 }
             }
@@ -68,20 +63,33 @@ public class SignupView
             phoneNumber = Console.ReadLine()?.Trim();
 
             if (phoneNumber == DependencyContainer.GetResource("BackButton"))
+            {
                 break;
+            }
 
             if (!string.IsNullOrEmpty(phoneNumber))
 
+            {
                 if (validation.IsPhoneNumber(phoneNumber))
+                {
                     if (CheckUniquePhoneNumber(phoneNumber))
+                    {
                         return phoneNumber;
+                    }
                     else
+                    {
                         Notification.Error(DependencyContainer.GetResource("PhoneAlreadyRegistered"));
-
+                    }
+                }
                 else
+                {
                     Notification.Error(DependencyContainer.GetResource("InvalidPhone"));
+                }
+            }
             else
+            {
                 Notification.Error(DependencyContainer.GetResource("EmptyFieldError"));
+            }
 
         }
         return null;
@@ -96,12 +104,20 @@ public class SignupView
                 Console.Write(DependencyContainer.GetResource("EnterAge"));
                 string input = Console.ReadLine()?.Trim();
                 if (int.TryParse(input, out int number))
+                {
                     if (number < 19)
+                    {
                         Notification.Error(DependencyContainer.GetResource("AgeGreaterThan18"));
+                    }
                     else
+                    {
                         return number;
+                    }
+                }
                 else
+                {
                     Notification.Error(DependencyContainer.GetResource("InvalidInteger"));
+                }
             }
         }
         catch (Exception error)
@@ -136,17 +152,21 @@ public class SignupView
                         while (true)
                         {
                             string input = Console.ReadLine()?.Trim();
-                            if(CreateCard(input, account, signedUpCustomer))
-                                break;
+                            if (CreateCard(input, account, signedUpCustomer))
+                            { break; }
                         }
                     }
                     else
+                    {
                         Notification.Error(DependencyContainer.GetResource("DepositFailure"));
+                    }
                 }
             }
             else
-                 Notification.Error(DependencyContainer.GetResource("AccountInsertFailure"));
-                
+            {
+                Notification.Error(DependencyContainer.GetResource("AccountInsertFailure"));
+            }
+
         }
         catch (Exception e)
         {
@@ -154,7 +174,8 @@ public class SignupView
         }
     }
 
-    public decimal GetAmount(decimal minimumBalance) {
+    public decimal GetAmount(decimal minimumBalance)
+    {
 
         HelperView helperView = new HelperView();
         decimal amount;
@@ -162,23 +183,27 @@ public class SignupView
         {
             amount = helperView.GetAmount();
             if (amount < minimumBalance)
+            {
                 Notification.Error(Formatter.FormatString(DependencyContainer.GetResource("InitialDepositAmountWarning"), minimumBalance));
+            }
             else
+            {
                 break;
+            }
         }
-        return amount;  
+        return amount;
     }
 
     public bool CreateCard(string input, Account account, Customer signedUpCustomer)
     {
-        CardView cardView= new CardView();
-            switch (input.ToLower())
-            {
-                case "y":
-                    Card card = cardView.CreateCard(CardType.DEBIT, account.ID, signedUpCustomer.ID);
-                    IGetCardDataManager GetCardDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IGetCardDataManager>();
-                    GetCardDataManager.GetAllCards(signedUpCustomer.ID);
-                    IInsertCardDataManager InsertCardDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IInsertCardDataManager>();
+        CardView cardView = new CardView();
+        switch (input.ToLower())
+        {
+            case "y":
+                Card card = cardView.CreateCard(CardType.DEBIT, account.ID, signedUpCustomer.ID);
+                IGetCardDataManager GetCardDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IGetCardDataManager>();
+                GetCardDataManager.GetAllCards(signedUpCustomer.ID);
+                IInsertCardDataManager InsertCardDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IInsertCardDataManager>();
 
                 if (InsertCardDataManager.InsertCard(card))
                 {
@@ -188,12 +213,12 @@ public class SignupView
                     Console.WriteLine();
                 }
                 return true;
-                case "n":
-                    return true;
-                default:
-                    Notification.Error(DependencyContainer.GetResource("InvalidInput"));
-                    return false;
-            }
+            case "n":
+                return true;
+            default:
+                Notification.Error(DependencyContainer.GetResource("InvalidInput"));
+                return false;
+        }
     }
 
     public bool CheckUniquePhoneNumber(string phoneNumber)
@@ -221,8 +246,12 @@ public class SignupView
         {
             IInsertCustomerDataManager InsertCustomerDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IInsertCustomerDataManager>();
             bool customerAdded = InsertCustomerDataManager.InsertCustomer(customer, password);
-            if (customerAdded) Notification.Success(DependencyContainer.GetResource("SignupSuccess"));
+            if (customerAdded)
+            {
+                Notification.Success(DependencyContainer.GetResource("SignupSuccess"));
+            }
         }
+
         else Notification.Error(DependencyContainer.GetResource("SignupFailure"));
     }
 
@@ -245,9 +274,12 @@ public class SignupView
         {
             Console.Write(label);
             string value = Console.ReadLine()?.Trim();
-            if (!string.IsNullOrEmpty(value) && Validator.IsValidPassword(value)) return value;
-            else if (value == DependencyContainer.GetResource("BackButton")) return null;
-            else Notification.Error(DependencyContainer.GetResource("InvalidPassword"));
+            if (!string.IsNullOrEmpty(value) && Validator.IsValidPassword(value)) { return value; }
+            else if (value == DependencyContainer.GetResource("BackButton")) { return null; }
+            else
+            {
+                Notification.Error(DependencyContainer.GetResource("InvalidPassword"));
+            }
         }
     }
 
@@ -257,28 +289,33 @@ public class SignupView
         {
             Console.Write(label);
             string value = Console.ReadLine()?.Trim();
-            if (value == DependencyContainer.GetResource("BackButton")) return null;
-            else if (!string.IsNullOrEmpty(value)) return value;
-            else return null;
+            if (value == DependencyContainer.GetResource("BackButton")) { return null; }
+            else if (!string.IsNullOrEmpty(value)) { return value; }
+            else { return null; }
         }
     }
 
     private string GetEmail()
     {
         string email;
-        Validator validation = new Validator();
         while (true)
         {
             Console.Write(DependencyContainer.GetResource("EnterEmail"));
             email = Console.ReadLine()?.Trim();
             if (email == DependencyContainer.GetResource("BackButton"))
-                email = null;
+            { email = null; }
             else if (string.IsNullOrEmpty(email))
-                Notification.Error(DependencyContainer.GetResource("EmptyFieldError"));
+            { Notification.Error(DependencyContainer.GetResource("EmptyFieldError")); }
             else
             {
-                if (validation.IsValidEmail(email)) break;
-                else Notification.Error(DependencyContainer.GetResource("InvalidEmail"));
+                if (Validator.IsValidEmail(email))
+                {
+                    break;
+                }
+                else
+                {
+                    Notification.Error(DependencyContainer.GetResource("InvalidEmail"));
+                }
             }
         }
         return email;
@@ -292,11 +329,17 @@ public class SignupView
             string rePassword = GetPassword(DependencyContainer.GetResource("EnterRePassword"));
 
             if (rePassword == null)
+            {
                 break;
+            }
             if (password.Equals(rePassword) && rePassword != null)
+            {
                 return true;
+            }
             else
+            {
                 Notification.Error(DependencyContainer.GetResource("PasswordMismatch"));
+            }
         }
         return false;
     }

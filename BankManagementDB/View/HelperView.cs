@@ -18,8 +18,14 @@ namespace BankManagementDB.View
                 {
                     Console.Write(DependencyContainer.GetResource("EnterAmount"));
                     decimal amount = decimal.Parse(Console.ReadLine()?.Trim());
-                    if (amount < 0) Notification.Error(DependencyContainer.GetResource("PositiveAmountWarning"));
-                    else return amount;
+                    if (amount < 0)
+                    {
+                        Notification.Error(DependencyContainer.GetResource("PositiveAmountWarning"));
+                    }
+                    else
+                    {
+                        return amount;
+                    }
                 }
             }
             catch (Exception error)
@@ -57,7 +63,9 @@ namespace BankManagementDB.View
             string password = passwordBuilder.ToString();
 
             if (!string.IsNullOrEmpty(password) && password != DependencyContainer.GetResource("BackButton"))
+            {
                 return password;
+            }
 
             return null;
         }
@@ -65,7 +73,9 @@ namespace BankManagementDB.View
         public void PerformOperation<T>(OptionsDelegate<T> function)
         {
             if (function == null)
+            {
                 throw new ArgumentNullException(DependencyContainer.GetResource("NullDelegateException"));
+            }
             else
             {
                 while (true)
@@ -81,22 +91,28 @@ namespace BankManagementDB.View
                     string option = Console.ReadLine()?.Trim();
                     Console.WriteLine();
                     if (!int.TryParse(option, out int entryOption))
+                    {
                         Notification.Error(DependencyContainer.GetResource("InvalidInteger"));
-
+                    }
                     else
                     {
                         if (entryOption == 0)
+                        {
                             break;
-
+                        }
                         else if (entryOption <= Enum.GetNames(typeof(T)).Count())
                         {
                             T cases = (T)(object)(entryOption - 1);
                             if (function(cases))
+                            {
                                 break;
+                            }
                         }
 
                         else
+                        {
                             Notification.Error(DependencyContainer.GetResource("InvalidOption"));
+                        }
                     }
                 }
             }

@@ -44,7 +44,9 @@ namespace BankManagementDB.View
                         }
                     }
                     else
+                    {
                         Notification.Error(DependencyContainer.GetResource("PhoneNotRegistered"));
+                    }
                 }
             }
             catch(Exception ex) {
@@ -80,11 +82,11 @@ namespace BankManagementDB.View
                 Validator validation = new Validator();
 
                 if (phoneNumber == DependencyContainer.GetResource("BackButton"))
-                    break;
+                { break; }
                 else if (validation.IsPhoneNumber(phoneNumber))
-                    return phoneNumber;
+                { return phoneNumber; }
                 else
-                    Notification.Error(DependencyContainer.GetResource("InvalidPhoneNumber"));
+                { Notification.Error(DependencyContainer.GetResource("InvalidPhoneNumber")); }
             }
             return null;
         }
@@ -95,7 +97,10 @@ namespace BankManagementDB.View
             IGetCustomerCredentialsDataManager customerCredentialsDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IGetCustomerCredentialsDataManager>();
             CustomerCredentials customerCredentials = customerCredentialsDataManager.GetCustomerCredentials(customer.ID);
             isValidated = ValidatePassword(customerCredentials, password);
-            if (!isValidated) Notification.Error(DependencyContainer.GetResource("PasswordIncorrect"));
+            if (!isValidated)
+            {
+                Notification.Error(DependencyContainer.GetResource("PasswordIncorrect"));
+            }
             return isValidated;
 
         }
@@ -104,7 +109,9 @@ namespace BankManagementDB.View
         {
             string hashedInput = AuthServices.HashPassword(password, customerCredentials.Salt);
             if (customerCredentials != null)
+            {
                 return hashedInput.Equals(customerCredentials.Password) ? true : false;
+            }
             return false;
         }
 

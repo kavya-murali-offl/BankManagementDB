@@ -37,16 +37,18 @@ namespace BankManagementDB.View
                 ToAccountNumber = toAccountNumber,
                 RecordedOn = DateTime.Now,
             };
-            
+
             IInsertTransactionDataManager InsertTransactionDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IInsertTransactionDataManager>();
             return InsertTransactionDataManager.InsertTransaction(transaction);
         }
 
         public bool ViewAllTransactions()
         {
-                IEnumerable<Transaction> statements = Store.TransactionsList;
-                foreach (Transaction transaction in statements)
-                    Console.WriteLine(transaction);
+            IEnumerable<Transaction> statements = Store.TransactionsList;
+            foreach (Transaction transaction in statements)
+            {
+                Console.WriteLine(transaction);
+            }
 
             return false;
         }

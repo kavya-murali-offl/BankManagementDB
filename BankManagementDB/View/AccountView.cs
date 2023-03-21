@@ -64,18 +64,26 @@ namespace BankManagementDB.View
                 if (cardsView.ValidateModeOfPayment(SelectedAccount.ID, modeOfPayment))
                 {
                     if (modeOfPayment == ModeOfPayment.CASH)
+                    {
                         isAuthenticated = true;
+                    }
                     else if (modeOfPayment == ModeOfPayment.DEBIT_CARD || modeOfPayment == ModeOfPayment.CREDIT_CARD)
                     {
                         cardNumber = cardsView.GetCardNumber();
                         if (cardNumber != null)
+                        {
                             isAuthenticated = IsAuthenticated(modeOfPayment, cardNumber);
+                        }
                     }
                     if (!isAuthenticated)
+                    {
                         Notification.Error(DependencyContainer.GetResource("CardVerificationFailed"));
+                    }
                 }
                 else
+                {
                     Notification.Error(DependencyContainer.GetResource("PaymentModeNotEnabled"));
+                }
             }
 
             if (isAuthenticated)
@@ -114,16 +122,28 @@ namespace BankManagementDB.View
             Console.WriteLine(DependencyContainer.GetResource("ModeOfPayments") + "\n");
             input = Console.ReadLine()?.Trim();
             Console.WriteLine();
-            if (input == DependencyContainer.GetResource("BackButton")) modeOfPayment = ModeOfPayment.DEFAULT;
-            else if (input == "1") modeOfPayment = ModeOfPayment.CASH;
-            else if (input == "2") modeOfPayment = ModeOfPayment.DEBIT_CARD;
+            if (input == DependencyContainer.GetResource("BackButton"))
+            {
+                modeOfPayment = ModeOfPayment.DEFAULT;
+            }
+            else if (input == "1")
+            {
+                modeOfPayment = ModeOfPayment.CASH;
+            }
+            else if (input == "2")
+            {
+                modeOfPayment = ModeOfPayment.DEBIT_CARD;
+            }
+
             return modeOfPayment;
         }
 
         public bool Withdraw(decimal amount, ModeOfPayment modeOfPayment, string cardNumber)
         {
             if (amount > SelectedAccount.Balance)
+            {
                 Notification.Error(DependencyContainer.GetResource("InsufficientBalance"));
+            }
             else
             {
                 WithdrawHandlers();
@@ -144,10 +164,14 @@ namespace BankManagementDB.View
         private void WithdrawHandlers()
         {
             if (SelectedAccount is SavingsAccount)
+            {
                 DepositInterest(SelectedAccount as SavingsAccount);
+            }
 
             else if (SelectedAccount is CurrentAccount)
+            {
                 ChargeForMinBalance(SelectedAccount as CurrentAccount);
+            }
         }
 
         private void ChargeForMinBalance(CurrentAccount currentAccount)
@@ -177,7 +201,10 @@ namespace BankManagementDB.View
 
         public void Transfer(decimal amount, ModeOfPayment modeOfPayment, string cardNumber)
         {
-            if (amount > SelectedAccount.Balance) Notification.Error(DependencyContainer.GetResource("InsufficientBalance"));
+            if (amount > SelectedAccount.Balance)
+            {
+                Notification.Error(DependencyContainer.GetResource("InsufficientBalance"));
+            }
             else
             {
                 Account transferAccount = GetTransferAccount(SelectedAccount.AccountNumber);
@@ -198,7 +225,9 @@ namespace BankManagementDB.View
                         }
                     }
                     else
+                    {
                         Notification.Error(DependencyContainer.GetResource("TransferFailure"));
+                    }
                 }
             }
         }
@@ -214,9 +243,13 @@ namespace BankManagementDB.View
             CardView cardsView = new CardView();
 
             if (modeOfPayment == ModeOfPayment.CASH)
+            {
                 return true;
+            }
             else
+            {
                 return cardsView.Authenticate(cardNumber);
+            }
         }
 
         public bool Deposit(decimal amount, ModeOfPayment modeOfPayment, string cardNumber)
@@ -228,7 +261,9 @@ namespace BankManagementDB.View
                 return true;
             }
             else
+            {
                 Notification.Error(DependencyContainer.GetResource("DepositFailure"));
+            }
             return false;
         }
 
@@ -239,11 +274,13 @@ namespace BankManagementDB.View
                 Console.Write(DependencyContainer.GetResource("EnterTransferAccountNumber"));
                 string transferAccountNumber = Console.ReadLine()?.Trim();
                 if (transferAccountNumber == DependencyContainer.GetResource("BackButton"))
-                    break;
+                { break; }
                 else
                 {
                     if (accountNumber == transferAccountNumber)
+                    {
                         Notification.Error(DependencyContainer.GetResource("ChooseDifferentTransferAccount"));
+                    }
                     else
                     {
                         Account transferAccount = Store.GetAccountByAccountNumber(transferAccountNumber);
@@ -252,7 +289,10 @@ namespace BankManagementDB.View
                             Notification.Error(DependencyContainer.GetResource("InvalidAccountNumber"));
                             break;
                         }
-                        else return transferAccount;
+                        else
+                        {
+                            return transferAccount;
+                        }
                     }
                 }
             }
@@ -287,7 +327,6 @@ namespace BankManagementDB.View
             OptionsDelegate<AccountCases> options = AccountOperations;
             HelperView helperView = new HelperView();
             helperView.PerformOperation(options);
-
         }
 
         public bool AccountOperations(AccountCases command) =>
@@ -349,14 +388,16 @@ namespace BankManagementDB.View
                 Console.Write(DependencyContainer.GetResource("EnterAccountNumber"));
                 string accountNumber = Console.ReadLine()?.Trim();
                 if (accountNumber == DependencyContainer.GetResource("BackButton"))
-                    break;
+                { break; }
                 else
                 {
                     Account account = Store.GetAccountByAccountNumber(accountNumber);
                     if (account == null)
-                        Notification.Error(DependencyContainer.GetResource("InvalidAccountNumber"));
+                    { Notification.Error(DependencyContainer.GetResource("InvalidAccountNumber")); }
                     else
+                    {
                         return account;
+                    }
                 }
             }
             return null;

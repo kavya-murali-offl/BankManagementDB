@@ -81,12 +81,20 @@ namespace BankManagementDB.View
             if (cardNumber != null)
             {
                 if (Store.IsCreditCard(cardNumber))
+                {
                     if (cardView.Authenticate(cardNumber))
+                    {
                         return true;
+                    }
                     else
+                    {
                         Notification.Error(DependencyContainer.GetResource("InvalidPin"));
+                    }
+                }
                 else
+                {
                     Notification.Error(DependencyContainer.GetResource("InvalidCreditCardNumber"));
+                }
             }
             return false;
         }
@@ -117,10 +125,14 @@ namespace BankManagementDB.View
                                 bool isTransacted = transactionView.RecordTransaction("Purchase", amount, creditCard.TotalDueAmount, TransactionType.PURCHASE, null, ModeOfPayment.CREDIT_CARD, creditCard.CardNumber, recipient);
                             }
                             else
+                            {
                                 Notification.Error(DependencyContainer.GetResource("PurchaseFailure"));
+                            }
                         }
                         else
+                        {
                             Notification.Error(DependencyContainer.GetResource("CreditLimitReached"));
+                        }
                     }
                 }
             }
@@ -149,7 +161,9 @@ namespace BankManagementDB.View
                         decimal amount = helperView.GetAmount();
                         AccountView.SelectedAccount = account;
                         if (amount > 0)
-                            if(accountView.Withdraw(amount, ModeOfPayment.DEBIT_CARD, creditCard.CardNumber))
+                        {
+                            if (accountView.Withdraw(amount, ModeOfPayment.DEBIT_CARD, creditCard.CardNumber))
+                            {
                                 if (UpdateDueAmount(CreditCardCases.PAYMENT, creditCard, amount))
                                 {
                                     Notification.Success(DependencyContainer.GetResource("PaymentSuccess"));
@@ -157,7 +171,11 @@ namespace BankManagementDB.View
                                     bool isTransacted = transactionView.RecordTransaction("Payment", amount, creditCard.TotalDueAmount, TransactionType.PAYMENT, account.AccountNumber, ModeOfPayment.CREDIT_CARD, creditCard.CardNumber, null);
                                 }
                                 else
+                                {
                                     Notification.Error(DependencyContainer.GetResource("PaymentFailure"));
+                                }
+                            }
+                        }
                     }
                 }
             }

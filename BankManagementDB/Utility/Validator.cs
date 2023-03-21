@@ -15,7 +15,7 @@ namespace BankManagementDB.Utility
         }
 
 
-        public bool IsValidEmail(string email)
+        public static bool IsValidEmail(string email)
         {
             if (string.IsNullOrWhiteSpace(email) || string.IsNullOrEmpty(email))
                 return false;
@@ -64,6 +64,6 @@ namespace BankManagementDB.Utility
 
         public static bool IsValidGuid(string str) =>  Guid.TryParse(str, out Guid guid);
 
-        public static bool IsValidAge(int age) => age > 18;
+        public static bool IsValidAge(int age) => age > 18 && age < 120;
     }
 }

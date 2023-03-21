@@ -52,6 +52,7 @@ namespace BankManagementDB.Config
                 .AddJsonFile("appsettings.json")
                 .AddEnvironmentVariables()
                 .Build();
+
             return serviceCollection;
         }
 
@@ -61,10 +62,10 @@ namespace BankManagementDB.Config
             var culture = CultureInfo.CurrentCulture;
 
             var resourceSet = manager.GetResourceSet(culture, true, false);
-            if (resourceSet == null)
-                resourceSet = manager.GetResourceSet(CultureInfo.InvariantCulture, true, false);
+            resourceSet ??= manager.GetResourceSet(CultureInfo.InvariantCulture, true, false);
 
             ResourceSet = resourceSet;
+
             return serviceCollection;
         }
 

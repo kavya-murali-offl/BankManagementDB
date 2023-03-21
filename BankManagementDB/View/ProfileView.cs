@@ -13,7 +13,7 @@ using BankManagementDB.Properties;
 using BankManagementDB.Utility;
 
 namespace BankManagementDB.View
-{ 
+{
 
     public class ProfileView
     {
@@ -57,48 +57,62 @@ namespace BankManagementDB.View
 
         private bool EditProfile()
         {
-                Customer currentUser = Store.CurrentUser;
-                Customer customer = (Customer)currentUser.Clone();
+            Customer currentUser = Store.CurrentUser;
+            Customer customer = (Customer)currentUser.Clone();
 
-                IDictionary<string, Action<string>> fields = new Dictionary<string, Action<string>>(){
+            IDictionary<string, Action<string>> fields = new Dictionary<string, Action<string>>(){
                      { "NAME", (value) => customer.Name = value },
                      { "AGE", (value) =>
                                 {
                                     if (int.TryParse(value, out int age))
-                                        if(age > 18)
+                                    {
+                                        if(Validator.IsValidAge(age))
+                                        {
                                             customer.Age = age;
+                                        }
                                         else
+                                        {
                                             Notification.Error(DependencyContainer.GetResource("AgeGreaterThan18"));
+                                        }
+                                    }
                                     else
+                                    {
                                         Notification.Error(DependencyContainer.GetResource("InvalidInteger"));
+                                    }
                                 }
                      }
-                };  
+                };
 
-                while (true)
+            while (true)
+            {
+                Console.WriteLine(DependencyContainer.GetResource("EnterName" + " ") + customer.Name);
+                Console.WriteLine(DependencyContainer.GetResource("EnterAge" + " ") + customer.Age);
+                Notification.Info(DependencyContainer.GetResource("AskFieldToEdit"));
+                Notification.Info(DependencyContainer.GetResource("PressBackButtonInfo"));
+
+                string field = Console.ReadLine()?.Trim().ToUpper();
+
+                if (fields.ContainsKey(field))
                 {
-                    Console.WriteLine(DependencyContainer.GetResource("EnterName") + customer.Name);
-                    Console.WriteLine(DependencyContainer.GetResource("EnterAge") +  customer.Age);
-                    Notification.Info(DependencyContainer.GetResource("AskFieldToEdit"));
-                    Notification.Info(DependencyContainer.GetResource("PressBackButtonInfo"));
-
-                    string field = Console.ReadLine()?.Trim().ToUpper();
-
-                    if (fields.ContainsKey(field))
-                    {
-                        Console.Write(DependencyContainer.GetResource("EnterNewValue"));
-                        string value = Console.ReadLine();
-                        fields[field](value);
-                    }
-                    else if (field == DependencyContainer.GetResource("BackButton"))
-                        break;
-                    else
-                        Notification.Error(DependencyContainer.GetResource("InvalidOption"));
+                    Console.Write(DependencyContainer.GetResource("EnterNewValue"));
+                    string value = Console.ReadLine();
+                    fields[field](value);
                 }
+                else if (field == DependencyContainer.GetResource("BackButton"))
+                {
+                    break;
+                }
+                else
+                {
+                    Notification.Error(DependencyContainer.GetResource("InvalidOption"));
+                }
+            }
 
 
-                if (!customer.Name.Equals(currentUser.Name) || !customer.Age.Equals(currentUser.Age))
-                    UpdateProfile(customer);
+            if (!customer.Name.Equals(currentUser.Name) || !customer.Age.Equals(currentUser.Age))
+            {
+                UpdateProfile(customer);
+            }
             return false;
 
         }
@@ -106,16 +120,18 @@ namespace BankManagementDB.View
 
         public void UpdateProfile(Customer updatedCustomer)
         {
-                IUpdateCustomerDataManager UpdateCustomerDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IUpdateCustomerDataManager>();
+            IUpdateCustomerDataManager UpdateCustomerDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IUpdateCustomerDataManager>();
 
-                if (UpdateCustomerDataManager.UpdateCustomer(updatedCustomer))
-                {
-                    Notification.Success(DependencyContainer.GetResource("ProfileUpdateSuccess"));
-                    Store.CurrentUser = updatedCustomer;
-                }
-                else
-                    Notification.Error(DependencyContainer.GetResource("ProfileUpdateFailure"));
-           
+            if (UpdateCustomerDataManager.UpdateCustomer(updatedCustomer))
+            {
+                Notification.Success(DependencyContainer.GetResource("ProfileUpdateSuccess"));
+                Store.CurrentUser = updatedCustomer;
+            }
+            else
+            {
+                Notification.Error(DependencyContainer.GetResource("ProfileUpdateFailure"));
+            }
+
         }
 
     }

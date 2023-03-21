@@ -16,7 +16,6 @@ namespace BankManagementDB.View
 
     public class DashboardView
     {
-
         public void ViewDashboard()
         {
             try
@@ -105,23 +104,29 @@ namespace BankManagementDB.View
                         HelperView helperView = new HelperView();
                         decimal amount = helperView.GetAmount();
                         if (amount == 0)
+                        {
                             break;
+                        }
                         else if (amount > account.MinimumBalance)
                         {
                             accountView.Deposit(amount, ModeOfPayment.CASH, null);
                             break;
                         }
                         else
+                        {
                             Notification.Warning(Formatter.FormatString(DependencyContainer.GetResource("InitialDepositAmountWarning"), account.MinimumBalance));
+                        }
                     }
                 }
                 Notification.Success(DependencyContainer.GetResource("AccountInsertSuccess"));
             }
             else
+            {
                 Notification.Error(DependencyContainer.GetResource("AccountInsertFailure"));
+            }
         }
 
-       
+
 
         private bool GoToAccount()
         {
@@ -133,8 +138,9 @@ namespace BankManagementDB.View
                 Account transactionAccount = ChooseAccountForTransaction();
 
                 if (transactionAccount != null)
+                {
                     accountView.GoToAccount(transactionAccount);
-
+                }
                 break;
             }
             return false;
@@ -143,53 +149,61 @@ namespace BankManagementDB.View
 
         public Account ChooseAccountForTransaction()
         {
-                int accountIndex;
-                IEnumerable<Account> accountsList = Store.AccountsList;
+            int accountIndex;
+            IEnumerable<Account> accountsList = Store.AccountsList;
 
-                if (accountsList.Count() == 1)
-                    accountIndex = 1;
-                else
+            if (accountsList.Count() == 1)
+            {
+                accountIndex = 1;
+            }
+            else
+            {
+                while (true)
                 {
-                    while (true)
-                    {
-                        ListAccountIDs(accountsList);
-                        Notification.Info(DependencyContainer.GetResource("ChooseAccount"));
-                        Notification.Info(DependencyContainer.GetResource("PressBackButtonInfo"));
-                        string index = Console.ReadLine()?.Trim();
-                        Console.WriteLine();
-                        if (!int.TryParse(index, out accountIndex))
-                            Notification.Error(DependencyContainer.GetResource("InvalidInteger"));
-                        else if (accountIndex > accountsList.Count())
-                            Notification.Error(DependencyContainer.GetResource("ChooseOnlyFromOptions"));
-                        else if (accountIndex <= accountsList.Count())
-                            break;
-                    }
+                    ListAccountIDs(accountsList);
+                    Notification.Info(DependencyContainer.GetResource("ChooseAccount"));
+                    Notification.Info(DependencyContainer.GetResource("PressBackButtonInfo"));
+                    string index = Console.ReadLine()?.Trim();
+                    Console.WriteLine();
+                    if (!int.TryParse(index, out accountIndex))
+                    { Notification.Error(DependencyContainer.GetResource("InvalidInteger")); }
+                    else if (accountIndex > accountsList.Count())
+                    { Notification.Error(DependencyContainer.GetResource("ChooseOnlyFromOptions")); }
+                    else if (accountIndex <= accountsList.Count())
+                    { break; }
                 }
+            }
 
-                if (accountIndex > 0)
-                    return accountsList.First();
+            if (accountIndex > 0)
+            {
+                return accountsList.First();
+            }
 
             return null;
         }
 
         private bool ListAllAccounts()
         {
-                foreach (Account account in Store.AccountsList)
-                    Console.WriteLine(account);
+            foreach (Account account in Store.AccountsList)
+            {
+                Console.WriteLine(account);
+            }
 
             return false;
         }
 
         private void SaveCustomerSession()
         {
-                IUpdateCustomerDataManager updateCustomerDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IUpdateCustomerDataManager>();
-                updateCustomerDataManager.UpdateCustomer(Store.CurrentUser);
+            IUpdateCustomerDataManager updateCustomerDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IUpdateCustomerDataManager>();
+            updateCustomerDataManager.UpdateCustomer(Store.CurrentUser);
         }
 
         public void ListAccountIDs(IEnumerable<Account> accounts)
         {
             for (int i = 0; i < accounts.Count(); i++)
+            {
                 Notification.Info(i + 1 + ". " + accounts.ElementAt(i).AccountNumber);
+            }
         }
     }
 }
