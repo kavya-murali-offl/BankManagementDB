@@ -22,6 +22,7 @@ namespace BankManagementDB.EnumerationType
         LIST_ACCOUNTS,
         ACCOUNT_SERVICES,
         CARD_SERVICES,
+        EXIT,
         SIGN_OUT
     }
 
@@ -29,6 +30,7 @@ namespace BankManagementDB.EnumerationType
     {
         VIEW_PROFILE,
         EDIT_PROFILE,
+        GO_BACK,
         EXIT
     }
 
@@ -41,7 +43,8 @@ namespace BankManagementDB.EnumerationType
         VIEW_STATEMENT,
         PRINT_STATEMENT,
         VIEW_ACCOUNT_DETAILS,
-        BACK
+        GO_BACK,
+        EXIT
     }
 
     public enum CardCases
@@ -51,6 +54,7 @@ namespace BankManagementDB.EnumerationType
         RESET_PIN,
         VIEW_TRANSACTIONS,
         CREDIT_CARD_SERVICES,
+        GO_BACK,
         EXIT
     }
 
@@ -58,13 +62,7 @@ namespace BankManagementDB.EnumerationType
     {
         PURCHASE,
         PAYMENT,
+        GO_BACK,
         EXIT
-    }
-
-    public enum MoneyServices
-    {
-        CASH,
-        CREDIT_CARD,
-        DEBIT_CARD,
     }
 }

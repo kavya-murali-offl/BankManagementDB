@@ -4,6 +4,7 @@ using BankManagementDB.Utility;
 using BankManagementDB.View;
 using SQLite;
 using System;
+using BankManagementDB.Properties;
 
 namespace BankManagementDB.Models
 {
@@ -38,6 +39,6 @@ namespace BankManagementDB.Models
             Balance -= amount;
         }
 
-        public override string ToString() => Formatter.FormatString(DependencyContainer.GetResource("DisplayAccount"), AccountNumber, Type, Status);
+        public override string ToString() => Formatter.FormatString(Resources.DisplayAccount, AccountNumber, Type, Status);
     }
 }

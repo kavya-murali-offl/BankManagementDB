@@ -32,14 +32,21 @@ namespace BankManagementDB.View
 
                 ProfileServiceCases.VIEW_PROFILE => ViewProfile(),
                 ProfileServiceCases.EDIT_PROFILE => EditProfile(),
-                ProfileServiceCases.EXIT => true,
+                ProfileServiceCases.GO_BACK => true,
+                ProfileServiceCases.EXIT => Exit(),
                 _ => Default(),
 
             };
 
+        private bool Exit()
+        {
+            Environment.Exit(0);
+            return true;
+        }
+
         private bool Default()
         {
-            Notification.Error(DependencyContainer.GetResource("InvalidOption"));
+            Notification.Error(Resources.InvalidOption);
             return false;
         }
 
@@ -48,7 +55,7 @@ namespace BankManagementDB.View
             Customer currentUser = Store.CurrentUser;
             Notification.Info(
                 Formatter.FormatString(
-                    DependencyContainer.GetResource("DisplayProfile"),
+                    Resources.DisplayProfile,
                     currentUser.ToString(),
                     Store.AccountsList.Count())
                 );
@@ -72,12 +79,12 @@ namespace BankManagementDB.View
                                         }
                                         else
                                         {
-                                            Notification.Error(DependencyContainer.GetResource("AgeGreaterThan18"));
+                                            Notification.Error(Resources.AgeGreaterThan18);
                                         }
                                     }
                                     else
                                     {
-                                        Notification.Error(DependencyContainer.GetResource("InvalidInteger"));
+                                        Notification.Error(Resources.InvalidInteger);
                                     }
                                 }
                      }
@@ -85,26 +92,26 @@ namespace BankManagementDB.View
 
             while (true)
             {
-                Console.WriteLine(DependencyContainer.GetResource("EnterName" + " ") + customer.Name);
-                Console.WriteLine(DependencyContainer.GetResource("EnterAge" + " ") + customer.Age);
-                Notification.Info(DependencyContainer.GetResource("AskFieldToEdit"));
-                Notification.Info(DependencyContainer.GetResource("PressBackButtonInfo"));
+                Console.WriteLine(Resources.Name + ": " + customer.Name);
+                Console.WriteLine(Resources.Age + ": " + customer.Age);
+                Notification.Info(Resources.AskFieldToEdit);
+                Notification.Info(Resources.PressBackButtonInfo);
 
                 string field = Console.ReadLine()?.Trim().ToUpper();
 
                 if (fields.ContainsKey(field))
                 {
-                    Console.Write(DependencyContainer.GetResource("EnterNewValue"));
+                    Console.Write(Resources.NewValue);
                     string value = Console.ReadLine();
                     fields[field](value);
                 }
-                else if (field == DependencyContainer.GetResource("BackButton"))
+                else if (field == Resources.BackButton)
                 {
                     break;
                 }
                 else
                 {
-                    Notification.Error(DependencyContainer.GetResource("InvalidOption"));
+                    Notification.Error(Resources.InvalidOption);
                 }
             }
 
@@ -124,12 +131,12 @@ namespace BankManagementDB.View
 
             if (UpdateCustomerDataManager.UpdateCustomer(updatedCustomer))
             {
-                Notification.Success(DependencyContainer.GetResource("ProfileUpdateSuccess"));
+                Notification.Success(Resources.ProfileUpdateSuccess);
                 Store.CurrentUser = updatedCustomer;
             }
             else
             {
-                Notification.Error(DependencyContainer.GetResource("ProfileUpdateFailure"));
+                Notification.Error(Resources.ProfileUpdateFailure);
             }
 
         }

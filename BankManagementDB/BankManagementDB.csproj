@@ -206,7 +206,7 @@
     <Compile Include="Data\DataManager\Interfaces\IInsertSavingsAccountDataManager.cs" />
     <Compile Include="Data\DataManager\InsertCurrentAccountDataManager.cs" />
     <Compile Include="Data\DataManager\InsertSavingsAccountDataManager.cs" />
-    <Compile Include="DependencyInjector\DependencyContainer.cs" />
+    <Compile Include="Data\DependencyInjector\DependencyContainer.cs" />
     <Compile Include="Constants\Constants.cs" />
     <Compile Include="Data\DataAdapter\DatabaseAdapter\SQLiteDatabaseAdapter.cs" />
     <Compile Include="Data\DataManager\GetAccountDataManager.cs" />
@@ -228,10 +228,18 @@
     <Compile Include="Data\DataManager\UpdateCustomerDataManager.cs" />
     <Compile Include="Data\Store.cs" />
     <Compile Include="Data\DataHandler\DBHandler\DBHandler.cs" />
-    <Compile Include="Domain\UseCase\LoginUser\LoginUserRequest.cs" />
-    <Compile Include="Domain\UseCase\LoginUser\LoginUserResponse.cs" />
-    <Compile Include="Domain\UseCase\LoginUser\LoginUserUseCase.cs" />
+    <Compile Include="Domain\EventsArgs\LoginCustomerEventArgs.cs" />
+    <Compile Include="Domain\UseCase\IPresenterCallback.cs" />
+    <Compile Include="Domain\UseCase\IUseCaseCallback.cs" />
+    <Compile Include="Domain\UseCase\LoginUser\LoginCustomerPresenterCallback.cs" />
+    <Compile Include="Domain\UseCase\LoginUser\LoginCustomerRequest.cs" />
+    <Compile Include="Domain\UseCase\LoginUser\LoginCustomerResponse.cs" />
+    <Compile Include="Domain\UseCase\LoginUser\LoginCustomerUseCase.cs" />
+    <Compile Include="Domain\UseCase\SignupCustomer\SignupCustomerRequest.cs" />
+    <Compile Include="Domain\UseCase\SignupCustomer\SignupCustomerResponse.cs" />
+    <Compile Include="Domain\UseCase\SignupCustomer\SignupCustomerUseCase.cs" />
     <Compile Include="Domain\UseCase\UseCaseBase.cs" />
+    <Compile Include="Domain\UseCase\ZError.cs" />
     <Compile Include="Entity\CurrentAccountDTO.cs" />
     <Compile Include="Entity\SavingsAccountDTO.cs" />
     <Compile Include="EnumerationTypes\CardType.cs" />
@@ -267,6 +275,9 @@
     <Compile Include="Entity\CustomerCredentials.cs" />
     <Compile Include="Entity\DebitCard.cs" />
     <Compile Include="Entity\DebitCardDTO.cs" />
+    <Compile Include="Events\AppEvents.cs" />
+    <Compile Include="Presentation\ViewModel\LoginViewModel.cs" />
+    <Compile Include="Presentation\ViewModel\ViewModelBase.cs" />
     <Compile Include="Properties\Resources.en-IN.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -293,21 +304,21 @@
     <Compile Include="Utility\Mapper.cs" />
     <Compile Include="Utility\RandomGenerator.cs" />
     <Compile Include="Utility\Helper.cs" />
-    <Compile Include="ViewModel\SignupViewModel.cs" />
-    <Compile Include="View\HelperView.cs" />
-    <Compile Include="View\CreditCardView.cs" />
+    <Compile Include="Presentation\ViewModel\SignupViewModel.cs" />
+    <Compile Include="Presentation\View\HelperView.cs" />
+    <Compile Include="Presentation\View\CreditCardView.cs" />
     <Compile Include="Data\DataManager\Interfaces\IInsertCardDataManager.cs" />
-    <Compile Include="View\Printer.cs" />
+    <Compile Include="Presentation\View\Printer.cs" />
     <Compile Include="Utility\Validator.cs" />
-    <Compile Include="View\AccountView.cs" />
-    <Compile Include="View\CardView.cs" />
-    <Compile Include="View\DashboardView.cs" />
-    <Compile Include="View\EntryView.cs" />
-    <Compile Include="View\LoginView.cs" />
-    <Compile Include="View\Notification.cs" />
-    <Compile Include="View\ProfileView.cs" />
-    <Compile Include="View\SignupView.cs" />
-    <Compile Include="View\TransactionView.cs" />
+    <Compile Include="Presentation\View\AccountView.cs" />
+    <Compile Include="Presentation\View\CardView.cs" />
+    <Compile Include="Presentation\View\DashboardView.cs" />
+    <Compile Include="Presentation\View\EntryView.cs" />
+    <Compile Include="Presentation\View\LoginView.cs" />
+    <Compile Include="Presentation\View\Notification.cs" />
+    <Compile Include="Presentation\View\ProfileView.cs" />
+    <Compile Include="Presentation\View\SignupView.cs" />
+    <Compile Include="Presentation\View\TransactionView.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -328,7 +339,9 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Domain\Contracts\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

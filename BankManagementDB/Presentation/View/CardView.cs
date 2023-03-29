@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using BankManagementDB.Utility;
 using BankManagementDB.Data;
 using BankManagementDB.DataManager;
+using BankManagementDB.Properties;
 
 namespace BankManagementDB.View
 {
@@ -46,14 +47,20 @@ namespace BankManagementDB.View
                 CardCases.RESET_PIN => ResetPin(),
                 CardCases.VIEW_TRANSACTIONS => ViewAllTransactions(),
                 CardCases.CREDIT_CARD_SERVICES => GoToCreditCardServices(),
-                CardCases.EXIT => true,
+                CardCases.GO_BACK => true,
+                CardCases.EXIT => Exit(),
                 _ => Default()
             };
 
+        private bool Exit()
+        {
+            Environment.Exit(0);
+            return true;
+        }
 
         private bool Default()
         {
-            Notification.Error(DependencyContainer.GetResource("InvalidOption"));
+            Notification.Error(Resources.InvalidOption);
             return false;
         }
 
@@ -86,7 +93,7 @@ namespace BankManagementDB.View
 
         private bool AddCard()
         {
-            Notification.Info(DependencyContainer.GetResource("PressBackButtonInfo"));
+            Notification.Info(Resources.PressBackButtonInfo);
 
             OptionsDelegate <CardType> optionsDelegate = CreateCardBasedOnType;
 
@@ -102,20 +109,20 @@ namespace BankManagementDB.View
 
             if (cardType == CardType.DEBIT)
             {
-                Console.Write(DependencyContainer.GetResource("EnterAccountNumber"));
+                Console.Write(Resources.AccountNumber + ": ");
                 string accountNumber = Console.ReadLine()?.Trim();
-                if (accountNumber != DependencyContainer.GetResource("BackButton"))
+                if (accountNumber != Resources.BackButton)
                 {
                     Account account = Store.GetAccountByAccountNumber(accountNumber);
                     if (account == null)
                     {
-                        Notification.Error(DependencyContainer.GetResource("InvalidAccountNumber"));
+                        Notification.Error(Resources.InvalidAccountNumber);
                     }
                     else
                     {
                         if (Store.IsDebitCardLinked(account.ID))
                         {
-                            Notification.Error(DependencyContainer.GetResource("DebitCardLinkedError"));
+                            Notification.Error(Resources.DebitCardLinkedError);
                         }
                         else
                         {
@@ -156,9 +163,9 @@ namespace BankManagementDB.View
                         });
                 }
 
-                Notification.Success(DependencyContainer.GetResource("CardInsertSuccess"));
+                Notification.Success(Resources.CardInsertSuccess);
                 Console.WriteLine(card);
-                Console.WriteLine(Formatter.FormatString(DependencyContainer.GetResource("PinDisplay"), card.Pin));
+                Console.WriteLine(Formatter.FormatString(Resources.PinDisplay, card.Pin));
                 Console.WriteLine();
                 IGetCardDataManager GetCardDataManager = DependencyContainer.ServiceProvider.GetRequiredService<IGetCardDataManager>();
 
@@ -166,7 +173,7 @@ namespace BankManagementDB.View
             }
             else
             {
-                Notification.Error(DependencyContainer.GetResource("CardInsertFailure"));
+                Notification.Error(Resources.CardInsertFailure);
             }
         }
 
@@ -204,11 +211,11 @@ namespace BankManagementDB.View
 
                             if (UpdateCardDataManager.UpdateCard(card))
                             {
-                                Notification.Success(DependencyContainer.GetResource("ResetPinSuccess"));
+                                Notification.Success(Resources.ResetPinSuccess);
                             }
                             else
                             {
-                                Notification.Error(DependencyContainer.GetResource("ResetPinFailure"));
+                                Notification.Error(Resources.ResetPinFailure);
                             }
                         }
                         else
@@ -233,9 +240,9 @@ namespace BankManagementDB.View
         {
             while (true)
             {
-                Console.Write(DependencyContainer.GetResource("EnterCardNumber"));
+                Console.Write(Resources.CardNumber + ": ");
                 string cardNumber = Console.ReadLine()?.Trim();
-                if (cardNumber == DependencyContainer.GetResource("BackButton"))
+                if (cardNumber == Resources.BackButton)
                 { return null; }
                 else
                 {
@@ -243,7 +250,7 @@ namespace BankManagementDB.View
                         return cardNumber;
                     }
                     else {
-                        Notification.Error(DependencyContainer.GetResource("CardNumberNotExist")); 
+                        Notification.Error(Resources.CardNumberNotExist); 
                     }
                 }
             }
@@ -254,9 +261,9 @@ namespace BankManagementDB.View
             Validator validation = new Validator();
             while (true)
             {
-                Console.Write(DependencyContainer.GetResource("EnterNewPin"));
+                Console.Write(Resources.NewPin + ": ");
                 string pin = Console.ReadLine()?.Trim();
-                if (pin == DependencyContainer.GetResource("BackButton"))
+                if (pin == Resources.BackButton)
                 {
                     return null;
                 }
@@ -266,7 +273,7 @@ namespace BankManagementDB.View
                 }
                 else
                 {
-                    Notification.Error(DependencyContainer.GetResource("InvalidPin"));
+                    Notification.Error(Resources.InvalidPin);
                 }
             }
         }
@@ -276,7 +283,7 @@ namespace BankManagementDB.View
             IEnumerable<Card> cards = Store.GetCardsList();
             if (cards.Count() == 0)
             {
-                Notification.Info(DependencyContainer.GetResource("NoCardsLinked"));
+                Notification.Info(Resources.NoCardsLinked);
             }
             foreach (Card card in cards)
             {
@@ -305,7 +312,7 @@ namespace BankManagementDB.View
             if (Store.IsCardNumber(cardNumber))
             {
                 Validator validation = new Validator();
-                Console.Write(DependencyContainer.GetResource("EnterPin"));
+                Console.Write(Resources.Pin + ": ");
                 string pin = Console.ReadLine()?.Trim();
                 if (validation.IsValidPin(pin))
                 {
@@ -314,7 +321,7 @@ namespace BankManagementDB.View
             }
             else
             {
-                Notification.Error(DependencyContainer.GetResource("CardNumberNotExist"));
+                Notification.Error(Resources.CardNumberNotExist);
             }
 
             return false;

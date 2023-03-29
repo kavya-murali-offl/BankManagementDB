@@ -42,6 +42,7 @@ namespace BankManagementDB.View
             DashboardCases.LIST_ACCOUNTS => ListAllAccounts(),
             DashboardCases.ACCOUNT_SERVICES => GoToAccount(),
             DashboardCases.CARD_SERVICES => GoToCardServices(),
+            DashboardCases.EXIT => Exit(),
             DashboardCases.SIGN_OUT => Signout(),
             _ => Default()
         };
@@ -49,8 +50,14 @@ namespace BankManagementDB.View
 
         private bool Default()
         {
-            Notification.Error(DependencyContainer.GetResource("InvalidOption"));
+            Notification.Error(Resources.InvalidOption);
             return false;
+        }
+
+        private bool Exit()
+        {
+            Environment.Exit(0);
+            return true;
         }
 
         public bool GoToProfileServices()
@@ -64,7 +71,7 @@ namespace BankManagementDB.View
         {
             SaveCustomerSession();
             Store.CurrentUser = null;
-            Notification.Success(DependencyContainer.GetResource("LogoutSuccess"));
+            Notification.Success(Resources.LogoutSuccess);
             return true;
         }
 
@@ -114,15 +121,15 @@ namespace BankManagementDB.View
                         }
                         else
                         {
-                            Notification.Warning(Formatter.FormatString(DependencyContainer.GetResource("InitialDepositAmountWarning"), account.MinimumBalance));
+                            Notification.Warning(Formatter.FormatString(Resources.InitialDepositAmountWarning, account.MinimumBalance));
                         }
                     }
                 }
-                Notification.Success(DependencyContainer.GetResource("AccountInsertSuccess"));
+                Notification.Success(Resources.AccountInsertSuccess);
             }
             else
             {
-                Notification.Error(DependencyContainer.GetResource("AccountInsertFailure"));
+                Notification.Error(Resources.AccountInsertFailure);
             }
         }
 
@@ -161,14 +168,14 @@ namespace BankManagementDB.View
                 while (true)
                 {
                     ListAccountIDs(accountsList);
-                    Notification.Info(DependencyContainer.GetResource("ChooseAccount"));
-                    Notification.Info(DependencyContainer.GetResource("PressBackButtonInfo"));
+                    Notification.Info(Resources.ChooseAccount);
+                    Notification.Info(Resources.PressBackButtonInfo);
                     string index = Console.ReadLine()?.Trim();
                     Console.WriteLine();
                     if (!int.TryParse(index, out accountIndex))
-                    { Notification.Error(DependencyContainer.GetResource("InvalidInteger")); }
+                    { Notification.Error(Resources.InvalidInteger); }
                     else if (accountIndex > accountsList.Count())
-                    { Notification.Error(DependencyContainer.GetResource("ChooseOnlyFromOptions")); }
+                    { Notification.Error(Resources.ChooseOnlyFromOptions); }
                     else if (accountIndex <= accountsList.Count())
                     { break; }
                 }

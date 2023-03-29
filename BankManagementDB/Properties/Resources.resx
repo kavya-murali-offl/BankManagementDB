@@ -123,8 +123,17 @@
   <data name="AccountInsertSuccess" xml:space="preserve">
     <value>Account created successfully</value>
   </data>
+  <data name="AccountNumber" xml:space="preserve">
+    <value>Account Number </value>
+  </data>
+  <data name="Age" xml:space="preserve">
+    <value>Age</value>
+  </data>
   <data name="AgeGreaterThan18" xml:space="preserve">
     <value>Age must be greater than 18</value>
+  </data>
+  <data name="Amount" xml:space="preserve">
+    <value>Amount</value>
   </data>
   <data name="AskFieldToEdit" xml:space="preserve">
     <value>Which field you want to edit?</value>
@@ -140,6 +149,9 @@
   </data>
   <data name="CardInsertSuccess" xml:space="preserve">
     <value>Card created successfully. Save Card Number and Pin for later use.</value>
+  </data>
+  <data name="CardNumber" xml:space="preserve">
+    <value>Card Number</value>
   </data>
   <data name="CardNumberNotExist" xml:space="preserve">
     <value>This card number does not exist. Please enter a valid card number to proceed</value>
@@ -204,50 +216,14 @@
   <data name="DisplayTransaction" xml:space="preserve">
     <value>Transaction Type: {0}\nTransaction Time: {1}\nDescription: {2}\nMode of Payment: {3}\nAmount: {4}\nBalance: {5}\n============================\n</value>
   </data>
+  <data name="Email" xml:space="preserve">
+    <value>Email</value>
+  </data>
   <data name="EmptyFieldError" xml:space="preserve">
     <value>Field should not be empty</value>
   </data>
-  <data name="EnterAccountNumber" xml:space="preserve">
-    <value>Account Number: </value>
-  </data>
-  <data name="EnterAge" xml:space="preserve">
-    <value>Age:</value>
-  </data>
-  <data name="EnterAmount" xml:space="preserve">
-    <value>Amount:</value>
-  </data>
-  <data name="EnterCardNumber" xml:space="preserve">
-    <value>Card Number: </value>
-  </data>
   <data name="EnterChoice" xml:space="preserve">
-    <value>Enter your choice: </value>
-  </data>
-  <data name="EnterEmail" xml:space="preserve">
-    <value>Email: </value>
-  </data>
-  <data name="EnterName" xml:space="preserve">
-    <value>Name:</value>
-  </data>
-  <data name="EnterNewPin" xml:space="preserve">
-    <value>Enter New Pin:</value>
-  </data>
-  <data name="EnterNewValue" xml:space="preserve">
-    <value>Enter value to update: </value>
-  </data>
-  <data name="EnterPassword" xml:space="preserve">
-    <value>Password: </value>
-  </data>
-  <data name="EnterPhoneNumber" xml:space="preserve">
-    <value>Phone Number: </value>
-  </data>
-  <data name="EnterPin" xml:space="preserve">
-    <value>Pin:</value>
-  </data>
-  <data name="EnterRePassword" xml:space="preserve">
-    <value>Re-enter Password:</value>
-  </data>
-  <data name="EnterTransferAccountNumber" xml:space="preserve">
-    <value>Account Number to transfer: </value>
+    <value>Enter your choice</value>
   </data>
   <data name="InitialDepositAmountWarning" xml:space="preserve">
     <value>Initial deposit amount must be greater than Minimum Balance (Rs. {0}). Try again.</value>
@@ -294,17 +270,32 @@
   <data name="LogoutSuccess" xml:space="preserve">
     <value>User logged out successfully</value>
   </data>
+  <data name="MakeInitialDeposit" xml:space="preserve">
+    <value>Make Initial Deposit to complete account creation</value>
+  </data>
   <data name="MinimumBalanceCharged" xml:space="preserve">
     <value>You have been charged for not maintaining minimum balance</value>
   </data>
   <data name="ModeOfPayments" xml:space="preserve">
     <value>1. CASH                   2. DEBIT CARD</value>
   </data>
+  <data name="Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="NewPin" xml:space="preserve">
+    <value>New Pin</value>
+  </data>
+  <data name="NewValue" xml:space="preserve">
+    <value>Enter value to update</value>
+  </data>
   <data name="NoCardsLinked" xml:space="preserve">
     <value>No cards linked to your profile. Add cards to enable service.</value>
   </data>
   <data name="NullDelegateException" xml:space="preserve">
     <value>No function passed in delegate</value>
+  </data>
+  <data name="Password" xml:space="preserve">
+    <value>Password</value>
   </data>
   <data name="PasswordBackspace" xml:space="preserve">
     <value>\b \b</value>
@@ -333,6 +324,12 @@
   <data name="PhoneNotRegistered" xml:space="preserve">
     <value>This Phone Number is not registered with us. Please try again!</value>
   </data>
+  <data name="PhoneNumber" xml:space="preserve">
+    <value>Phone Number</value>
+  </data>
+  <data name="Pin" xml:space="preserve">
+    <value>Pin</value>
+  </data>
   <data name="PinDisplay" xml:space="preserve">
     <value>PIN:   {0}</value>
   </data>
@@ -354,6 +351,9 @@
   <data name="PurchaseSuccess" xml:space="preserve">
     <value>Purchase successful</value>
   </data>
+  <data name="RePassword" xml:space="preserve">
+    <value>Re-enter Password</value>
+  </data>
   <data name="ResetPinFailure" xml:space="preserve">
     <value>Attempt to reset pin failed. Please try again</value>
   </data>
@@ -366,8 +366,8 @@
   <data name="SignupSuccess" xml:space="preserve">
     <value>Signup successful</value>
   </data>
-  <data name="String1" xml:space="preserve">
-    <value />
+  <data name="TransferAccountNumber" xml:space="preserve">
+    <value>Account Number to transfer</value>
   </data>
   <data name="TransferFailure" xml:space="preserve">
     <value>Transfer unsuccessful</value>

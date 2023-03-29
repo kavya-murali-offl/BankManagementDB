@@ -4,11 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BankManagementDB.ViewModel
+namespace BankManagementDB.Domain.UseCase
 {
-    public class SignupViewModel
+    internal class SignupCustomerUseCase
     {
-
-
     }
 }

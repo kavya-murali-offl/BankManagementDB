@@ -1,6 +1,5 @@
 ﻿using System;
-using BankManagementDB.Config;
-using BankManagementDB.EnumerationType;
+using BankManagementDB.Properties;
 using BankManagementDB.Models;
 using BankManagementDB.Utility;
 
@@ -17,7 +16,7 @@ namespace BankManagementDB.Model
             return interest;
         }
 
-        public override string ToString() => base.ToString() + Formatter.FormatString(DependencyContainer.GetResource("DisplaySavingsAccount"), InterestRate);
+        public override string ToString() => base.ToString() + Formatter.FormatString(Resources.DisplaySavingsAccount, InterestRate);
 
     }
 }

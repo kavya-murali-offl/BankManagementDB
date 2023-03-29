@@ -1,4 +1,4 @@
-﻿using BankManagementDB.Config;
+﻿using BankManagementDB.Properties;
 using BankManagementDB.Utility;
 using SQLite;
 using System;
@@ -23,7 +23,7 @@ namespace BankManagementDB.Models
 
         public DateTime CreatedOn { get; set; }
 
-        public override string ToString() => Formatter.FormatString(DependencyContainer.GetResource("DisplayCustomer"), Name, Age, Email, Phone, LastLoggedOn); 
+        public override string ToString() => Formatter.FormatString(Resources.DisplayCustomer, Name, Age, Email, Phone, LastLoggedOn); 
            
         public object Clone() => this.MemberwiseClone();
     }

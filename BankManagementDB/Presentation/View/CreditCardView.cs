@@ -50,13 +50,21 @@ namespace BankManagementDB.View
             {
                 CreditCardCases.PURCHASE => MakePurchase(),
                 CreditCardCases.PAYMENT => MakePayment(),
-                CreditCardCases.EXIT => true,
+                CreditCardCases.GO_BACK => true,
+                CreditCardCases.EXIT => Exit(),
                 _ => Default()
 
             };
+
+        private bool Exit()
+        {
+            Environment.Exit(0);
+            return true;
+        }
+
         private bool Default()
         {
-            Notification.Error(DependencyContainer.GetResource("InvalidOption"));
+            Notification.Error(Resources.InvalidOption);
             return false;
         }
 
@@ -88,12 +96,12 @@ namespace BankManagementDB.View
                     }
                     else
                     {
-                        Notification.Error(DependencyContainer.GetResource("InvalidPin"));
+                        Notification.Error(Resources.InvalidPin);
                     }
                 }
                 else
                 {
-                    Notification.Error(DependencyContainer.GetResource("InvalidCreditCardNumber"));
+                    Notification.Error(Resources.InvalidCreditCardNumber);
                 }
             }
             return false;
@@ -115,23 +123,23 @@ namespace BankManagementDB.View
                     {
                         if ((amount + creditCard.TotalDueAmount) < creditCard.CreditLimit)
                         {
-                            Console.Write(DependencyContainer.GetResource("EnterAccountNumber"));
+                            Console.Write(Resources.AccountNumber + ": ");
                             string recipient = Console.ReadLine();
                             if (UpdateDueAmount(CreditCardCases.PURCHASE, creditCard, amount))
                             {
-                                Notification.Success(DependencyContainer.GetResource("PurchaseSuccess"));
+                                Notification.Success(Resources.PurchaseSuccess);
                                 TransactionView transactionView = new TransactionView();
                                 creditCard.TotalDueAmount += amount;
                                 bool isTransacted = transactionView.RecordTransaction("Purchase", amount, creditCard.TotalDueAmount, TransactionType.PURCHASE, null, ModeOfPayment.CREDIT_CARD, creditCard.CardNumber, recipient);
                             }
                             else
                             {
-                                Notification.Error(DependencyContainer.GetResource("PurchaseFailure"));
+                                Notification.Error(Resources.PurchaseFailure);
                             }
                         }
                         else
                         {
-                            Notification.Error(DependencyContainer.GetResource("CreditLimitReached"));
+                            Notification.Error(Resources.CreditLimitReached);
                         }
                     }
                 }
@@ -166,13 +174,13 @@ namespace BankManagementDB.View
                             {
                                 if (UpdateDueAmount(CreditCardCases.PAYMENT, creditCard, amount))
                                 {
-                                    Notification.Success(DependencyContainer.GetResource("PaymentSuccess"));
+                                    Notification.Success(Resources.PaymentSuccess);
                                     creditCard.TotalDueAmount -= amount;
                                     bool isTransacted = transactionView.RecordTransaction("Payment", amount, creditCard.TotalDueAmount, TransactionType.PAYMENT, account.AccountNumber, ModeOfPayment.CREDIT_CARD, creditCard.CardNumber, null);
                                 }
                                 else
                                 {
-                                    Notification.Error(DependencyContainer.GetResource("PaymentFailure"));
+                                    Notification.Error(Resources.PaymentFailure);
                                 }
                             }
                         }

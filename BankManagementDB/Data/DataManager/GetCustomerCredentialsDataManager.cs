@@ -1,4 +1,7 @@
-﻿using BankManagementDB.Interface;
+﻿using BankManagementDB.Domain.UseCase.LoginCustomer;
+using BankManagementDB.Domain.UseCase.LoginUser;
+using BankManagementDB.Domain.UseCase;
+using BankManagementDB.Interface;
 using BankManagementDB.Model;
 using BankManagementDB.Models;
 using System;
@@ -17,7 +20,43 @@ namespace BankManagementDB.DataManager
         }
         private IDBHandler DBHandler { get; set; }
 
-        public CustomerCredentials GetCustomerCredentials(string id) => DBHandler.GetCredentials(id).Result.FirstOrDefault();
+        public async void GetCustomerCredentials(LoginCustomerRequest request, IUseCaseCallback<LoginCustomerResponse> callback)
+        {
+            List<CustomerCredentials> customerCredentialsList = await DBHandler.GetCredentials(request.CustomerID);
+            var customerCredentials = customerCredentialsList.FirstOrDefault();
 
+            if (customerCredentials != null)
+            {
+                string hashedInput = AuthServices.HashPassword(request.InputPassword, customerCredentials.Salt);
+                bool isLoggedIn = hashedInput.Equals(customerCredentials.Password);
+
+                if (customerCredentials != null)
+                {
+                    var response = new LoginCustomerResponse()
+                    {
+                        IsLoggedIn = isLoggedIn
+                    };
+                    callback.OnSuccess(response);
+                }
+                else
+                {
+                    ZError error = new ZError()
+                    {
+                        Type = "InvalidCredentials",
+                        Message = "Invalid Credentials"
+                    };
+                    callback.OnFailure(error);
+                }
+            }
+            else
+            {
+                ZError error = new ZError()
+                {
+                    Type = "UserNotFound",
+                    Message = "Invalid Credentials"
+                };
+                callback.OnFailure(error);
+            }
+        }
     }
 }

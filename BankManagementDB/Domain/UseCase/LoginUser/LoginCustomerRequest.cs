@@ -6,7 +6,12 @@ using System.Threading.Tasks;
 
 namespace BankManagementDB.Domain.UseCase.LoginUser
 {
-    public class LoginUserResponse
+    public class LoginCustomerRequest
     {
+        public LoginCustomerRequest() { }
+
+        public string CustomerID { get; set; }  
+
+        public string InputPassword { get; set; }  
     }
 }

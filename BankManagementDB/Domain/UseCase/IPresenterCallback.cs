@@ -6,8 +6,11 @@ using System.Threading.Tasks;
 
 namespace BankManagementDB.Domain.UseCase
 {
-    public class LoginUserUseCase
+    public interface IPresenterCallback<T>
     {
+        void OnSuccess(T result);
+
+        void OnFailure(ZError exception);
 
     }
 }

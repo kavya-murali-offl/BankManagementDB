@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BankManagementDB.Domain.UseCase.LoginUser
+namespace BankManagementDB.Domain.UseCase.SignupCustomer
 {
-    internal class LoginUserRequest
+    internal class SignupCustomerResponse
     {
     }
 }

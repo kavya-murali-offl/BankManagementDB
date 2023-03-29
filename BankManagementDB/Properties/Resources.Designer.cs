@@ -79,11 +79,38 @@ namespace BankManagementDB.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Account Number .
+        /// </summary>
+        public static string AccountNumber {
+            get {
+                return ResourceManager.GetString("AccountNumber", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Age.
+        /// </summary>
+        public static string Age {
+            get {
+                return ResourceManager.GetString("Age", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Age must be greater than 18.
         /// </summary>
         public static string AgeGreaterThan18 {
             get {
                 return ResourceManager.GetString("AgeGreaterThan18", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Amount.
+        /// </summary>
+        public static string Amount {
+            get {
+                return ResourceManager.GetString("Amount", resourceCulture);
             }
         }
         
@@ -129,6 +156,15 @@ namespace BankManagementDB.Properties {
         public static string CardInsertSuccess {
             get {
                 return ResourceManager.GetString("CardInsertSuccess", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Card Number.
+        /// </summary>
+        public static string CardNumber {
+            get {
+                return ResourceManager.GetString("CardNumber", resourceCulture);
             }
         }
         
@@ -322,6 +358,15 @@ namespace BankManagementDB.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Email.
+        /// </summary>
+        public static string Email {
+            get {
+                return ResourceManager.GetString("Email", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Field should not be empty.
         /// </summary>
         public static string EmptyFieldError {
@@ -331,128 +376,11 @@ namespace BankManagementDB.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Account Number: .
-        /// </summary>
-        public static string EnterAccountNumber {
-            get {
-                return ResourceManager.GetString("EnterAccountNumber", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Age:.
-        /// </summary>
-        public static string EnterAge {
-            get {
-                return ResourceManager.GetString("EnterAge", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Amount:.
-        /// </summary>
-        public static string EnterAmount {
-            get {
-                return ResourceManager.GetString("EnterAmount", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Card Number: .
-        /// </summary>
-        public static string EnterCardNumber {
-            get {
-                return ResourceManager.GetString("EnterCardNumber", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Enter your choice: .
+        ///   Looks up a localized string similar to Enter your choice.
         /// </summary>
         public static string EnterChoice {
             get {
                 return ResourceManager.GetString("EnterChoice", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Email: .
-        /// </summary>
-        public static string EnterEmail {
-            get {
-                return ResourceManager.GetString("EnterEmail", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Name:.
-        /// </summary>
-        public static string EnterName {
-            get {
-                return ResourceManager.GetString("EnterName", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Enter New Pin:.
-        /// </summary>
-        public static string EnterNewPin {
-            get {
-                return ResourceManager.GetString("EnterNewPin", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Enter value to update: .
-        /// </summary>
-        public static string EnterNewValue {
-            get {
-                return ResourceManager.GetString("EnterNewValue", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Password: .
-        /// </summary>
-        public static string EnterPassword {
-            get {
-                return ResourceManager.GetString("EnterPassword", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Phone Number: .
-        /// </summary>
-        public static string EnterPhoneNumber {
-            get {
-                return ResourceManager.GetString("EnterPhoneNumber", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Pin:.
-        /// </summary>
-        public static string EnterPin {
-            get {
-                return ResourceManager.GetString("EnterPin", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Re-enter Password:.
-        /// </summary>
-        public static string EnterRePassword {
-            get {
-                return ResourceManager.GetString("EnterRePassword", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Account Number to transfer: .
-        /// </summary>
-        public static string EnterTransferAccountNumber {
-            get {
-                return ResourceManager.GetString("EnterTransferAccountNumber", resourceCulture);
             }
         }
         
@@ -592,6 +520,15 @@ namespace BankManagementDB.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Make Initial Deposit to complete account creation.
+        /// </summary>
+        public static string MakeInitialDeposit {
+            get {
+                return ResourceManager.GetString("MakeInitialDeposit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to You have been charged for not maintaining minimum balance.
         /// </summary>
         public static string MinimumBalanceCharged {
@@ -610,6 +547,33 @@ namespace BankManagementDB.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Name.
+        /// </summary>
+        public static string Name {
+            get {
+                return ResourceManager.GetString("Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to New Pin.
+        /// </summary>
+        public static string NewPin {
+            get {
+                return ResourceManager.GetString("NewPin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enter value to update.
+        /// </summary>
+        public static string NewValue {
+            get {
+                return ResourceManager.GetString("NewValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to No cards linked to your profile. Add cards to enable service..
         /// </summary>
         public static string NoCardsLinked {
@@ -624,6 +588,15 @@ namespace BankManagementDB.Properties {
         public static string NullDelegateException {
             get {
                 return ResourceManager.GetString("NullDelegateException", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Password.
+        /// </summary>
+        public static string Password {
+            get {
+                return ResourceManager.GetString("Password", resourceCulture);
             }
         }
         
@@ -709,6 +682,24 @@ namespace BankManagementDB.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Phone Number.
+        /// </summary>
+        public static string PhoneNumber {
+            get {
+                return ResourceManager.GetString("PhoneNumber", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Pin.
+        /// </summary>
+        public static string Pin {
+            get {
+                return ResourceManager.GetString("Pin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to PIN:   {0}.
         /// </summary>
         public static string PinDisplay {
@@ -772,6 +763,15 @@ namespace BankManagementDB.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Re-enter Password.
+        /// </summary>
+        public static string RePassword {
+            get {
+                return ResourceManager.GetString("RePassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Attempt to reset pin failed. Please try again.
         /// </summary>
         public static string ResetPinFailure {
@@ -808,11 +808,11 @@ namespace BankManagementDB.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to Account Number to transfer.
         /// </summary>
-        public static string String1 {
+        public static string TransferAccountNumber {
             get {
-                return ResourceManager.GetString("String1", resourceCulture);
+                return ResourceManager.GetString("TransferAccountNumber", resourceCulture);
             }
         }
         

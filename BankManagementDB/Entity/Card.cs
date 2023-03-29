@@ -1,4 +1,4 @@
-﻿using BankManagementDB.Config;
+﻿using BankManagementDB.Properties;
 using BankManagementDB.EnumerationType;
 using BankManagementDB.Utility;
 using SQLite;
@@ -31,6 +31,6 @@ namespace BankManagementDB.Model
         public CardType Type { get; set; }
 
         public override string ToString() =>
-            Formatter.FormatString(DependencyContainer.GetResource("DisplayCard"), Type.ToString(), CardNumber, ExpiryMonth, ExpiryYear);
+            Formatter.FormatString(Resources.DisplayCard, Type.ToString(), CardNumber, ExpiryMonth, ExpiryYear);
     }
 }

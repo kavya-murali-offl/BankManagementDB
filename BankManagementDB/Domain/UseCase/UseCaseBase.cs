@@ -1,48 +1,43 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace BankManagementDB.Domain.UseCase
 {
-    public abstract class UseCaseBase
+    public abstract class UseCaseBase<TRequest, TResponse>
     {
 
-        public bool GetIfAvailableInCache()
+        protected virtual bool GetIfAvailableInCache(TRequest request, IPresenterCallback<TResponse> presenterCallback)
         {
             return false;
         }
 
 
-        public void Execute()
+        public void Execute(TRequest request, IPresenterCallback<TResponse> presenterCallback)
         {
 
-            if (GetIfAvailableInCache()) return;
+            if (GetIfAvailableInCache(request, presenterCallback)) return;
 
             CancellationTokenSource cancellationTokenSource = new CancellationTokenSource(5000);
 
-            Task.Run(delegate()
+            Task.Run(() =>
             {
                 try
                 {
-                    Action();
+                    Action(request, presenterCallback);
                 }
-                catch(TaskCanceledException taskCancelledException)
+                catch (TaskCanceledException taskCancelledException)
                 {
-                   
+
                 }
                 catch (Exception ex)
                 {
-                    //            ZError errObj = new
-                    //                    Error(ErrorType.Unknown, "Error message");
-                    //PresenterCallback?.OnError(errObj);
+                    ZError errObj = new ZError();
+                    presenterCallback?.OnFailure(errObj);
                 }
-
             }, cancellationTokenSource.Token);
         }
 
-        public abstract void Action();
+        protected abstract void Action(TRequest request, IPresenterCallback<TResponse> presenterCallback);
     }
 }

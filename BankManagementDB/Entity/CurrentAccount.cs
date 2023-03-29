@@ -1,9 +1,7 @@
 ﻿using System;
-using BankManagementDB.EnumerationType;
 using BankManagementDB.Models;
-using BankManagementDB.Constants;
 using BankManagementDB.Utility;
-using BankManagementDB.Config;
+using BankManagementDB.Properties;
 
 namespace BankManagementDB.Model
 {
@@ -11,6 +9,6 @@ namespace BankManagementDB.Model
     {
         public decimal CHARGES = 100;
 
-        public override string ToString() => base.ToString() + Formatter.FormatString(DependencyContainer.GetResource("DisplayCurrentAccount"), MinimumBalance);
+        public override string ToString() => base.ToString() + Formatter.FormatString(Resources.DisplayCurrentAccount, MinimumBalance);
     }
 }

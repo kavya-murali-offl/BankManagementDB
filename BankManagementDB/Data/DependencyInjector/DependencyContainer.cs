@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Globalization;
 using System;
+using BankManagementDB.Events;
 
 namespace BankManagementDB.Config
 {
@@ -20,8 +21,7 @@ namespace BankManagementDB.Config
         {
             ServiceProvider = 
                 new ServiceCollection()
-                .ConfigureDBServices()
-                .AddLocalization()
+                //.ConfigureServices()
                 .ConfigureDBAdapter()
                 .ConfigureCustomerServices()
                 .ConfigureAccountServices()
@@ -34,10 +34,6 @@ namespace BankManagementDB.Config
 
         public static IConfiguration Config { get; private set; }
 
-        private static ResourceSet ResourceSet { get;  set; }
-
-        public static string GetResource(string key) => ResourceSet.GetString(key);
-
         private static IServiceCollection ConfigureDBAdapter(this IServiceCollection serviceCollection)
         {
             serviceCollection.AddSingleton<IDatabaseAdapter, SQLiteDatabaseAdapter>();
@@ -45,29 +41,15 @@ namespace BankManagementDB.Config
             return serviceCollection;
         }
 
-        private static IServiceCollection ConfigureDBServices(this IServiceCollection serviceCollection)
-        {
-            Config = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json")
-                .AddEnvironmentVariables()
-                .Build();
+        //private static IServiceCollection ConfigureServices(this IServiceCollection serviceCollection)
+        //{
+        //    Config = new ConfigurationBuilder()
+        //        .SetBasePath(Directory.GetCurrentDirectory())
+        //        .AddJsonFile("appsettings.json")
+        //        .Build();
 
-            return serviceCollection;
-        }
-
-        private static IServiceCollection AddLocalization(this IServiceCollection serviceCollection)
-        {
-            ResourceManager manager = new ResourceManager(typeof(Properties.Resources));
-            var culture = CultureInfo.CurrentCulture;
-
-            var resourceSet = manager.GetResourceSet(culture, true, false);
-            resourceSet ??= manager.GetResourceSet(CultureInfo.InvariantCulture, true, false);
-
-            ResourceSet = resourceSet;
-
-            return serviceCollection;
-        }
+        //    return serviceCollection;
+        //}
 
         private static IServiceCollection ConfigureCardServices(this IServiceCollection serviceCollection)
         {
@@ -96,6 +78,7 @@ namespace BankManagementDB.Config
             serviceCollection.AddScoped<IGetAccountDataManager, GetAccountDataManager>();
             serviceCollection.AddScoped<IUpdateAccountDataManager, UpdateAccountDataManager>();
             serviceCollection.AddSingleton<IAccountFactory, AccountFactory>();
+            serviceCollection.AddSingleton<AppEvents>();
             return serviceCollection;
         }
     

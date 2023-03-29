@@ -77,12 +77,12 @@ namespace BankManagementDB.View
                     }
                     if (!isAuthenticated)
                     {
-                        Notification.Error(DependencyContainer.GetResource("CardVerificationFailed"));
+                        Notification.Error(Resources.CardVerificationFailed);
                     }
                 }
                 else
                 {
-                    Notification.Error(DependencyContainer.GetResource("PaymentModeNotEnabled"));
+                    Notification.Error(Resources.PaymentModeNotEnabled);
                 }
             }
 
@@ -118,11 +118,11 @@ namespace BankManagementDB.View
         {
             string input;
             ModeOfPayment modeOfPayment = ModeOfPayment.DEFAULT;
-            Console.WriteLine(DependencyContainer.GetResource("ChoosePaymentMode"));
-            Console.WriteLine(DependencyContainer.GetResource("ModeOfPayments") + "\n");
+            Console.WriteLine(Resources.ChoosePaymentMode);
+            Console.WriteLine(Resources.ModeOfPayments + "\n");
             input = Console.ReadLine()?.Trim();
             Console.WriteLine();
-            if (input == DependencyContainer.GetResource("BackButton"))
+            if (input == Resources.BackButton)
             {
                 modeOfPayment = ModeOfPayment.DEFAULT;
             }
@@ -142,7 +142,7 @@ namespace BankManagementDB.View
         {
             if (amount > SelectedAccount.Balance)
             {
-                Notification.Error(DependencyContainer.GetResource("InsufficientBalance"));
+                Notification.Error(Resources.InsufficientBalance);
             }
             else
             {
@@ -150,12 +150,12 @@ namespace BankManagementDB.View
 
                 if (UpdateBalance(SelectedAccount, amount, TransactionType.WITHDRAW))
                 {
-                    Notification.Success(Formatter.FormatString(DependencyContainer.GetResource("WithdrawSuccess"), amount));
+                    Notification.Success(Formatter.FormatString(Resources.WithdrawSuccess, amount));
                     bool isTransactionRecorded = TransactionView.RecordTransaction("Withdraw", amount, SelectedAccount.Balance, TransactionType.WITHDRAW, SelectedAccount.AccountNumber, modeOfPayment, cardNumber, null);
                     return true;
                 }
                 else
-                    Notification.Error(DependencyContainer.GetResource("WithdrawFailure"));
+                    Notification.Error(Resources.WithdrawFailure);
             }
 
             return false;
@@ -179,7 +179,7 @@ namespace BankManagementDB.View
             if (currentAccount.Balance < currentAccount.MinimumBalance && currentAccount.Balance > currentAccount.CHARGES)
             {
                 UpdateBalance(currentAccount, currentAccount.CHARGES, TransactionType.WITHDRAW);
-                Notification.Info(DependencyContainer.GetResource("MinimumBalanceCharged"));
+                Notification.Info(Resources.MinimumBalanceCharged);
                 TransactionView.RecordTransaction("Minimum Balance Charge",
                     currentAccount.CHARGES, currentAccount.Balance,
                     TransactionType.WITHDRAW, currentAccount.AccountNumber, ModeOfPayment.INTERNAL, null, null);
@@ -191,7 +191,7 @@ namespace BankManagementDB.View
             decimal interest = account.GetInterest();
             if (interest > 0)
             {
-                Notification.Info(Formatter.FormatString(DependencyContainer.GetResource("InterestDepositInitiated")));
+                Notification.Info(Formatter.FormatString(Resources.InterestDepositInitiated));
                 UpdateBalance(account, interest, TransactionType.DEPOSIT);
                 TransactionView.RecordTransaction("Interest", interest, account.Balance, TransactionType.DEPOSIT, null, ModeOfPayment.INTERNAL,null, account.AccountNumber);
                 return interest;
@@ -203,7 +203,7 @@ namespace BankManagementDB.View
         {
             if (amount > SelectedAccount.Balance)
             {
-                Notification.Error(DependencyContainer.GetResource("InsufficientBalance"));
+                Notification.Error(Resources.InsufficientBalance);
             }
             else
             {
@@ -214,19 +214,19 @@ namespace BankManagementDB.View
                     {
                         if (UpdateBalance(transferAccount, amount, TransactionType.DEPOSIT))
                         {
-                            Notification.Success(Formatter.FormatString(DependencyContainer.GetResource("TransferSuccess"), amount));
+                            Notification.Success(Formatter.FormatString(Resources.TransferSuccess, amount));
                             TransactionView.RecordTransaction("Transferred", amount, SelectedAccount.Balance, TransactionType.TRANSFER, SelectedAccount.AccountNumber, modeOfPayment, cardNumber, null);
                             TransactionView.RecordTransaction("Received", amount, SelectedAccount.Balance, TransactionType.RECEIVED, null, modeOfPayment, cardNumber, SelectedAccount.AccountNumber);
                         }
                         else
                         {
-                            Notification.Error(DependencyContainer.GetResource("TransferFailure"));
+                            Notification.Error(Resources.TransferFailure);
                             UpdateBalance(SelectedAccount, amount, TransactionType.DEPOSIT);
                         }
                     }
                     else
                     {
-                        Notification.Error(DependencyContainer.GetResource("TransferFailure"));
+                        Notification.Error(Resources.TransferFailure);
                     }
                 }
             }
@@ -257,12 +257,12 @@ namespace BankManagementDB.View
             if (UpdateBalance(SelectedAccount, amount, TransactionType.DEPOSIT))
             {
                 TransactionView.RecordTransaction("Deposit", amount, SelectedAccount.Balance, TransactionType.DEPOSIT, null, modeOfPayment, cardNumber, SelectedAccount.AccountNumber);
-                Notification.Success(Formatter.FormatString(DependencyContainer.GetResource("DepositSuccess"), amount));
+                Notification.Success(Formatter.FormatString(Resources.DepositSuccess, amount));
                 return true;
             }
             else
             {
-                Notification.Error(DependencyContainer.GetResource("DepositFailure"));
+                Notification.Error(Resources.DepositFailure);
             }
             return false;
         }
@@ -271,22 +271,22 @@ namespace BankManagementDB.View
         {
             while (true)
             {
-                Console.Write(DependencyContainer.GetResource("EnterTransferAccountNumber"));
+                Console.Write(Resources.TransferAccountNumber);
                 string transferAccountNumber = Console.ReadLine()?.Trim();
-                if (transferAccountNumber == DependencyContainer.GetResource("BackButton"))
+                if (transferAccountNumber == Resources.BackButton)
                 { break; }
                 else
                 {
                     if (accountNumber == transferAccountNumber)
                     {
-                        Notification.Error(DependencyContainer.GetResource("ChooseDifferentTransferAccount"));
+                        Notification.Error(Resources.ChooseDifferentTransferAccount);
                     }
                     else
                     {
                         Account transferAccount = Store.GetAccountByAccountNumber(transferAccountNumber);
                         if (transferAccount == null)
                         {
-                            Notification.Error(DependencyContainer.GetResource("InvalidAccountNumber"));
+                            Notification.Error(Resources.InvalidAccountNumber);
                             break;
                         }
                         else
@@ -340,26 +340,33 @@ namespace BankManagementDB.View
                 AccountCases.VIEW_STATEMENT => TransactionView.ViewAllTransactions(),
                 AccountCases.PRINT_STATEMENT => TransactionView.PrintStatement(),
                 AccountCases.VIEW_ACCOUNT_DETAILS => ViewAccountDetails(),
-                AccountCases.BACK => true,
+                AccountCases.GO_BACK => true,
+                AccountCases.EXIT => Exit(),
                 _ => Default(),
 
             };
 
+        private bool Exit()
+        {
+            Environment.Exit(0);
+            return true;
+        }
+
         private bool CheckBalance()
         {
-            Notification.Info(Formatter.FormatString(DependencyContainer.GetResource("BalanceDisplay"), SelectedAccount.Balance));
+            Notification.Info(Formatter.FormatString(Resources.BalanceDisplay, SelectedAccount.Balance));
             return false;
         }
 
         private bool Default()
         {
-            Notification.Error(DependencyContainer.GetResource("InvalidInput"));
+            Notification.Error(Resources.InvalidInput);
             return false;
         }
 
         public Account GenerateAccount()
         {
-            Notification.Info(DependencyContainer.GetResource("PressBackButtonInfo"));
+            Notification.Info(Resources.PressBackButtonInfo);
 
             OptionsDelegate<AccountType> options = GetAccountByType;
             HelperView helperView = new HelperView();
@@ -385,15 +392,15 @@ namespace BankManagementDB.View
         {
             while (true)
             {
-                Console.Write(DependencyContainer.GetResource("EnterAccountNumber"));
+                Console.Write(Resources.AccountNumber + ": ");
                 string accountNumber = Console.ReadLine()?.Trim();
-                if (accountNumber == DependencyContainer.GetResource("BackButton"))
+                if (accountNumber == Resources.BackButton)
                 { break; }
                 else
                 {
                     Account account = Store.GetAccountByAccountNumber(accountNumber);
                     if (account == null)
-                    { Notification.Error(DependencyContainer.GetResource("InvalidAccountNumber")); }
+                    { Notification.Error(Resources.InvalidAccountNumber); }
                     else
                     {
                         return account;

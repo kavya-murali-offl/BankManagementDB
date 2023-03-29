@@ -16,11 +16,11 @@ namespace BankManagementDB.View
             {
                 while (true)
                 {
-                    Console.Write(DependencyContainer.GetResource("EnterAmount"));
+                    Console.Write(Resources.Amount + ": ");
                     decimal amount = decimal.Parse(Console.ReadLine()?.Trim());
                     if (amount < 0)
                     {
-                        Notification.Error(DependencyContainer.GetResource("PositiveAmountWarning"));
+                        Notification.Error(Resources.PositiveAmountWarning);
                     }
                     else
                     {
@@ -62,7 +62,7 @@ namespace BankManagementDB.View
 
             string password = passwordBuilder.ToString();
 
-            if (!string.IsNullOrEmpty(password) && password != DependencyContainer.GetResource("BackButton"))
+            if (!string.IsNullOrEmpty(password) && password != Resources.BackButton)
             {
                 return password;
             }
@@ -74,7 +74,7 @@ namespace BankManagementDB.View
         {
             if (function == null)
             {
-                throw new ArgumentNullException(DependencyContainer.GetResource("NullDelegateException"));
+                throw new ArgumentNullException(Resources.NullDelegateException);
             }
             else
             {
@@ -86,13 +86,13 @@ namespace BankManagementDB.View
                         Console.WriteLine($"{i + 1}. {cases.ToString().Replace("_", " ")}");
                     }
 
-                    Console.Write("\n" + DependencyContainer.GetResource("EnterChoice"));
+                    Console.Write("\n" + Resources.EnterChoice + ": ");
 
                     string option = Console.ReadLine()?.Trim();
                     Console.WriteLine();
                     if (!int.TryParse(option, out int entryOption))
                     {
-                        Notification.Error(DependencyContainer.GetResource("InvalidInteger"));
+                        Notification.Error(Resources.InvalidInteger);
                     }
                     else
                     {
@@ -111,7 +111,7 @@ namespace BankManagementDB.View
 
                         else
                         {
-                            Notification.Error(DependencyContainer.GetResource("InvalidOption"));
+                            Notification.Error(Resources.InvalidOption);
                         }
                     }
                 }

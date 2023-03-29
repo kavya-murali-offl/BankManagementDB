@@ -1,6 +1,7 @@
 ﻿using System;
 using BankManagementDB.Config;
 using BankManagementDB.EnumerationType;
+using BankManagementDB.Properties;
 
 namespace BankManagementDB.View
 {
@@ -35,9 +36,9 @@ namespace BankManagementDB.View
         public bool Login()
         {
             LoginView loginView = new LoginView();
-            loginView.UserChanged += onUserChanged;
+            loginView.UserChanged += OnUserChanged;
             loginView.Login();
-            loginView.UserChanged -= onUserChanged;
+            loginView.UserChanged -= OnUserChanged;
             return false;
         }
 
@@ -56,11 +57,11 @@ namespace BankManagementDB.View
 
         public bool Default()
         {
-            Notification.Error(DependencyContainer.GetResource("InvalidInput"));
+            Notification.Error(Resources.InvalidInput);
             return false;
         }
 
-        public void onUserChanged(string message)
+        public void OnUserChanged(string message)
         {
             Notification.Success(message);
         }

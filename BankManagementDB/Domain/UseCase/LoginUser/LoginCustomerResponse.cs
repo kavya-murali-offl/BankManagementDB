@@ -6,10 +6,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BankManagementDB.Interface
+namespace BankManagementDB.Domain.UseCase.LoginCustomer
 {
-    public interface IInsertCustomerDataManager
+    public class LoginCustomerResponse
     {
-        bool InsertCustomer(Customer customer, CustomerCredentials customerCredentials);
+
+        public bool IsLoggedIn { get; set; }
     }
 }

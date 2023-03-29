@@ -20,7 +20,7 @@ namespace BankManagementDB.DatabaseAdapter
         private SQLiteAsyncConnection Connection { get; set; }
 
         private SQLiteConnectionString GetConnectionString(){
-            string databasePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), DependencyContainer.Config.GetConnectionString("SQLiteConnectionString"));
+            string databasePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "BankDB.db3");
             return new SQLiteConnectionString(databasePath, true, key: Environment.GetEnvironmentVariable("DATABASE_PASSWORD"));
         }
 
